@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>हाजिरी प्रणाली</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏫</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style id="print-style">
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+    </style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Mukta', sans-serif;
+            background-color: #f3f4f6;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Card Status Colors */
+        .card-present {
+            background-color: #dcfce7 !important;
+            border-left: 5px solid #22c55e !important;
+        }
+
+        .card-absent {
+            background-color: #fee2e2 !important;
+            border-left: 5px solid #ef4444 !important;
+        }
+
+        .card-leave {
+            background-color: #fef9c3 !important;
+            border-left: 5px solid #eab308 !important;
+        }
+
+        .card-neutral {
+            background-color: #ffffff !important;
+            border-left: 5px solid #9ca3af !important;
+        }
+
+        .att-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+            background-color: white;
+            color: #374151;
+            transition: all 0.1s;
+            touch-action: manipulation;
+        }
+
+        .att-btn:active {
+            transform: scale(0.9);
+        }
+
+        .att-btn.active-p {
+            background-color: #16a34a !important;
+            border-color: #15803d !important;
+            color: white !important;
+        }
+
+        .att-btn.active-l {
+            background-color: #ca8a04 !important;
+            border-color: #a16207 !important;
+            color: white !important;
+        }
+
+        .att-btn.disabled {
+            pointer-events: none;
+            cursor: not-allowed;
+            filter: grayscale(0.1);
+        }
+
+        button:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loader.hidden {
+            display: none !important;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.95);
+            transition: transform 0.2s;
+        }
+
+        .modal-overlay:not(.hidden) .modal-content {
+            transform: scale(1);
+        }
+
+        /* Print Logic */
+        @media (max-width: 768px) {
+            .desktop-only-print {
+                display: none !important;
+            }
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            body:not(.modal-open) #report-output,
+            body:not(.modal-open) #report-output * {
+                visibility: visible;
+            }
+
+            body:not(.modal-open) #report-output {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                color: black;
+                border: none !important;
+            }
+
+            /* Print Modal Content if Open */
+            body.modal-open .modal-overlay {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                background: white;
+                z-index: 9999;
+                padding: 0;
+                display: block !important;
+                visibility: visible;
+                opacity: 1;
+            }
+
+            body.modal-open .modal-content,
+            body.modal-open .modal-content * {
+                visibility: visible;
+            }
+
+            body.modal-open .modal-content {
+                border: none;
+                box-shadow: none;
+                max-width: 100%;
+                width: 100%;
+                transform: none;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 10pt;
+                border: 1px solid #000;
+            }
+
+            th,
+            td {
+                border: 1px solid #000;
+                padding: 3px;
+                text-align: center;
+                color: #000 !important;
+                background: transparent !important;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .online-dot {
+            animation: pulse-green 2s infinite;
+        }
+
+        .offline-dot {
+            animation: pulse-red 2s infinite;
+            background-color: #ef4444 !important;
+        }
+
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Teacher Ledger / Payment Management Modal -->
+    <div id="payment-mgmt-modal" class="modal-overlay hidden">
+        <div class="modal-content p-5">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-gray-800 text-xl"><i class="fas fa-wallet text-blue-600 mr-2"></i>पेमेन्ट
+                    व्यवस्थापन</h3>
+                <button onclick="document.getElementById('payment-mgmt-modal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-3 gap-3 mb-5 text-center">
+                <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Collected</div>
+                    <div class="font-bold text-green-700 text-lg" id="mgmt-total-collected">Rs. 0</div>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Handover</div>
+                    <div class="font-bold text-blue-700 text-lg" id="mgmt-total-cleared">Rs. 0</div>
+                </div>
+                <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Due Balance</div>
+                    <div class="font-bold text-red-700 text-lg" id="mgmt-due-balance">Rs. 0</div>
+                </div>
+            </div>
+
+            <!-- Action: Handover -->
+            <div class="bg-gray-50 p-4 rounded-lg mb-5 border shadow-sm">
+                <h4 class="font-bold text-xs text-gray-700 mb-2 uppercase tracking-wide">रकम फर्च्योट (Handover to
+                    Admin)</h4>
+                <div class="flex gap-2">
+                    <input type="number" id="self-clear-amount" placeholder="Amount"
+                        class="border p-2 rounded text-sm w-28 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="self-clear-remarks" placeholder="Remarks"
+                        class="border p-2 rounded text-sm flex-1 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <button onclick="saveSelfClearance()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">Save</button>
+                </div>
+            </div>
+
+            <!-- Ledger List -->
+            <h4 class="font-bold text-sm text-gray-700 mb-2 border-b pb-1">दैनिक संकलन विवरण (Log)</h4>
+            <div id="teacher-ledger-list" class="overflow-y-auto max-h-60 text-sm space-y-2 pr-1">
+                <p class="text-center text-gray-400 py-4">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Teacher Modal -->
+    <div id="teacher-modal" class="modal-overlay hidden">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-gray-800 text-xl" id="teacher-modal-title">शिक्षक थप्नुहोस्</h3>
+                <button onclick="closeTeacherModal()" class="text-gray-400 hover:text-red-500"><i
+                        class="fas fa-times text-2xl"></i></button>
+            </div>
+            <form onsubmit="handleTeacherSubmit(event)" class="space-y-4">
+                <input type="hidden" id="t-edit-id">
+                <input id="new-t-email" type="email" placeholder="Email Address"
+                    class="w-full border p-3 rounded-lg bg-gray-50 focus:bg-white transition focus:ring-2 focus:ring-indigo-500 outline-none"
+                    required>
+                <input id="new-t-pass" type="password" placeholder="Password (min 6 chars)"
+                    class="w-full border p-3 rounded-lg bg-gray-50 focus:bg-white transition focus:ring-2 focus:ring-indigo-500 outline-none">
+                <p class="text-[10px] text-gray-500 mt-0 pt-0 hidden" id="pass-hint">* Leave blank to keep current
+                    password</p>
+                <input id="new-t-name" type="text" placeholder="Teacher Full Name"
+                    class="w-full border p-3 rounded-lg bg-gray-50 focus:bg-white transition focus:ring-2 focus:ring-indigo-500 outline-none"
+                    required>
+
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="bg-gray-100 p-2 font-bold text-xs text-gray-600 uppercase">Assign Classes & Sections
+                    </div>
+                    <div id="class-checkboxes" class="p-3 max-h-48 overflow-y-auto space-y-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold shadow hover:bg-indigo-700 transition transform active:scale-95">Save
+                    Teacher</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Payment Popup (Add/Edit) -->
+    <div id="student-pay-modal" class="modal-overlay hidden">
+        <div class="modal-content p-5">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-xl" id="pay-modal-title">Payment</h3>
+                    <p class="text-xs text-gray-500" id="pay-modal-subtitle">Details</p>
+                </div>
+                <button onclick="closePayModal()" class="text-gray-400 hover:text-red-500"><i
+                        class="fas fa-times text-2xl"></i></button>
+            </div>
+
+            <!-- Add New Payment -->
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-5 shadow-sm">
+                <label class="block text-xs font-bold text-blue-800 mb-2 uppercase">नयाँ रकम थप्नुहोस् (Add New)</label>
+                <div class="flex gap-2">
+                    <input type="number" id="pay-new-amount" placeholder="Rs."
+                        class="border p-2 rounded w-full font-bold text-lg text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <button onclick="savePayment()"
+                        class="bg-green-600 text-white px-6 rounded font-bold hover:bg-green-700 shadow transition transform active:scale-95">Save</button>
+                </div>
+                <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1"><i class="fas fa-info-circle"></i>
+                    मिति आजको (नेपाली) कायम हुनेछ।</p>
+            </div>
+
+            <!-- History / Edit -->
+            <h4 class="font-bold text-sm text-gray-700 mb-2">भुक्तानी इतिहास (History) <span
+                    class="text-xs font-normal text-red-500 ml-2" id="offline-pay-warning"></span></h4>
+            <div id="pay-history-list" class="bg-white border rounded-lg max-h-48 overflow-y-auto">
+                <!-- List items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Confirmation Modal -->
+    <div id="password-modal" class="modal-overlay hidden">
+        <div class="bg-white p-6 rounded-lg shadow-2xl w-96 transform scale-100 transition-transform">
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-lock text-red-500 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800" id="pass-modal-title">Password Required</h3>
+            </div>
+            <input type="password" id="confirm-pass"
+                class="w-full border p-3 rounded-lg mb-4 text-center focus:ring-2 focus:ring-red-500 outline-none"
+                placeholder="Enter Your Password">
+            <div class="flex gap-2">
+                <button onclick="closePassModal()"
+                    class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 font-medium">Cancel</button>
+                <button id="confirm-action-btn"
+                    class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 font-bold shadow">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Details Modal -->
+    <div id="edit-student-modal" class="modal-overlay hidden">
+        <div class="modal-content p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">विद्यार्थी विवरण सच्याउनुहोस्</h3>
+            <input type="hidden" id="edit-s-id">
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-700 mb-1">नाम (Name)</label>
+                <input id="edit-s-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-700 mb-1">सेक्सन (Section)</label>
+                <select id="edit-s-sec"
+                    class="w-full border p-2 rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="document.getElementById('edit-student-modal').classList.add('hidden')"
+                    class="px-4 py-2 rounded text-gray-600 hover:bg-gray-100 font-medium">Cancel</button>
+                <button onclick="saveStudentEdit()"
+                    class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-bold shadow">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Report Card Modal -->
+    <div id="student-card-modal" class="modal-overlay hidden">
+        <div class="modal-content" id="student-card-content">
+            <!-- Content injected via JS -->
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mb-4" id="spinner"></div>
+        <p class="text-gray-600 font-bold text-lg animate-pulse" id="loader-text">सिस्टम लोड हुँदैछ...</p>
+        <div id="error-box"
+            class="hidden mt-6 text-center max-w-sm p-4 bg-red-50 border border-red-200 rounded-lg shadow-lg">
+            <h3 class="text-red-700 font-bold">कनेक्सन समस्या!</h3>
+            <p id="error-msg" class="text-xs text-gray-600 my-2">इन्टरनेट नभएको वा ब्लक भएको हुन सक्छ।</p>
+            <button onclick="location.reload()"
+                class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700">Reload</button>
+            <button onclick="forceLogout()"
+                class="bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-gray-700">Logout</button>
+        </div>
+    </div>
+
+    <!-- Login -->
+    <div id="login-screen"
+        class="min-h-screen flex items-center justify-center p-4 hidden bg-gradient-to-br from-blue-600 to-indigo-800">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm border-none">
+            <div class="text-center mb-8">
+                <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-school text-4xl text-blue-600"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800">हाजिरी प्रणाली</h2>
+                <p class="text-gray-500 text-sm">Sign in to continue</p>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Email</label>
+                    <input type="email" id="login-email"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        placeholder="user@school.com" required>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Password</label>
+                    <input type="password" id="login-pass"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        placeholder="••••••" required>
+                </div>
+                <button type="submit" id="login-btn"
+                    class="w-full bg-blue-600 text-white py-4 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg text-lg">लगइन
+                    गर्नुहोस्</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Interface -->
+    <div id="app-interface" class="hidden min-h-screen flex flex-col">
+        <header
+            class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-4 flex justify-between items-center shadow-lg no-print sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <div id="sync-status"
+                    class="w-3 h-3 rounded-full bg-green-400 online-dot shadow-inner border border-white"
+                    title="Checking Connection..."></div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight"><i class="fas fa-user-graduate mr-2"></i>हाजिरी</h1>
+                    <p id="user-role-display" class="text-[10px] text-blue-200 uppercase tracking-wide font-semibold">
+                        User</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="nepali-date"
+                    class="text-sm font-bold text-yellow-300 hidden sm:block bg-white/10 px-2 py-1 rounded"></span>
+                <button onclick="logout()"
+                    class="bg-red-500/80 hover:bg-red-600 p-2 rounded-lg text-xs shadow transition backdrop-blur-sm"><i
+                        class="fas fa-sign-out-alt fa-lg"></i></button>
+            </div>
+        </header>
+
+        <nav class="bg-white shadow-sm p-2 flex gap-2 overflow-x-auto no-print border-b">
+            <button onclick="navigateSection('dashboard')"
+                class="nav-btn flex-1 py-3 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-sm whitespace-nowrap border border-indigo-100 transition"><i
+                    class="fas fa-home mr-1"></i> होम</button>
+            <button onclick="navigateSection('attendance')"
+                class="nav-btn flex-1 py-3 rounded-lg hover:bg-gray-50 text-gray-600 font-bold text-sm whitespace-nowrap border border-transparent transition"><i
+                    class="fas fa-check-circle mr-1"></i> हाजिरी</button>
+            <button onclick="navigateSection('reports')"
+                class="nav-btn flex-1 py-3 rounded-lg hover:bg-gray-50 text-gray-600 font-bold text-sm whitespace-nowrap border border-transparent transition"><i
+                    class="fas fa-file-alt mr-1"></i> रिपोर्ट</button>
+            <button id="nav-students" onclick="navigateSection('student-mgmt')"
+                class="nav-btn flex-1 py-3 rounded-lg hover:bg-gray-50 text-gray-600 font-bold text-sm whitespace-nowrap border border-transparent transition"><i
+                    class="fas fa-users mr-1"></i> विद्यार्थी</button>
+            <button id="nav-admin" onclick="navigateSection('admin')"
+                class="nav-btn flex-1 py-3 rounded-lg hover:bg-gray-50 text-gray-600 font-bold text-sm whitespace-nowrap hidden border border-transparent transition"><i
+                    class="fas fa-users-cog mr-1"></i> एडमिन</button>
+        </nav>
+
+        <main class="flex-1 p-4 overflow-y-auto pb-24 bg-gray-50">
+            <!-- Dashboard -->
+            <section id="dashboard" class="space-y-4 max-w-4xl mx-auto">
+                <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 border-l-4 border-indigo-500">
+                    <div class="flex-1">
+                        <label class="text-xs font-bold text-gray-500 block uppercase mb-1">Class</label>
+                        <select id="dash-class-select" onchange="updateDashboard()"
+                            class="w-full border p-2 rounded-lg text-sm font-bold bg-gray-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="all">All Classes</option>
+                        </select>
+                    </div>
+                    <div class="w-28">
+                        <label class="text-xs font-bold text-gray-500 block uppercase mb-1">Section</label>
+                        <select id="dash-sec-select" onchange="updateDashboard()"
+                            class="w-full border p-2 rounded-lg text-sm font-bold bg-gray-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="all">All</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div
+                        class="bg-white p-5 rounded-xl shadow-sm border-b-4 border-green-500 flex flex-col items-center justify-center">
+                        <h3 class="text-gray-500 text-xs font-bold uppercase">आज उपस्थित</h3>
+                        <p class="text-3xl font-bold text-green-600 mt-1" id="dash-present">0</p>
+                    </div>
+                    <div
+                        class="bg-white p-5 rounded-xl shadow-sm border-b-4 border-red-500 flex flex-col items-center justify-center">
+                        <h3 class="text-gray-500 text-xs font-bold uppercase">आज अनुपस्थित</h3>
+                        <p class="text-3xl font-bold text-red-600 mt-1" id="dash-absent">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <h3 class="text-gray-800 font-bold text-sm mb-3 border-b pb-2 flex items-center"><i
+                            class="fas fa-user-times text-red-500 mr-2"></i>आज अनुपस्थित विद्यार्थीहरू</h3>
+                    <div id="dash-absent-list" class="text-sm text-gray-600 space-y-2 max-h-60 overflow-y-auto pl-1">
+                        <p class="text-gray-400 italic">No Data</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student Mgmt -->
+            <section id="student-mgmt" class="hidden space-y-4 max-w-4xl mx-auto">
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">विद्यार्थी व्यवस्थापन</h3>
+                    <div class="flex gap-2 mb-4">
+                        <select id="mgmt-class" onchange="renderStudentMgmtList()"
+                            class="border p-2 rounded-lg text-sm w-24 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                        <select id="mgmt-sec" onchange="renderStudentMgmtList()"
+                            class="border p-2 rounded-lg text-sm w-20 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="all">All</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                        <input type="text" id="mgmt-search" onkeyup="renderStudentMgmtList()"
+                            placeholder="Search Name..."
+                            class="border p-2 rounded-lg text-sm flex-1 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+
+                    <div id="mgmt-list-container" class="border rounded-lg h-96 overflow-y-auto p-2 text-sm bg-gray-50">
+                    </div>
+
+                    <div class="mt-4 border-t pt-4 space-y-4">
+                        <div class="bg-gray-50 p-3 rounded-lg border border-dashed border-gray-300">
+                            <h4 class="font-bold text-sm mb-2 text-gray-600"><i class="fas fa-plus-circle mr-1"></i>नयाँ
+                                विद्यार्थी थप्नुहोस्:</h4>
+                            <form onsubmit="addStudent(event)" class="grid grid-cols-2 gap-2">
+                                <input id="s-name" placeholder="Name"
+                                    class="col-span-2 border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    required>
+                                <select id="s-class"
+                                    class="border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                                <select id="s-sec"
+                                    class="border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                </select>
+                                <input id="s-roll" type="number" placeholder="Roll"
+                                    class="col-span-2 border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    required>
+                                <button
+                                    class="col-span-2 bg-green-600 text-white py-2 rounded font-bold shadow hover:bg-green-700 transition">Add
+                                    Student</button>
+                            </form>
+                        </div>
+                        <!-- EXCEL UPLOAD: Hidden for Teachers -->
+                        <div id="excel-upload-container" class="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <h4 class="font-bold text-xs mb-3 text-green-800 uppercase tracking-wide">एक्सेलबाट अपलोड
+                                (Excel Upload):</h4>
+                            <div class="flex gap-2">
+                                <button onclick="downloadStudentTemplate()"
+                                    class="bg-white text-gray-700 border border-gray-300 px-3 py-2 rounded text-xs hover:bg-gray-50 font-medium transition"><i
+                                        class="fas fa-download mr-1"></i> Download Template</button>
+                                <label
+                                    class="bg-green-600 text-white px-3 py-2 rounded text-xs cursor-pointer hover:bg-green-700 font-bold shadow transition"><i
+                                        class="fas fa-file-upload mr-1"></i> Upload Excel<input type="file"
+                                        id="excel-file" accept=".xlsx, .xls" class="hidden"
+                                        onchange="uploadStudentExcel(this)"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Section -->
+            <section id="admin" class="hidden space-y-6 max-w-4xl mx-auto">
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 class="font-bold text-lg text-blue-800">शिक्षक व्यवस्थापन</h3>
+                        <button onclick="openTeacherModal()"
+                            class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow hover:bg-indigo-700 transition"><i
+                                class="fas fa-plus mr-1"></i> Add Teacher</button>
+                    </div>
+
+                    <div id="teacher-list-container" class="space-y-2 max-h-60 overflow-y-auto text-sm"></div>
+                    <button onclick="loadTeachers()" class="text-xs text-blue-600 underline mt-2">Refresh List</button>
+                </div>
+                <!-- Other Admin Settings -->
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">विद्यालय सेटिङ</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-gray-500 font-bold uppercase">School Name</label>
+                            <input id="set-school-name" type="text" placeholder="School Name"
+                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-bold uppercase">Address</label>
+                            <input id="set-school-address" type="text" placeholder="Address"
+                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Class-wise Fine Rates
+                                (Rs):</label>
+                            <div id="fine-rates-container" class="grid grid-cols-3 gap-3"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Manage Classes:</label>
+                            <input id="set-classes-list" type="text" placeholder="e.g. 1,2,3,4,5 (Comma separated)"
+                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <button onclick="confirmAction(saveSettings)"
+                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-700 transition">Save
+                            Settings</button>
+
+                        <!-- Danger Zones -->
+                        <div class="mt-8 pt-6 border-t border-red-200">
+                            <h4 class="text-red-600 font-bold text-sm mb-3"><i
+                                    class="fas fa-exclamation-triangle mr-1"></i> DANGER ZONE</h4>
+
+                            <!-- Delete Attendance -->
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
+                                <h5 class="font-bold text-xs text-red-800 mb-2 uppercase">Delete Attendance Record</h5>
+                                <div class="flex gap-2 items-center flex-wrap">
+                                    <input type="number" id="del-att-y" placeholder="YYYY"
+                                        class="w-16 border p-1 rounded text-sm text-center">
+                                    <input type="number" id="del-att-m" placeholder="MM"
+                                        class="w-12 border p-1 rounded text-sm text-center">
+                                    <input type="number" id="del-att-d" placeholder="DD"
+                                        class="w-12 border p-1 rounded text-sm text-center">
+                                    <button onclick="deleteAttendanceRecord()"
+                                        class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 shadow">Delete</button>
+                                </div>
+                                <p class="text-[10px] text-red-500 mt-1">Warning: This will delete attendance for ALL
+                                    classes for the selected date.</p>
+                            </div>
+
+                            <!-- Master Delete Student -->
+                            <div class="flex gap-2 items-center bg-red-50 p-4 rounded-lg border border-red-200">
+                                <select id="master-delete-class"
+                                    class="border border-red-300 p-2 rounded text-sm w-32 bg-white"></select>
+                                <button onclick="masterDeleteClass()"
+                                    class="bg-red-600 text-white px-3 py-2 rounded text-xs font-bold hover:bg-red-700 shadow flex-1">Delete
+                                    All Students in Class</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance -->
+            <section id="attendance" class="hidden h-full flex flex-col max-w-4xl mx-auto">
+                <div class="bg-white p-4 rounded-xl shadow-sm mb-4 sticky top-0 z-30 transition-shadow" id="att-header">
+                    <div class="flex flex-wrap gap-3 items-center justify-between mb-3">
+                        <div class="flex gap-2">
+                            <select id="att-class" onchange="loadAtt()"
+                                class="border p-2 rounded-lg bg-gray-50 font-bold text-sm w-24 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"></select>
+                            <select id="att-sec" onchange="loadAtt()"
+                                class="border p-2 rounded-lg bg-gray-50 font-bold text-sm w-20 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                                <option value="all">All</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-1 items-center bg-gray-100 p-1 rounded-lg">
+                            <input id="att-y" type="number" readonly
+                                class="w-14 bg-gray-200 border-none text-sm text-center font-bold focus:outline-none cursor-not-allowed"
+                                title="वर्ष लक छ (Year Locked)">
+                            <select id="att-m"
+                                class="bg-transparent border-none text-sm font-bold focus:outline-none"></select>
+                            <input id="att-d" type="number"
+                                class="w-10 bg-transparent border-none text-sm text-center font-bold focus:outline-none">
+                            <button onclick="loadAtt()"
+                                class="bg-white text-blue-600 p-1.5 rounded-md shadow-sm hover:text-blue-800"><i
+                                    class="fas fa-sync-alt"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center px-1">
+                        <p id="day-name" class="text-sm font-bold text-indigo-600"></p>
+                        <button id="btn-mark-holiday" onclick="markHoliday()"
+                            class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-bold hover:bg-purple-200 hidden transition">Mark
+                            Holiday (Admin)</button>
+                    </div>
+                </div>
+
+                <div class="flex-1 bg-white p-4 rounded-xl shadow-sm min-h-[300px] mb-20 relative">
+                    <div id="att-lock-status-bar"
+                        class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 mb-4 rounded-lg flex justify-between items-center shadow-sm sticky top-0 z-10">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-lock text-yellow-600"></i>
+                            <div>
+                                <p class="font-bold text-sm">Locked</p>
+                                <p class="text-[10px]">Tap Unlock to edit</p>
+                            </div>
+                        </div>
+                        <button onclick="unlockAttendance()"
+                            class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm hover:bg-yellow-200 text-xs font-bold border border-yellow-300 transition"><i
+                                class="fas fa-key mr-1"></i> Unlock</button>
+                    </div>
+
+                    <div id="start-att-btn"
+                        class="hidden text-center p-10 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-xl mb-4">
+                        <div
+                            class="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                            <i class="fas fa-clipboard-list text-2xl text-indigo-500"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-indigo-900 mb-1">हाजिरी सुरु भएको छैन</h3>
+                        <p class="text-xs text-gray-500 mb-4">Click below to mark everyone as Absent initially.</p>
+                        <button onclick="initDayAttendance()"
+                            class="bg-indigo-600 text-white px-8 py-3 rounded-full shadow-lg font-bold hover:bg-indigo-700 transition transform active:scale-95">हाजिरी
+                            सुरु गर्नुहोस्</button>
+                    </div>
+
+                    <div id="att-grid" class="flex flex-col gap-3"></div>
+                </div>
+
+                <div id="att-save-footer"
+                    class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] border-t z-30 hidden flex justify-between items-center">
+                    <span class="text-xs text-red-600 font-bold animate-pulse flex items-center gap-1"><i
+                            class="fas fa-circle text-[8px]"></i> Unsaved</span>
+                    <button onclick="saveAttendance()"
+                        class="bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-xl hover:bg-green-700 transition transform active:scale-95 w-1/2 ml-auto"><i
+                            class="fas fa-save mr-2"></i> SAVE</button>
+                </div>
+            </section>
+
+            <!-- Reports -->
+            <section id="reports" class="hidden space-y-4 max-w-4xl mx-auto">
+                <div class="bg-white p-5 rounded-xl shadow-sm no-print">
+                    <h2 class="font-bold text-gray-800 mb-4 border-b pb-2">मासिक प्रतिवेदन</h2>
+                    <div class="flex flex-wrap gap-2 items-end mb-4">
+                        <div class="flex-1">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase">Class</label>
+                            <select id="rep-class" class="w-full border p-2 rounded-lg text-sm bg-gray-50 outline-none"
+                                onchange="updateReportStudentDropdown()"></select>
+                        </div>
+                        <div class="w-20">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase">Sec</label>
+                            <select id="rep-sec" class="w-full border p-2 rounded-lg text-sm bg-gray-50 outline-none"
+                                onchange="updateReportStudentDropdown()">
+                                <option value="all">All</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+                        <div class="w-24">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase">Year</label>
+                            <select id="rep-year"
+                                class="w-full border p-2 rounded-lg text-sm bg-gray-50 outline-none"></select>
+                        </div>
+                        <div class="w-28">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase">Month</label>
+                            <select id="rep-month"
+                                class="w-full border p-2 rounded-lg text-sm bg-gray-50 outline-none"></select>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mb-2">
+                        <select id="report-type"
+                            class="border p-2 rounded-lg text-sm flex-1 bg-gray-50 outline-none font-medium">
+                            <option value="list">Attendance Sheet (Monthly)</option>
+                            <option value="fine">Fine & Payment Report</option>
+                        </select>
+                        <button onclick="handleViewReport()"
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700 transition"><i
+                                class="fas fa-eye mr-2"></i>View</button>
+                    </div>
+                    <button onclick="handlePrint()"
+                        class="w-full bg-gray-700 text-white px-3 py-3 rounded-lg text-sm font-bold mt-2 desktop-only-print hover:bg-gray-800 transition"><i
+                            class="fas fa-print mr-2"></i> Print Report</button>
+                </div>
+
+                <div id="report-output" class="bg-white p-2 overflow-x-auto text-sm shadow-sm rounded-lg min-h-[200px]">
+                    <p class="text-center text-gray-400 py-10">Select criteria and click View to generate report.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, getDocs, query, where, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, updateDoc, deleteDoc, writeBatch, deleteField, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_ERgjNFwN2BEQfsd4u80mAge5d-3e2k4",
+            authDomain: "schoolattendance-7a711.firebaseapp.com",
+            projectId: "schoolattendance-7a711",
+            storageBucket: "schoolattendance-7a711.firebasestorage.app",
+            messagingSenderId: "647726152144",
+            appId: "1:647726152144:web:7996c0c49cbb034bc1a1d5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+
+        const MONTHS = ["बैशाख", "जेष्ठ", "असार", "श्रावण", "भाद्र", "आश्विन", "कार्तिक", "मंसिर", "पुष", "माघ", "फाल्गुन", "चैत्र"];
+        const DAYS = ["आईतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
+        let CLASSES = ["Nursery", "KG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+        const SECTIONS = ["A", "B"];  // Only sections A and B allowed
+
+        // Date Converter (Same as before)
+        const dateConverter = { nepaliCalendarData: { 2000: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2001: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2002: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2003: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2004: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2005: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2006: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2007: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2008: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2009: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2010: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2011: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2012: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2013: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2014: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2015: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2016: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2017: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2018: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2019: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2020: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2021: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2022: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2023: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2024: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2025: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2026: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2027: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2028: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2029: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2030: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2031: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2032: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2033: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2034: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2035: [30, 32, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2036: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2037: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2038: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2039: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2040: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2041: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2042: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2043: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2044: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2045: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2046: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2047: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2048: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2049: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2050: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2051: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2052: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2053: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2054: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2055: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2056: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2057: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2058: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2059: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2060: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2061: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2062: [30, 32, 31, 32, 31, 31, 29, 30, 29, 30, 29, 31], 2063: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2064: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2065: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2066: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2067: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2068: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2069: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2070: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2071: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2072: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2073: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2074: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2075: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2076: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2077: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2078: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2079: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2080: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2081: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2082: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2083: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2084: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2085: [31, 32, 31, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2086: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2087: [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30], 2088: [30, 31, 32, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2089: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2090: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30] }, referenceBS: { year: 2000, month: 1, day: 1 }, referenceAD: new Date(1943, 3, 14), bsToAd: function (a, b, c) { if (!this.nepaliCalendarData[a] || b < 1 || b > 12 || c < 1 || c > this.nepaliCalendarData[a][b - 1]) return null; let d = 0; for (let e = this.referenceBS.year; e < a; e++)this.nepaliCalendarData[e] && (d += this.nepaliCalendarData[e].reduce((f, g) => f + g, 0)); for (let e = 0; e < b - 1; e++)d += this.nepaliCalendarData[a][e]; d += c - 1; const e = new Date(this.referenceAD); return e.setDate(e.getDate() + d), e }, adToBs: function (a) { if (!(a instanceof Date)) return null; let b = a - this.referenceAD, c = Math.floor(b / 864e5), d = this.referenceBS.year, e = this.referenceBS.month, f = this.referenceBS.day; for (; ;) { if (!this.nepaliCalendarData[d]) break; const g = this.nepaliCalendarData[d][e - 1], h = g - f + 1; if (c >= h) { c -= h, e++, f = 1, e > 12 && (e = 1, d++); continue } f += c; break } return { year: d, month: e, day: f, dayOfWeek: a.getDay() } } };
+
+        let currentUserData = null;
+        let studentsData = [];
+        let schoolSettings = { fineRate: 10, schoolName: "विद्यालयको नाम", schoolAddress: "ठेगाना", classFines: {}, classes: CLASSES };
+        let localAttendanceBuffer = {};
+        let currentDayHasUnsavedChanges = false;
+        let currentDayIsLocked = false;
+        let teachersList = [];
+        let editTeacherMode = false;
+
+        // Offline Guard
+        function requireOnline() {
+            if (!navigator.onLine) {
+                alert("माफ गर्नुहोला, डिलिट वा सम्पादन गर्न ईन्टरनेट अनिवार्य छ।\n(Internet required for this action)");
+                return false;
+            }
+            return true;
+        }
+
+        const loadTimer = setTimeout(() => {
+            const loader = document.getElementById('loader');
+            if (!loader.classList.contains('hidden')) {
+                document.getElementById('spinner').classList.add('hidden');
+                document.getElementById('loader-text').innerText = "";
+                document.getElementById('error-box').classList.remove('hidden');
+            }
+        }, 6000);
+
+        window.forceLogout = async () => { await signOut(auth); location.reload(); };
+        function showError(msg) { document.getElementById('spinner').classList.add('hidden'); document.getElementById('loader-text').innerText = ""; document.getElementById('error-box').classList.remove('hidden'); document.getElementById('error-msg').innerText = msg; }
+
+        let pendingAction = null;
+        window.confirmAction = (actionFn, title = "🔒 Admin Password Required") => {
+            if (!navigator.onLine) {
+                alert("⚠️ सुरक्षा सूचना: यो कार्य अफलाइन मोडमा उपलब्ध छैन।");
+                return;
+            }
+            pendingAction = actionFn;
+            document.getElementById('pass-modal-title').innerText = title;
+            document.getElementById('password-modal').classList.remove('hidden');
+        };
+
+        window.closePassModal = () => {
+            document.getElementById('password-modal').classList.add('hidden');
+            document.getElementById('confirm-pass').value = '';
+            pendingAction = null;
+        };
+
+        document.getElementById('confirm-action-btn').addEventListener('click', async () => {
+            const pass = document.getElementById('confirm-pass').value;
+            if (!pass) return alert("पासवर्ड आवश्यक छ");
+            try {
+                const cred = EmailAuthProvider.credential(auth.currentUser.email, pass);
+                await reauthenticateWithCredential(auth.currentUser, cred);
+                const actionToRun = pendingAction;
+                closePassModal();
+                if (actionToRun) actionToRun();
+            } catch (e) { console.error(e); alert("गलत पासवर्ड!"); }
+        });
+
+        function updateSyncStatus() {
+            const el = document.getElementById('sync-status');
+            const offlineWarning = document.getElementById('offline-pay-warning');
+
+            if (navigator.onLine) {
+                el.classList.remove('bg-red-500', 'offline-dot');
+                el.classList.add('bg-green-400', 'online-dot');
+                el.title = "Online";
+                if (offlineWarning) offlineWarning.innerText = "Edit/Delete (Online Only)";
+            } else {
+                el.classList.remove('bg-green-400', 'online-dot');
+                el.classList.add('bg-red-500', 'offline-dot');
+                el.title = "Offline";
+                if (offlineWarning) offlineWarning.innerText = "Offline Mode (Read Only)";
+            }
+        }
+
+        window.addEventListener('online', updateSyncStatus);
+        window.addEventListener('offline', updateSyncStatus);
+
+        onAuthStateChanged(auth, async (user) => {
+            clearTimeout(loadTimer);
+            updateSyncStatus();
+            try {
+                if (user) {
+                    // Try to get from cache first then server
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        currentUserData = docSnap.data();
+                        currentUserData.uid = user.uid;
+                        await initApp();
+                    } else { showError("User profile missing."); await signOut(auth); }
+                } else {
+                    document.getElementById('loader').classList.add('hidden');
+                    document.getElementById('login-screen').classList.remove('hidden');
+                    document.getElementById('app-interface').classList.add('hidden');
+                }
+            } catch (error) { showError(error.message); }
+        });
+
+        async function initApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            document.getElementById('user-role-display').innerText = `${currentUserData.name} (${currentUserData.role})`;
+
+            if (currentUserData.role !== 'admin') {
+                const excelContainer = document.getElementById('excel-upload-container');
+                if (excelContainer) excelContainer.style.display = 'none';
+            }
+
+            await loadSettings();
+
+            if (currentUserData.role === 'admin') {
+                document.getElementById('nav-admin').classList.remove('hidden');
+                document.getElementById('btn-mark-holiday').classList.remove('hidden');
+                loadTeachers();
+            } else {
+                document.getElementById('nav-students').classList.remove('hidden');
+            }
+
+            updateClassDropdowns();
+
+            document.getElementById('att-m').innerHTML = MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+            document.getElementById('rep-month').innerHTML = MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+
+            const d = dateConverter.adToBs(new Date());
+            const currentYear = d.year;
+            // Show only current year as per academic session requirement
+            const yearsHTML = `<option value="${currentYear}" selected>${currentYear}</option>`;
+            document.getElementById('rep-year').innerHTML = yearsHTML;
+            document.getElementById('rep-month').value = d.month;
+
+            if (d) {
+                document.getElementById('att-y').value = d.year;
+                document.getElementById('att-m').value = d.month;
+                document.getElementById('att-d').value = d.day;
+                document.getElementById('nepali-date').innerText = `${d.year}-${MONTHS[d.month - 1]}-${d.day} (${DAYS[d.dayOfWeek]})`;
+            }
+
+            // Set today in delete attendance fields too
+            document.getElementById('del-att-y').value = d.year;
+            document.getElementById('del-att-m').value = d.month;
+            document.getElementById('del-att-d').value = d.day;
+
+            await loadStudents();
+            showSection('dashboard');
+            document.getElementById('loader').classList.add('hidden');
+        }
+
+        // --- ACCESS CONTROL: UPDATE DROPDOWNS ---
+        function updateClassDropdowns() {
+            let visibleClasses = [];
+
+            if (currentUserData.role === 'admin') {
+                visibleClasses = CLASSES;
+            } else if (currentUserData.classes) {
+                // If teacher, extract unique class numbers from "9" or "9-A"
+                visibleClasses = [...new Set(currentUserData.classes.map(c => c.split('-')[0]))];
+
+                // Sort classes
+                visibleClasses.sort((a, b) => {
+                    if (isNaN(a) && !isNaN(b)) return -1;
+                    if (!isNaN(a) && isNaN(b)) return 1;
+                    return isNaN(a) ? a.localeCompare(b) : parseInt(a) - parseInt(b);
+                });
+            }
+
+            const classOptions = visibleClasses.length > 0 ? visibleClasses.map(c => `<option value="${c}">${c}</option>`).join('') : `<option value="">No Access</option>`;
+
+            // Populate Dropdowns
+            ['att-class', 'rep-class', 's-class', 'mgmt-class', 'master-delete-class'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = classOptions;
+            });
+
+            // Dashboard Dropdown (With "All Classes")
+            const dashSelect = document.getElementById('dash-class-select');
+            if (dashSelect) {
+                dashSelect.innerHTML = (visibleClasses.length > 1 ? `<option value="all">All Assigned Classes</option>` : '') + visibleClasses.map(c => `<option value="${c}">Class ${c}</option>`).join('');
+                if (visibleClasses.length > 0) dashSelect.value = visibleClasses.length > 1 ? 'all' : visibleClasses[0];
+            }
+
+            // Trigger section filter for first load
+            if (currentUserData.role !== 'admin') {
+                filterSectionDropdown('att-class', 'att-sec');
+                filterSectionDropdown('rep-class', 'rep-sec');
+                filterSectionDropdown('mgmt-class', 'mgmt-sec');
+                filterSectionDropdown('dash-class-select', 'dash-sec-select');
+            }
+        }
+
+        // Helper to filter section dropdown based on selected class
+        window.filterSectionDropdown = (classElId, secElId) => {
+            if (currentUserData.role === 'admin') return; // Admin sees all
+
+            const selectedClass = document.getElementById(classElId).value;
+            const secEl = document.getElementById(secElId);
+
+            if (selectedClass === 'all') {
+                secEl.innerHTML = '<option value="all">All</option>';
+                return;
+            }
+
+            // Find assigned sections for this class
+            // e.g., if user has ["9-A", "9-B", "10"], and selectedClass is "9", valid are A, B.
+            // if "10" is whole class, valid are All, A, B.
+
+            const assignments = currentUserData.classes || [];
+            let allowedSections = [];
+            let hasWholeClass = false;
+
+            assignments.forEach(a => {
+                if (a === selectedClass) hasWholeClass = true;
+                if (a.startsWith(selectedClass + '-')) {
+                    allowedSections.push(a.split('-')[1]);
+                }
+            });
+
+            if (hasWholeClass) {
+                secEl.innerHTML = `<option value="all">All</option>` + SECTIONS.map(s => `<option value="${s}">${s}</option>`).join('');
+            } else {
+                if (allowedSections.length > 0) {
+                    secEl.innerHTML = (allowedSections.length > 1 ? `<option value="all">All</option>` : '') + allowedSections.map(s => `<option value="${s}">${s}</option>`).join('');
+                } else {
+                    secEl.innerHTML = `<option value="">No Access</option>`;
+                }
+            }
+        };
+
+        // Attach listeners to filter sections on change
+        ['att-class', 'rep-class', 'mgmt-class', 'dash-class-select'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', () => {
+                    let secId = id.replace('class', 'sec').replace('-select', '-select'); // hacky id mapping
+                    if (id === 'att-class') secId = 'att-sec';
+                    if (id === 'rep-class') secId = 'rep-sec';
+                    if (id === 'mgmt-class') secId = 'mgmt-sec';
+                    if (id === 'dash-class-select') secId = 'dash-sec-select';
+
+                    if (currentUserData.role !== 'admin') filterSectionDropdown(id, secId);
+
+                    // After filtering, reload relevant data
+                    if (id === 'att-class') loadAtt();
+                    if (id === 'mgmt-class') renderStudentMgmtList();
+                    if (id === 'dash-class-select') updateDashboard();
+                });
+            }
+        });
+
+
+        // --- PAYMENT MGMT (TEACHER LEDGER) ---
+        window.openPaymentManagement = async () => {
+            const modal = document.getElementById('payment-mgmt-modal');
+            modal.classList.remove('hidden');
+            const list = document.getElementById('teacher-ledger-list');
+            list.innerHTML = '<p class="text-center text-gray-400 py-4">Loading data...</p>';
+
+            try {
+                // Fetch Payments (Offline capable)
+                const qCol = query(collection(db, "collections"), where("teacherId", "==", currentUserData.uid));
+                const snapCol = await getDocs(qCol);
+
+                const qClear = query(collection(db, "clearances"), where("teacherId", "==", currentUserData.uid));
+                const snapClear = await getDocs(qClear);
+
+                let totalCollected = 0;
+                let totalCleared = 0;
+                let html = '';
+
+                let collections = [];
+                snapCol.forEach(doc => collections.push({ id: doc.id, ...doc.data() }));
+
+                // Sort by timestamp if available, else date
+                collections.sort((a, b) => {
+                    const tA = a.timestamp?.seconds || 0;
+                    const tB = b.timestamp?.seconds || 0;
+                    return tB - tA;
+                });
+
+                if (collections.length === 0) {
+                    html = '<p class="text-center text-gray-500 italic">कुनै संकलन छैन।</p>';
+                } else {
+                    collections.forEach(d => {
+                        totalCollected += parseInt(d.amount);
+                        html += `
+                            <div class="flex justify-between items-center bg-white p-3 rounded border-b hover:bg-gray-50 transition">
+                                <div>
+                                    <div class="font-bold text-gray-700">${d.studentName} <span class="text-xs bg-gray-200 text-gray-600 px-1 rounded ml-1">Cls ${studentsData.find(s => s.id === d.studentId)?.class || '?'}</span></div>
+                                    <div class="text-[10px] text-gray-500">${d.date}</div>
+                                </div>
+                                <div class="font-bold text-green-600">Rs. ${d.amount}</div>
+                            </div>
+                        `;
+                    });
+                }
+                list.innerHTML = html;
+
+                snapClear.forEach(doc => { totalCleared += parseInt(doc.data().amount); });
+
+                document.getElementById('mgmt-total-collected').innerText = `Rs. ${totalCollected}`;
+                document.getElementById('mgmt-total-cleared').innerText = `Rs. ${totalCleared}`;
+                document.getElementById('mgmt-due-balance').innerText = `Rs. ${totalCollected - totalCleared}`;
+
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = `<p class="text-red-500 text-center">Error: ${e.message}</p>`;
+            }
+        };
+
+        window.saveSelfClearance = async () => {
+            // BLOCK: Fine Settlement requires internet connection
+            if (!navigator.onLine) {
+                alert("हिसाब फर्च्योट गर्न इन्टरनेट आवश्यक छ।\n(Internet required for settlement)");
+                return;
+            }
+
+            const amount = parseInt(document.getElementById('self-clear-amount').value);
+            const remarks = document.getElementById('self-clear-remarks').value;
+            if (!amount || amount <= 0) return alert("मान्य रकम प्रविष्ट गर्नुहोस्");
+
+            try {
+                const todayBS = dateConverter.adToBs(new Date());
+                await addDoc(collection(db, "clearances"), {
+                    teacherId: currentUserData.uid,
+                    teacherName: currentUserData.name,
+                    amount: amount,
+                    remarks: remarks || "Self Handover",
+                    date: `${todayBS.year}-${todayBS.month}-${todayBS.day}`,
+                    timestamp: new Date()
+                });
+                alert("हिसाब फर्च्योट रेकर्ड भयो!");
+                document.getElementById('self-clear-amount').value = '';
+                document.getElementById('self-clear-remarks').value = '';
+                openPaymentManagement();
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        // --- TEACHER MODAL LOGIC (New) ---
+        window.openTeacherModal = () => {
+            document.getElementById('teacher-modal').classList.remove('hidden');
+            document.getElementById('teacher-modal-title').innerText = "शिक्षक थप्नुहोस् (Add Teacher)";
+            document.getElementById('t-edit-id').value = "";
+            document.querySelector('form').reset();
+            populateClassCheckboxes(); // Clear checkboxes
+            document.getElementById('new-t-pass').required = true;
+            document.getElementById('pass-hint').classList.add('hidden');
+            document.getElementById('new-t-email').disabled = false;
+        };
+
+        window.editTeacher = (id) => {
+            const t = teachersList.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('teacher-modal').classList.remove('hidden');
+            document.getElementById('teacher-modal-title').innerText = "शिक्षक सम्पादन (Edit Teacher)";
+            document.getElementById('t-edit-id').value = id;
+            document.getElementById('new-t-name').value = t.name;
+            document.getElementById('new-t-email').value = t.email;
+            document.getElementById('new-t-email').disabled = true; // Email can't change easily in Firebase
+            document.getElementById('new-t-pass').required = false;
+            document.getElementById('pass-hint').classList.remove('hidden');
+
+            populateClassCheckboxes(t.classes || []);
+        };
+
+        window.closeTeacherModal = () => document.getElementById('teacher-modal').classList.add('hidden');
+
+        function populateClassCheckboxes(selected = []) {
+            const container = document.getElementById('class-checkboxes');
+            let html = "";
+            CLASSES.forEach(c => {
+                html += `<div class="mb-2">
+                            <div class="font-bold text-gray-500 text-xs border-b mb-1">Class ${c}</div>
+                            <div class="flex flex-col gap-1 ml-2">`;
+
+                const isAllSelected = selected.includes(c);
+                html += `<label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" value="${c}" class="class-cb rounded text-indigo-600 focus:ring-indigo-500" ${isAllSelected ? 'checked' : ''}>
+                            <span>All Sections</span>
+                         </label>`;
+
+                SECTIONS.forEach(s => {
+                    const val = `${c}-${s}`;
+                    const isSecSelected = selected.includes(val);
+                    html += `<label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                <input type="checkbox" value="${val}" class="class-cb rounded text-indigo-600 focus:ring-indigo-500" ${isSecSelected ? 'checked' : ''}>
+                                <span>Section ${s}</span>
+                             </label>`;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        window.handleTeacherSubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('t-edit-id').value;
+            const name = document.getElementById('new-t-name').value;
+            const checkedBoxes = document.querySelectorAll('.class-cb:checked');
+            const assignedClasses = Array.from(checkedBoxes).map(cb => cb.value);
+
+            // Filter logic: If 'Class 9' is checked, remove '9-A', '9-B' to avoid redundancy
+            const cleanedClasses = assignedClasses.filter(cls => {
+                if (cls.includes('-')) {
+                    const parentClass = cls.split('-')[0];
+                    return !assignedClasses.includes(parentClass);
+                }
+                return true;
+            });
+
+            if (id) {
+                // EDIT MODE
+                try {
+                    const pass = document.getElementById('new-t-pass').value;
+                    let updates = { name, classes: cleanedClasses };
+                    await updateDoc(doc(db, "users", id), updates);
+
+                    // Password update is complex without re-auth, skipping for simple edit
+                    // If needed, we'd call a Cloud Function or Admin SDK.
+
+                    alert("शिक्षकको विवरण अद्यावधिक भयो!");
+                    closeTeacherModal();
+                    loadTeachers();
+                } catch (err) { alert("Error: " + err.message); }
+            } else {
+                // CREATE MODE
+                const email = document.getElementById('new-t-email').value;
+                const pass = document.getElementById('new-t-pass').value;
+                try {
+                    const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+                    const secondaryAuth = getAuth(secondaryApp);
+                    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+                    await setDoc(doc(db, "users", cred.user.uid), { email, name, role: 'teacher', classes: cleanedClasses });
+                    await signOut(secondaryAuth);
+                    alert("शिक्षक खाता बन्यो!");
+                    closeTeacherModal();
+                    loadTeachers();
+                } catch (err) { alert("Error: " + err.message); }
+            }
+        };
+
+        // --- ADMIN: LOAD TEACHERS ---
+        async function loadTeachers() {
+            const container = document.getElementById('teacher-list-container');
+            container.innerHTML = "Loading...";
+            const q = query(collection(db, "users"), where("role", "==", "teacher"));
+            const snap = await getDocs(q);
+            container.innerHTML = "";
+            teachersList = [];
+            snap.forEach(d => {
+                const t = d.data();
+                t.id = d.id;
+                teachersList.push(t);
+
+                // Format classes for display
+                const classDisplay = (t.classes || []).join(', ');
+
+                container.innerHTML += `
+                    <div class="flex justify-between border-b p-2 bg-gray-50 rounded mb-2 items-center hover:bg-gray-100 transition">
+                        <div class="leading-tight">
+                            <span class="font-bold block text-gray-800">${t.name}</span>
+                            <span class="text-xs text-gray-500 block">${t.email}</span>
+                            <span class="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-1 rounded inline-block mt-1">Assign: ${classDisplay || 'None'}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editTeacher('${t.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded-full transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="confirmAction(() => deleteTeacher('${d.id}'))" class="text-red-500 hover:bg-red-100 p-2 rounded-full transition"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            });
+        }
+        window.deleteTeacher = async (uid) => { await deleteDoc(doc(db, "users", uid)); alert("शिक्षक हटाइयो"); loadTeachers(); }
+
+        // --- ADMIN: DELETE ATTENDANCE ---
+        window.deleteAttendanceRecord = async () => {
+            const y = document.getElementById('del-att-y').value;
+            const m = document.getElementById('del-att-m').value;
+            const d = document.getElementById('del-att-d').value;
+            if (!y || !m || !d) return alert("कृपया मान्य मिति प्रविष्ट गर्नुहोस्");
+
+            confirmAction(async () => {
+                try {
+                    const dateKey = `${y}-${m}-${d}`;
+                    await deleteDoc(doc(db, "attendance", dateKey));
+                    alert(`${dateKey} को हाजिरी सफलतापूर्वक डिलिट भयो!`);
+                    // If current view is that day, reload
+                    if (document.getElementById('att-y').value == y && document.getElementById('att-m').value == m && document.getElementById('att-d').value == d) {
+                        loadAtt();
+                    }
+                } catch (e) { alert("Error: " + e.message); }
+            }, "Confirm Delete Attendance?");
+        };
+
+        // --- PAYMENT POPUP LOGIC ---
+        let currentPayStudent = null;
+        window.openPayModal = async (sid, name) => {
+            currentPayStudent = { id: sid, name: name };
+            document.getElementById('pay-modal-title').innerText = name;
+            document.getElementById('student-pay-modal').classList.remove('hidden');
+            document.getElementById('pay-new-amount').value = '';
+
+            // Allow opening modal offline, but history fetch might fail or be empty if not cached
+            loadStudentPaymentHistory(sid);
+        };
+
+        async function loadStudentPaymentHistory(sid) {
+            const list = document.getElementById('pay-history-list');
+            list.innerHTML = '<p class="p-2 text-gray-400">Loading history...</p>';
+
+            try {
+                const q = query(collection(db, "collections"), where("studentId", "==", sid));
+                // Use default caching behavior (online first, fallback cache)
+                const snap = await getDocs(q);
+
+                let payments = [];
+                snap.forEach(doc => payments.push({ id: doc.id, ...doc.data() }));
+
+                // Sort
+                payments.sort((a, b) => {
+                    const tA = a.timestamp?.seconds || 0;
+                    const tB = b.timestamp?.seconds || 0;
+                    return tB - tA;
+                });
+
+                if (payments.length === 0) {
+                    list.innerHTML = '<p class="p-4 text-center text-gray-500 text-xs">No payment history found.</p>';
+                } else {
+                    let html = '';
+                    payments.forEach(d => {
+                        html += `
+                            <div class="flex justify-between items-center p-3 border-b hover:bg-gray-50 last:border-0">
+                                <div>
+                                    <div class="font-bold text-gray-700 text-sm">${d.date}</div>
+                                    <div class="text-[10px] text-gray-500">Rec: ${d.teacherName}</div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-green-600 text-sm">Rs. ${d.amount}</span>
+                                    <button onclick="deletePayment('${d.id}')" class="text-red-500 text-xs px-2 py-1 hover:bg-red-100 rounded transition"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    list.innerHTML = html;
+                }
+            } catch (e) {
+                list.innerHTML = `<p class="p-2 text-red-400 text-xs">Offline: History not available.</p>`;
+            }
+        }
+        window.closePayModal = () => document.getElementById('student-pay-modal').classList.add('hidden');
+
+        window.savePayment = async () => {
+            // Allow offline saves
+            if (!currentPayStudent) return;
+            const amount = parseInt(document.getElementById('pay-new-amount').value);
+            if (!amount || amount <= 0) return alert("कृपया रकम प्रविष्ट गर्नुहोस्");
+
+            try {
+                const todayBS = dateConverter.adToBs(new Date());
+                const dateString = `${todayBS.year}-${todayBS.month}-${todayBS.day}`;
+
+                await addDoc(collection(db, "collections"), {
+                    date: dateString,
+                    year: todayBS.year,
+                    month: todayBS.month,
+                    day: todayBS.day,
+                    amount: amount,
+                    studentId: currentPayStudent.id,
+                    studentName: currentPayStudent.name,
+                    teacherId: auth.currentUser.uid,
+                    teacherName: currentUserData.name,
+                    timestamp: new Date()
+                });
+
+                alert("भुक्तानी थपियो! (अनलाइन हुँदा सिंक हुनेछ)");
+                document.getElementById('pay-new-amount').value = '';
+                loadStudentPaymentHistory(currentPayStudent.id);
+            } catch (err) { alert("Error: " + err.message); }
+        };
+
+        window.deletePayment = async (docId) => {
+            if (!requireOnline()) return;
+            if (confirm("यो भुक्तानी रेकर्ड डिलिट गर्ने?")) {
+                try {
+                    await deleteDoc(doc(db, "collections", docId));
+                    loadStudentPaymentHistory(currentPayStudent.id);
+                } catch (e) { alert("Error: " + e.message); }
+            }
+        };
+
+        // --- STUDENT MANAGEMENT & REPORT CARD ---
+        async function loadStudents() {
+            try {
+                // If offline, this pulls from cache if available
+                const q = query(collection(db, "students"));
+                const snapshot = await getDocs(q);
+                studentsData = [];
+                snapshot.forEach(doc => studentsData.push({ id: doc.id, ...doc.data() }));
+                renderStudentMgmtList();
+                updateDashboard();
+            } catch (e) { console.warn("Error loading students: ", e); }
+        }
+
+        window.renderStudentMgmtList = () => {
+            const container = document.getElementById('mgmt-list-container');
+            if (!container) return;
+            const cls = document.getElementById('mgmt-class').value;
+            const sec = document.getElementById('mgmt-sec').value;
+            const search = document.getElementById('mgmt-search').value.toLowerCase();
+
+            let filtered = studentsData.filter(s => {
+                if (s.class != cls) return false;
+                if (sec !== 'all' && s.section !== sec) return false;
+                if (search && !s.name.toLowerCase().includes(search) && !s.roll.toString().includes(search)) return false;
+
+                // Admin sees all. Teachers only see assigned.
+                if (currentUserData.role !== 'admin') {
+                    const assignments = currentUserData.classes || [];
+                    const hasWholeClass = assignments.includes(s.class);
+                    const hasSection = assignments.includes(`${s.class}-${s.section}`);
+                    if (!hasWholeClass && !hasSection) return false;
+                }
+                return true;
+            });
+
+            container.innerHTML = filtered.sort((a, b) => parseInt(a.roll) - parseInt(b.roll)).map(s => `
+                <div class="flex justify-between border-b p-3 items-center hover:bg-white transition last:border-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">${s.roll}</div>
+                        <div>
+                            <span class="font-bold text-gray-800 block">${s.name}</span>
+                            <span class="text-[10px] text-gray-500 uppercase font-semibold">Class: ${s.class}-${s.section}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="viewStudentCard('${s.id}')" class="text-indigo-600 bg-indigo-50 p-2 rounded-lg hover:bg-indigo-100 transition" title="Report Card"><i class="fas fa-id-card"></i></button>
+                        <button onclick="editStudent('${s.id}')" class="text-blue-600 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteStudent('${s.id}')" class="text-red-600 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        // --- STUDENT REPORT CARD MODAL ---
+        window.viewStudentCard = async (sid) => {
+            const student = studentsData.find(s => s.id === sid);
+            if (!student) return;
+
+            const modal = document.getElementById('student-card-modal');
+            const content = document.getElementById('student-card-content');
+            modal.classList.remove('hidden');
+
+            const d = dateConverter.adToBs(new Date());
+            const y = d.year;
+            const m = d.month; // Current Month
+
+            content.innerHTML = `<div class="p-6 text-center"><i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i><p class="mt-2 text-gray-500">Generating Report Card...</p></div>`;
+
+            try {
+                // 1. Fetch Attendance
+                const daysInMonth = dateConverter.nepaliCalendarData[y][m - 1];
+                let present = 0, absent = 0, holidays = 0, saturdays = 0, schoolDays = 0;
+                const attPromises = [];
+                for (let i = 1; i <= daysInMonth; i++) {
+                    attPromises.push(getDoc(doc(db, "attendance", `${y}-${m}-${i}`)));
+                }
+                const attSnaps = await Promise.all(attPromises);
+
+                attSnaps.forEach((snap, idx) => {
+                    const day = idx + 1;
+                    const adDate = dateConverter.bsToAd(y, m, day);
+                    const isSat = adDate && adDate.getDay() === 6;
+
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        if (data.isHoliday) {
+                            holidays++;
+                        }
+                        else if (isSat) {
+                            saturdays++;
+                        }
+                        else {
+                            // Check if at least one student was present on this day
+                            // Only count as a school day if someone attended
+                            const hasAnyPresent = Object.values(data).some(status =>
+                                status === 'P' || (typeof status === 'string' && status.startsWith('L'))
+                            );
+
+                            if (hasAnyPresent) {
+                                schoolDays++; // Valid attendance day
+                                if (data[sid] === 'P') { present++; }
+                                else if (data[sid] === 'A') { absent++; }
+                                else if (data[sid] && data[sid].startsWith('L')) { /* Leave */ }
+                            }
+                            // If all students absent, don't count as school day
+                        }
+                    } else {
+                        if (isSat) saturdays++;
+                    }
+                });
+
+                const percentage = schoolDays > 0 ? ((present / schoolDays) * 100).toFixed(1) : 0;
+
+                // 2. Fetch Payments for this month/year
+                let paidAmount = 0;
+                const qPay = query(collection(db, "collections"), where("studentId", "==", sid), where("year", "==", y), where("month", "==", m));
+                const paySnaps = await getDocs(qPay);
+                paySnaps.forEach(doc => { paidAmount += parseInt(doc.data().amount || 0); });
+
+                // 3. Calculate Fine
+                const rate = schoolSettings.classFines?.[student.class] || schoolSettings.fineRate || 10;
+                const totalFine = absent * rate;
+                const dueAmount = totalFine - paidAmount;
+
+                const monthName = MONTHS[m - 1];
+
+                // 4. Generate HTML (New Design)
+                let html = `
+                    <div class="bg-white rounded-xl overflow-hidden max-w-lg mx-auto w-full sm:max-w-lg border border-gray-200 shadow-2xl relative print:shadow-none print:border-none print:w-full">
+                        <button onclick="closeStudentCardModal()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10 print:hidden"><i class="fas fa-times text-xl"></i></button>
+                        
+                        <div class="p-4 sm:p-8 print:p-0">
+                            <!-- Header -->
+                            <div class="text-center mb-6">
+                                <h2 class="text-xl font-bold text-blue-800 uppercase tracking-wide">${schoolSettings.schoolName}</h2>
+                                <p class="text-gray-500 text-xs mt-1">${schoolSettings.schoolAddress}</p>
+                                <div class="mt-3">
+                                     <span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-gray-200">Monthly Report Card</span>
+                                </div>
+                            </div>
+
+                            <!-- Student Details -->
+                            <div class="border-t border-b border-gray-100 py-4 mb-6">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-bold text-gray-800 text-lg"><span class="text-gray-500 text-sm mr-1">Name:</span> ${student.name}</h3>
+                                    <span class="font-bold text-gray-800 text-sm">Roll: ${student.roll}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm text-gray-500">
+                                    <span>Class: ${student.class} (${student.section})</span>
+                                    <span>Date: ${y} / ${monthName}</span>
+                                </div>
+                            </div>
+
+                            <!-- Attendance Stats -->
+                            <div class="space-y-3 mb-6 text-sm">
+                                <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                    <span class="text-gray-600 font-medium">School Days</span>
+                                    <span class="font-bold text-gray-800">${schoolDays}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                    <span class="text-gray-600 font-medium">Present Days</span>
+                                    <span class="font-bold text-green-600">${present}</span>
+                                </div>
+                                 <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                    <span class="text-gray-600 font-medium">Absent Days</span>
+                                    <span class="font-bold text-red-600">${absent}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-2 bg-blue-50 rounded border border-blue-100 mt-2">
+                                    <span class="text-blue-800 font-bold">Attendance %</span>
+                                    <span class="font-bold text-blue-700">${percentage}%</span>
+                                </div>
+                            </div>
+
+                            <!-- Payment/Fine Section -->
+                            <div class="bg-red-50 rounded-xl p-5 border border-red-100 mb-8">
+                                <div class="flex justify-between items-center mb-2 text-sm">
+                                    <span class="text-gray-600">Fine Rate (Per Day)</span>
+                                    <span class="font-medium text-gray-800">Rs. ${rate}</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold text-gray-800 text-sm">Total Fine</span>
+                                    <span class="font-bold text-gray-900">Rs. ${totalFine}</span>
+                                </div>
+                                 <div class="flex justify-between items-center mb-3 text-sm">
+                                    <span class="text-green-600 font-medium">Paid Amount</span>
+                                    <span class="font-bold text-green-700">Rs. ${paidAmount}</span>
+                                </div>
+                                <div class="border-t border-red-200 pt-3 flex justify-between items-center">
+                                    <span class="font-bold text-red-700 uppercase text-sm">Due Amount</span>
+                                    <span class="font-bold text-red-700 text-lg">Rs. ${dueAmount}</span>
+                                </div>
+                            </div>
+
+                            <!-- Signatures -->
+                            <div class="flex justify-between items-end pt-8 text-center text-xs text-gray-400 print:mt-10">
+                                <div class="w-20 border-t border-gray-300 pt-1">Guardian</div>
+                                <div class="w-20 border-t border-gray-300 pt-1">Teacher</div>
+                                <div class="w-20 border-t border-gray-300 pt-1">Principal</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                content.innerHTML = html;
+
+            } catch (e) {
+                console.error(e);
+                content.innerHTML = `<p class="p-4 text-red-500 text-center">Error loading card: ${e.message}</p>`;
+            }
+        };
+
+        // Close Student Card Modal - ensures back button works even after errors
+        window.closeStudentCardModal = () => {
+            try {
+                const modal = document.getElementById('student-card-modal');
+                if (modal) modal.classList.add('hidden');
+            } catch (e) {
+                console.error('Error closing modal:', e);
+                // Force close anyway
+                const modal = document.getElementById('student-card-modal');
+                if (modal) modal.classList.add('hidden');
+            }
+        };
+
+
+        // --- GENERIC FUNCTIONS (Existing Logic) ---
+        window.navigateSection = (sectionId) => {
+            if (currentDayHasUnsavedChanges) {
+                if (!confirm("तपाईंको हाजिरी सेभ भएको छैन! के तपाईं डाटा डिस्कार्ड (Discard) गरेर बाहिर निस्कन चाहनुहुन्छ?")) return;
+                currentDayHasUnsavedChanges = false;
+                document.getElementById('att-save-footer').classList.add('hidden');
+            }
+            showSection(sectionId);
+        }
+
+        async function loadSettings() {
+            try {
+                const snap = await getDoc(doc(db, "settings", "config"));
+                if (snap.exists()) {
+                    schoolSettings = { ...schoolSettings, ...snap.data() };
+                    if (schoolSettings.classes) CLASSES = schoolSettings.classes;
+                }
+                if (currentUserData.role === 'admin') {
+                    document.getElementById('set-school-name').value = schoolSettings.schoolName || "";
+                    document.getElementById('set-school-address').value = schoolSettings.schoolAddress || "";
+                    document.getElementById('set-classes-list').value = CLASSES.join(',');
+                    renderFineRateSettings();
+                }
+            } catch (e) { console.log("Offline settings load"); }
+        }
+
+        function renderFineRateSettings() {
+            const container = document.getElementById('fine-rates-container');
+            container.innerHTML = CLASSES.map(c => `<div><label class="text-[10px] text-gray-500 block">Cls ${c}</label><input type="number" class="fine-input w-full border p-1 rounded text-sm focus:ring-1 focus:ring-blue-500" data-class="${c}" value="${schoolSettings.classFines?.[c] || 10}"></div>`).join('');
+        }
+        window.saveSettings = async () => {
+            const name = document.getElementById('set-school-name').value;
+            const addr = document.getElementById('set-school-address').value;
+            const classesInput = document.getElementById('set-classes-list').value;
+            const newClasses = classesInput.split(',').map(s => s.trim()).filter(s => s);
+            const fineInputs = document.querySelectorAll('.fine-input');
+            let classFines = {};
+            fineInputs.forEach(inp => { classFines[inp.dataset.class] = parseInt(inp.value) || 0; });
+            await setDoc(doc(db, "settings", "config"), { schoolName: name, schoolAddress: addr, classFines: classFines, classes: newClasses }, { merge: true });
+            alert("सेटिङ सुरक्षित भयो! रिलोड हुँदैछ..."); location.reload();
+        }
+
+        window.editStudent = (id) => {
+            if (!requireOnline()) return;
+            const s = studentsData.find(st => st.id === id);
+            if (!s) return;
+            document.getElementById('edit-s-id').value = id;
+            document.getElementById('edit-s-name').value = s.name;
+            document.getElementById('edit-s-sec').value = s.section;
+            document.getElementById('edit-student-modal').classList.remove('hidden');
+        }
+
+        window.saveStudentEdit = async () => {
+            if (!requireOnline()) return;
+            const id = document.getElementById('edit-s-id').value;
+            const newName = document.getElementById('edit-s-name').value;
+            const newSec = document.getElementById('edit-s-sec').value;
+            if (!newName || !newSec) return alert("नाम र सेक्सन खाली हुन सक्दैन");
+            try {
+                await updateDoc(doc(db, "students", id), { name: newName, section: newSec });
+                const s = studentsData.find(st => st.id === id);
+                if (s) { s.name = newName; s.section = newSec; }
+                alert("विवरण सफलतापूर्वक अपडेट भयो!");
+                document.getElementById('edit-student-modal').classList.add('hidden');
+                renderStudentMgmtList();
+                updateDashboard();
+            } catch (e) { alert("Error updating: " + e.message); }
+        }
+
+        window.deleteStudent = async (id) => {
+            if (!requireOnline()) return;
+            confirmAction(async () => {
+                await deleteDoc(doc(db, "students", id));
+                studentsData = studentsData.filter(s => s.id !== id);
+                renderStudentMgmtList();
+                updateDashboard();
+                alert("विद्यार्थी सफलतापूर्वक डिलिट भयो");
+            }, "🔒 Confirm Delete (Password Required)");
+        }
+
+        window.masterDeleteClass = async () => {
+            if (!requireOnline()) return;
+            const cls = document.getElementById('master-delete-class').value;
+            if (!cls) return alert("पहिले क्लास चयन गर्नुहोस्");
+            const toDelete = studentsData.filter(s => s.class == cls);
+            if (toDelete.length === 0) return alert(`No students found in Class ${cls}.`);
+
+            // Just simulate auth check via confirmAction for simplicity, or keep original prompts
+            confirmAction(async () => {
+                const chunks = [];
+                for (let i = 0; i < toDelete.length; i += 450) chunks.push(toDelete.slice(i, i + 450));
+                try {
+                    let count = 0;
+                    for (const chunk of chunks) {
+                        const batch = writeBatch(db);
+                        chunk.forEach(s => batch.delete(doc(db, "students", s.id)));
+                        await batch.commit();
+                        count += chunk.length;
+                    }
+                    alert(`SUCCESS: Deleted ${count} students from Class ${cls}.`);
+                    studentsData = studentsData.filter(s => s.class != cls);
+                    renderStudentMgmtList();
+                    updateDashboard();
+                } catch (e) { alert("Error during deletion: " + e.message); }
+            }, "Confirm MASTER DELETE?");
+        }
+
+        window.showSection = (id) => {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'border-indigo-100');
+                btn.classList.add('text-gray-600', 'border-transparent');
+            });
+
+            const navBtnMap = { 'dashboard': 0, 'attendance': 1, 'reports': 2, 'student-mgmt': 3, 'admin': 4 };
+            const btns = document.querySelectorAll('.nav-btn');
+            if (btns[navBtnMap[id]]) {
+                btns[navBtnMap[id]].classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-100');
+                btns[navBtnMap[id]].classList.remove('text-gray-600', 'border-transparent');
+            }
+            if (id === 'attendance') loadAtt();
+            if (id === 'dashboard') updateDashboard();
+        };
+
+        window.handleLogin = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const btn = document.getElementById('login-btn');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`; btn.disabled = true;
+            signInWithEmailAndPassword(auth, email, pass).catch(err => { alert("Login Failed: " + err.message); btn.innerHTML = `लगइन गर्नुहोस्`; btn.disabled = false; });
+        };
+        window.logout = () => signOut(auth);
+
+        window.addStudent = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('s-name').value;
+            const cls = document.getElementById('s-class').value;
+            const sec = document.getElementById('s-sec').value.toUpperCase();
+            const roll = document.getElementById('s-roll').value;
+            const id = `${cls}-${sec}-${roll}`;
+            try {
+                await setDoc(doc(db, "students", id), { name, class: cls, section: sec, roll: parseInt(roll) });
+                if (!studentsData.find(s => s.id === id)) studentsData.push({ id, name, class: cls, section: sec, roll: parseInt(roll) });
+                alert("विद्यार्थी थपियो!"); e.target.reset(); updateDashboard(); renderStudentMgmtList();
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        // Excel Upload (unchanged logic)
+        window.uploadStudentExcel = (input) => {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                if (jsonData.length === 0) return alert("खाली फाइल");
+                let count = 0;
+                let newClassesFound = false;
+                const batch = writeBatch(db);
+                let batchCount = 0;
+                for (let row of jsonData) {
+                    const name = row['Name'] || row['name'];
+                    const cls = String(row['Class'] || row['class']).trim();
+                    const sec = String(row['Section'] || row['section'] || 'A').trim().toUpperCase();
+                    const roll = parseInt(row['Roll'] || row['roll']);
+                    if (name && cls && roll) {
+                        const id = `${cls}-${sec}-${roll}`;
+                        batch.set(doc(db, "students", id), { name, class: cls, section: sec, roll: roll });
+                        if (!CLASSES.includes(cls)) { CLASSES.push(cls); newClassesFound = true; }
+                        if (!studentsData.find(s => s.id === id)) studentsData.push({ id, name, class: cls, section: sec, roll: roll });
+                        else { const idx = studentsData.findIndex(s => s.id === id); if (idx > -1) studentsData[idx] = { id, name, class: cls, section: sec, roll: roll }; }
+                        count++; batchCount++;
+                        if (batchCount >= 450) { await batch.commit(); batchCount = 0; }
+                    }
+                }
+                if (batchCount > 0) await batch.commit();
+                if (newClassesFound && currentUserData.role === 'admin') { await setDoc(doc(db, "settings", "config"), { classes: CLASSES }, { merge: true }); updateClassDropdowns(); }
+                alert(`${count} विद्यार्थीहरू सफलतापूर्वक अपलोड भयो!`); renderStudentMgmtList(); updateDashboard();
+            };
+            reader.readAsArrayBuffer(file);
+        };
+        window.downloadStudentTemplate = () => {
+            const ws = XLSX.utils.json_to_sheet([{ Name: "Ram Nepal", Class: "10", Section: "A", Roll: 1 }, { Name: "Sita Sharma", Class: "10", Section: "A", Roll: 2 }]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Students"); XLSX.writeFile(wb, "Student_Template.xlsx");
+        };
+
+        // --- ATTENDANCE CORE ---
+        window.loadAtt = async () => {
+            let cls = document.getElementById('att-class').value;
+            let sec = document.getElementById('att-sec').value;
+
+            // Check access if forced via url/console
+            if (currentUserData.role !== 'admin') {
+                const assigned = currentUserData.classes || [];
+                // If user doesn't have class access, fallback or stop?
+                // The dropdown filters handle UI, but logic check:
+                const hasWhole = assigned.includes(cls);
+                const hasSec = assigned.includes(`${cls}-${sec}`);
+                if (!hasWhole && !hasSec && sec !== 'all') {
+                    // Try to fix selection automatically
+                    filterSectionDropdown('att-class', 'att-sec');
+                    sec = document.getElementById('att-sec').value;
+                }
+            }
+
+            const y = parseInt(document.getElementById('att-y').value);
+            const m = parseInt(document.getElementById('att-m').value);
+            const d = parseInt(document.getElementById('att-d').value);
+            const dateKey = `${y}-${m}-${d}`;
+
+            if (currentDayHasUnsavedChanges) { if (!confirm("अहिले गरिएको परिवर्तन सेभ भएको छैन, बाहिर निस्कने हो र ?")) return; currentDayHasUnsavedChanges = false; document.getElementById('att-save-footer').classList.add('hidden'); }
+
+            const monthDays = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 32;
+            if (d > monthDays) { alert('यो महिनामा यति गते छैन!'); return; }
+            const dayCheck = dateConverter.bsToAd(y, m, d);
+            const realDow = dayCheck ? dayCheck.getDay() : 0;
+            document.getElementById('day-name').innerText = DAYS[realDow] + (realDow === 6 ? " (Sat)" : "");
+
+            const grid = document.getElementById('att-grid');
+            const startBtn = document.getElementById('start-att-btn');
+            const statusBar = document.getElementById('att-lock-status-bar');
+            grid.innerHTML = '';
+
+            localAttendanceBuffer = {}; currentDayIsLocked = false;
+            statusBar.classList.add('hidden'); startBtn.classList.add('hidden');
+
+            let students = studentsData.filter(s => s.class == cls);
+            if (sec !== 'all') students = students.filter(s => s.section == sec);
+            students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+            if (students.length === 0) { grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>'; return; }
+
+            try {
+                const snap = await getDoc(doc(db, "attendance", dateKey));
+                if (snap.exists()) {
+                    let attData = snap.data();
+                    if (attData.isHoliday) { grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`; return; }
+
+                    // Check if *any* student in this class has data in the doc
+                    const hasDataForClass = students.some(s => attData[s.id]);
+
+                    if (hasDataForClass) {
+                        currentDayIsLocked = true;
+                        localAttendanceBuffer = attData;
+                        renderAttendanceGrid(students, attData, true);
+                        statusBar.classList.remove('hidden');
+                    } else {
+                        if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                        else startBtn.classList.remove('hidden');
+                    }
+                } else {
+                    if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                    else startBtn.classList.remove('hidden');
+                }
+            } catch (e) {
+                // Offline fallback
+                console.log("Offline mode or error", e);
+                startBtn.classList.remove('hidden'); // Assume no data if error, allow start
+            }
+        };
+
+        function renderAttendanceGrid(students, attData, isLocked = false) {
+            const grid = document.getElementById('att-grid');
+            grid.innerHTML = '';
+            students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+            students.forEach(s => {
+                const status = attData[s.id] || 'A';
+                localAttendanceBuffer[s.id] = status;
+                let cardClass = status === 'P' ? 'card-present' : (status.startsWith('L') ? 'card-leave' : 'card-absent');
+                let pClass = status === 'P' ? 'active-p' : '';
+                let lClass = status.startsWith('L') ? 'active-l' : '';
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-lg shadow-sm border flex justify-between items-center student-card ${cardClass} mb-2 transition-all duration-200`;
+                div.innerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center font-bold border border-black/10 text-gray-700 shadow-sm">${s.roll}</div><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs font-semibold uppercase tracking-wider text-gray-600 status-text">${status === 'P' ? 'उपस्थित' : (status.startsWith('L') ? 'बिदा' : 'अनुपस्थित')}</div></div></div><div class="flex gap-3"><button onclick="window.toggleAtt('${s.id}', 'P', this)" class="att-btn ${pClass} ${isLocked ? 'disabled' : ''} hover:scale-105 shadow-sm">P</button><button onclick="window.toggleAtt('${s.id}', 'L', this)" class="att-btn ${lClass} ${isLocked ? 'disabled' : ''} hover:scale-105 shadow-sm">L</button></div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        window.initDayAttendance = async () => {
+            let cls = document.getElementById('att-class').value;
+            let sec = document.getElementById('att-sec').value;
+            let students = studentsData.filter(s => s.class == cls);
+            if (sec !== 'all') students = students.filter(s => s.section == sec);
+            let initialData = {}; students.forEach(s => initialData[s.id] = 'A');
+            localAttendanceBuffer = initialData; document.getElementById('start-att-btn').classList.add('hidden'); renderAttendanceGrid(students, initialData, false); currentDayHasUnsavedChanges = true; document.getElementById('att-save-footer').classList.remove('hidden');
+        };
+
+        window.toggleAtt = (sid, type, btnElement) => {
+            if (currentDayIsLocked) return;
+            const btns = btnElement.closest('.student-card').querySelectorAll('.att-btn');
+            const isP = btns[0].classList.contains('active-p');
+            const isL = btns[1].classList.contains('active-l');
+            let newStatus = 'A';
+            if (type === 'P') newStatus = isP ? 'A' : 'P'; else if (type === 'L') newStatus = isL ? 'A' : 'L';
+            const card = btnElement.closest('.student-card');
+            card.classList.remove('card-present', 'card-absent', 'card-leave');
+            if (newStatus === 'P') card.classList.add('card-present'); else if (newStatus.startsWith('L')) card.classList.add('card-leave'); else card.classList.add('card-absent');
+            btns[0].classList.remove('active-p'); btns[1].classList.remove('active-l');
+            if (newStatus === 'P') btns[0].classList.add('active-p'); else if (newStatus.startsWith('L')) btns[1].classList.add('active-l');
+            card.querySelector('.status-text').innerText = newStatus === 'P' ? 'उपस्थित' : (newStatus.startsWith('L') ? 'बिदा' : 'अनुपस्थित');
+            localAttendanceBuffer[sid] = newStatus;
+            if (!currentDayHasUnsavedChanges) { currentDayHasUnsavedChanges = true; document.getElementById('att-save-footer').classList.remove('hidden'); }
+        };
+
+        window.saveAttendance = async () => {
+            const dateKey = `${document.getElementById('att-y').value}-${document.getElementById('att-m').value}-${document.getElementById('att-d').value}`;
+
+            // UI Feedback
+            currentDayHasUnsavedChanges = false; document.getElementById('att-save-footer').classList.add('hidden'); currentDayIsLocked = true; document.getElementById('att-lock-status-bar').classList.remove('hidden');
+
+            let cls = document.getElementById('att-class').value; let sec = document.getElementById('att-sec').value;
+            let students = studentsData.filter(s => s.class == cls); if (sec !== 'all') students = students.filter(s => s.section == sec);
+            renderAttendanceGrid(students, localAttendanceBuffer, true);
+
+            try { await setDoc(doc(db, "attendance", dateKey), localAttendanceBuffer, { merge: true }); alert("हाजिरी सुरक्षित भयो!"); }
+            catch (e) { alert("अफलाइन सुरक्षित भयो (पछि सिंक हुनेछ)"); }
+        };
+
+        window.unlockAttendance = () => {
+            // Edit previous attendance requires online check? User said "Offline mode... student details ... restricted, but payment ok". Attendance edits usually risky offline if conflict. But let's allow it as prompt didn't explicitly forbid.
+            if (!navigator.onLine && !confirm("चेतावनी: अफलाइन सम्पादन गर्दा विवाद हुन सक्छ। जारी राख्ने?")) return;
+
+            confirmAction(() => {
+                currentDayIsLocked = false; document.getElementById('att-lock-status-bar').classList.add('hidden');
+                let cls = document.getElementById('att-class').value; let sec = document.getElementById('att-sec').value;
+                let students = studentsData.filter(s => s.class == cls); if (sec !== 'all') students = students.filter(s => s.section == sec);
+                renderAttendanceGrid(students, localAttendanceBuffer, false);
+                document.getElementById('att-save-footer').classList.remove('hidden'); currentDayHasUnsavedChanges = true;
+            }, "Unlock Attendance?");
+        };
+
+        window.markHoliday = async () => {
+            const dateKey = `${document.getElementById('att-y').value}-${document.getElementById('att-m').value}-${document.getElementById('att-d').value}`;
+            if (confirm("यो दिन बिदा मार्क गर्ने?")) {
+                const title = prompt("बिदाको शीर्षक:", "सार्वजनिक बिदा");
+                if (title) { await setDoc(doc(db, "attendance", dateKey), { isHoliday: true, holidayTitle: title }, { merge: true }); loadAtt(); }
+            }
+        };
+
+        window.updateDashboard = async () => {
+            const d = dateConverter.adToBs(new Date());
+            const dateKey = `${d.year}-${d.month}-${d.day}`;
+            let selectedClass = document.getElementById('dash-class-select') ? document.getElementById('dash-class-select').value : 'all';
+            let selectedSec = document.getElementById('dash-sec-select') ? document.getElementById('dash-sec-select').value : 'all';
+
+            document.getElementById('dash-present').innerText = '-'; document.getElementById('dash-absent').innerText = '-';
+            const listContainer = document.getElementById('dash-absent-list'); listContainer.innerHTML = '<p class="text-gray-400 italic">Loading...</p>';
+
+            try {
+                // Offline first approach or check?
+                const snap = await getDoc(doc(db, "attendance", dateKey));
+                let present = 0, absent = 0; let absentNames = [];
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.isHoliday) { listContainer.innerHTML = '<p class="text-purple-600 font-bold">आज बिदा हो</p>'; document.getElementById('dash-present').innerText = '0'; document.getElementById('dash-absent').innerText = '0'; return; }
+
+                    let targetStudents = studentsData.filter(s => {
+                        if (selectedClass !== 'all' && s.class != selectedClass) return false;
+                        if (selectedSec !== 'all' && s.section !== selectedSec) return false;
+
+                        // Teacher filter
+                        if (currentUserData.role !== 'admin') {
+                            const assignments = currentUserData.classes || [];
+                            const hasWhole = assignments.includes(s.class);
+                            const hasSec = assignments.includes(`${s.class}-${s.section}`);
+                            if (!hasWhole && !hasSec) return false;
+                        }
+                        return true;
+                    });
+
+                    targetStudents.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+                    targetStudents.forEach(s => { const status = data[s.id]; if (status === 'P') present++; if (status === 'A') { absent++; absentNames.push(`${s.name} (${s.class}-${s.section})`); } });
+                }
+                document.getElementById('dash-present').innerText = present; document.getElementById('dash-absent').innerText = absent;
+                if (absentNames.length > 0) listContainer.innerHTML = absentNames.map(name => `<div class="border-b pb-1 border-gray-100"><i class="fas fa-times-circle text-red-400 mr-2"></i>${name}</div>`).join('');
+                else listContainer.innerHTML = present > 0 ? '<p class="text-green-600 italic">सबै उपस्थित छन्!</p>' : '<p class="text-gray-400 italic">हाजिरी भएको छैन</p>';
+            } catch (e) { console.log("Dash Error (Offline?)", e); listContainer.innerHTML = "Offline - Data Unavailable"; }
+        }
+
+        window.updateReportStudentDropdown = () => { }
+
+        window.handleViewReport = () => {
+            const type = document.getElementById('report-type').value;
+            if (type === 'list') generateReport(); else if (type === 'fine') generateFineReport();
+        };
+
+        window.handlePrint = () => {
+            if (document.activeElement) document.activeElement.blur();
+            setTimeout(() => {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                // Simple Print Logic
+                window.print();
+            }, 300);
+        };
+
+        // --- REPORTS ---
+        window.generateReport = async () => {
+            const cls = document.getElementById('rep-class').value;
+            const sec = document.getElementById('rep-sec').value;
+            const y = parseInt(document.getElementById('rep-year').value);
+            const m = parseInt(document.getElementById('rep-month').value);
+            const output = document.getElementById('report-output');
+
+            // Offline restriction: only current month
+            const currentBS = dateConverter.adToBs(new Date());
+            const isOffline = !navigator.onLine;
+            if (isOffline && (y !== currentBS.year || m !== currentBS.month)) {
+                output.innerHTML = `<div class="p-8 text-center bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <i class="fas fa-wifi-slash text-yellow-600 text-3xl mb-3"></i>
+                    <h3 class="font-bold text-yellow-800 mb-2">अफलाइन मोड (Offline Mode)</h3>
+                    <p class="text-sm text-gray-600">अफलाइन हुँदा केवल चालु महिनाको रिपोर्ट मात्र उपलब्ध छ।<br>
+                    <span class="font-semibold">वर्तमान: ${currentBS.year} - ${MONTHS[currentBS.month - 1]}</span></p>
+                </div>`;
+                return;
+            }
+
+            output.innerHTML = `<p class="text-center p-4">Loading Report...</p>`;
+            let students = studentsData.filter(s => s.class == cls);
+            if (sec !== 'all') students = students.filter(s => s.section === sec);
+            students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+            const daysInMonth = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 30;
+            let monthData = {}; let holidayMap = {}; let dailyPresentCounts = new Array(daysInMonth + 1).fill(0); let totalMonthPresent = 0;
+
+            // Fetch current month data
+            try {
+                const promises = []; for (let d = 1; d <= daysInMonth; d++) promises.push(getDoc(doc(db, "attendance", `${y}-${m}-${d}`)));
+                const snaps = await Promise.all(promises);
+                snaps.forEach((s, i) => { if (s.exists()) { monthData[i + 1] = s.data(); if (s.data().isHoliday) holidayMap[i + 1] = s.data().holidayTitle || "Holiday"; } });
+            } catch (e) { console.log(e); }
+
+            // Fetch session data (Baishakh to current month) for AT column - ONLY IF ONLINE
+            let sessionData = {}; // studentId => total present days from Baishakh to current month
+            let showATColumn = !isOffline; // Hide AT column in offline mode
+
+            if (!isOffline) {
+                try {
+                    // Academic session starts from Baishakh (month 1)
+                    for (let month = 1; month <= m; month++) {
+                        const monthDays = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][month - 1] : 30;
+                        const monthPromises = [];
+                        for (let d = 1; d <= monthDays; d++) {
+                            monthPromises.push(getDoc(doc(db, "attendance", `${y}-${month}-${d}`)));
+                        }
+                        const monthSnaps = await Promise.all(monthPromises);
+                        monthSnaps.forEach(snap => {
+                            if (snap.exists()) {
+                                const data = snap.data();
+                                if (!data.isHoliday) {
+                                    students.forEach(student => {
+                                        if (data[student.id] === 'P') {
+                                            if (!sessionData[student.id]) sessionData[student.id] = 0;
+                                            sessionData[student.id]++;
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } catch (e) { console.log("Session data load error:", e); showATColumn = false; }
+            }
+
+            let holidayFooter = ""; if (Object.keys(holidayMap).length > 0) { const holidays = Object.entries(holidayMap).map(([d, title]) => `${d}=${title}`).join(', '); holidayFooter = `<div class="mt-2 text-xs border-t pt-1"><b>बिदा विवरण:</b> ${holidays}</div>`; }
+            let html = `<div class="text-center mb-2"><h1 class="text-xl font-bold text-black">${schoolSettings.schoolName}</h1><p class="text-xs text-gray-600">${schoolSettings.schoolAddress}</p><h2 class="text-sm font-bold underline mt-1">मासिक हाजिरी प्रतिवेदन</h2><div class="flex justify-between px-4 text-xs mt-1 font-semibold"><span>कक्षा: ${cls} ${sec !== 'all' ? '(' + sec + ')' : ''}</span><span>वर्ष: ${y} | महिना: ${MONTHS[m - 1]}</span></div></div><table class="w-full border-collapse border text-xs"><thead><tr><th class="border p-0 w-8">क्र</th><th class="border p-0 text-left min-w-[150px] pl-2">विद्यार्थी</th>`;
+            for (let d = 1; d <= daysInMonth; d++) html += `<th class="border p-0 w-5 text-center">${d}</th>`;
+            html += `<th class="border p-1 bg-green-50" title="Current Month (यो महिना)">AM</th>`;
+            if (showATColumn) html += `<th class="border p-1 bg-blue-50" title="Academic Total (बैशाख देखि अहिले सम्म)">AT</th>`;
+            html += `</tr></thead><tbody>`;
+
+            students.forEach((s) => {
+                let presentCount = 0; let rowCells = '';
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const data = monthData[d]; let display = '', bgClass = ''; const dayCheck = dateConverter.bsToAd(y, m, d); const isSat = dayCheck && dayCheck.getDay() === 6;
+                    if (data && data.isHoliday) { display = 'H'; bgClass = 'bg-gray-200'; } else if (isSat) { display = 'S'; bgClass = 'bg-gray-200'; } else if (data) { const status = data[s.id]; if (status === 'P') { display = 'P'; bgClass = 'bg-green-100'; presentCount++; dailyPresentCounts[d]++; } else if (status && status.startsWith('L')) { display = 'L'; bgClass = 'bg-yellow-100'; } else if (status === 'A') { display = 'A'; bgClass = 'bg-red-100'; } else { display = '-'; } } else { display = '-'; }
+                    rowCells += `<td class="border p-0 text-center ${bgClass}">${display}</td>`;
+                }
+                totalMonthPresent += presentCount;
+                const sessionTotal = sessionData[s.id] || 0;
+                html += `<tr><td class="border p-1 text-center">${s.roll}</td><td class="border p-1 text-left pl-2">${s.name}</td>${rowCells}<td class="border p-1 text-center font-bold bg-green-50">${presentCount}</td>`;
+                if (showATColumn) html += `<td class="border p-1 text-center font-bold bg-blue-50">${sessionTotal}</td>`;
+                html += `</tr>`;
+            });
+
+            let totalSessionPresent = 0; // Calculate total AT
+            students.forEach(s => { totalSessionPresent += (sessionData[s.id] || 0); });
+
+            html += `<tr class="bg-gray-200 font-bold"><td colspan="2" class="border p-1 text-right">Total Present</td>`;
+            for (let d = 1; d <= daysInMonth; d++) { html += `<td class="border p-0 text-center text-[10px]">${dailyPresentCounts[d]}</td>`; }
+            html += `<td class="border p-1 text-center">${totalMonthPresent}</td>`;
+            if (showATColumn) html += `<td class="border p-1 text-center">${totalSessionPresent}</td>`;
+            html += `</tr></tbody></table><div class="mt-2 flex justify-between text-xs"><div>P=Present, A=Absent, L=Leave, S=Sat, H=Holiday | AM=यो महिना${showATColumn ? ', AT=बैशाख देखि कुल' : ''}</div><div>हस्ताक्षर: __________________</div></div>${holidayFooter}`;
+            output.innerHTML = html;
+        }
+
+        window.generateFineReport = async () => {
+            const cls = document.getElementById('rep-class').value;
+            const sec = document.getElementById('rep-sec').value;
+            const y = parseInt(document.getElementById('rep-year').value);
+            const m = parseInt(document.getElementById('rep-month').value);
+            const output = document.getElementById('report-output');
+
+            // Offline restriction: only current month
+            const currentBS = dateConverter.adToBs(new Date());
+            const isOffline = !navigator.onLine;
+            if (isOffline && (y !== currentBS.year || m !== currentBS.month)) {
+                output.innerHTML = `<div class="p-8 text-center bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <i class="fas fa-wifi-slash text-yellow-600 text-3xl mb-3"></i>
+                    <h3 class="font-bold text-yellow-800 mb-2">अफलाइन मोड (Offline Mode)</h3>
+                    <p class="text-sm text-gray-600">अफलाइन हुँदा केवल चालु महिनाको रिपोर्ट मात्र उपलब्ध छ।<br>
+                    <span class="font-semibold">वर्तमान: ${currentBS.year} - ${MONTHS[currentBS.month - 1]}</span></p>
+                </div>`;
+                return;
+            }
+
+            output.innerHTML = `<p class="text-center p-4">Loading Fine Data...</p>`;
+
+            let students = studentsData.filter(s => s.class == cls);
+            if (sec !== 'all') students = students.filter(s => s.section === sec);
+            students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+            const daysInMonth = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 30;
+            let monthData = {};
+
+            const promises = [];
+            for (let d = 1; d <= daysInMonth; d++) promises.push(getDoc(doc(db, "attendance", `${y}-${m}-${d}`)));
+            const snaps = await Promise.all(promises);
+            snaps.forEach((s, i) => { if (s.exists()) monthData[i + 1] = s.data(); });
+
+            let paymentMap = {};
+            try {
+                const qPay = query(collection(db, "collections"), where("year", "==", y), where("month", "==", m));
+                const snapPay = await getDocs(qPay);
+                snapPay.forEach(doc => {
+                    const p = doc.data();
+                    if (!paymentMap[p.studentId]) paymentMap[p.studentId] = 0;
+                    paymentMap[p.studentId] += parseInt(p.amount);
+                });
+            } catch (e) { console.log("Payment Load Error", e); }
+
+            const rate = schoolSettings.classFines?.[cls] || schoolSettings.fineRate || 10;
+            let grandTotalFine = 0, grandTotalPaid = 0, grandTotalDue = 0;
+
+            let html = `
+                <div class="flex justify-between items-center mb-4 no-print">
+                    <div></div>
+                    <button onclick="openPaymentManagement()" class="bg-indigo-600 text-white px-4 py-2 rounded shadow font-bold hover:bg-indigo-700">
+                        <i class="fas fa-wallet mr-2"></i>पेमेन्ट व्यवस्थापन
+                    </button>
+                </div>
+                <div class="text-center mb-4">
+                    <h1 class="text-xl font-bold text-black">${schoolSettings.schoolName}</h1>
+                    <p class="text-gray-600 mb-2">${schoolSettings.schoolAddress}</p>
+                    <h2 class="text-lg font-bold underline">मासिक जरिवाना (Class ${cls})</h2>
+                    <p class="mt-1">वर्ष: ${y} | महिना: ${MONTHS[m - 1]}</p>
+                </div>
+                <table class="w-full border-collapse border text-sm">
+                <thead><tr class="bg-gray-100"><th class="border p-2">क्र.स</th><th class="border p-2 text-left">विद्यार्थी</th><th class="border p-2">गयल</th><th class="border p-2">दर</th><th class="border p-2">जम्मा जरिवाना</th><th class="border p-2">तिरेको</th><th class="border p-2">बाँकी</th><th class="border p-2 no-print">Action</th></tr></thead><tbody>`;
+
+            students.forEach((s) => {
+                let absentCount = 0;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const data = monthData[d];
+                    const dayCheck = dateConverter.bsToAd(y, m, d);
+                    if (!data || data.isHoliday) continue;
+                    if (dayCheck && dayCheck.getDay() === 6) continue;
+                    if (data[s.id] === 'A') absentCount++;
+                }
+                const fine = absentCount * rate;
+                const paidAmount = paymentMap[s.id] || 0;
+                const due = fine - paidAmount;
+                const dueClass = due > 0 ? 'text-red-600 font-bold' : 'text-green-600';
+
+                grandTotalFine += fine; grandTotalPaid += paidAmount; grandTotalDue += due;
+
+                html += `<tr>
+                    <td class="border p-2 text-center">${s.roll}</td>
+                    <td class="border p-2">${s.name}</td>
+                    <td class="border p-2 text-center font-bold text-red-600">${absentCount}</td>
+                    <td class="border p-2 text-center">रू. ${rate}</td>
+                    <td class="border p-2 text-center font-bold">रू. ${fine}</td>
+                    <td class="border p-2 text-center text-green-700">रू. ${paidAmount}</td>
+                    <td class="border p-2 text-center ${dueClass}">रू. ${due}</td>
+                    <td class="border p-2 text-center no-print">
+                        <button onclick="openPayModal('${s.id}', '${s.name}')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">Pay</button>
+                    </td>
+                </tr>`;
+            });
+
+            html += `<tr class="bg-gray-200 font-bold border-t-2 border-gray-400">
+                        <td class="border p-2 text-right" colspan="4">TOTAL</td>
+                        <td class="border p-2 text-center">रू. ${grandTotalFine}</td>
+                        <td class="border p-2 text-center text-green-800">रू. ${grandTotalPaid}</td>
+                        <td class="border p-2 text-center text-red-800">रू. ${grandTotalDue}</td>
+                        <td class="no-print"></td>
+                    </tr></tbody></table>
+                    <div class="mt-4 text-right text-sm"><div>हस्ताक्षर: __________________</div></div>`;
+            output.innerHTML = html;
+        }
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(err => console.log("SW Error", err));
+    </script>
+</body>
+
+</html>
