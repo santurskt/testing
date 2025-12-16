@@ -1594,53 +1594,53 @@
 
                 // 4. Generate HTML (New Design)
                 let html = `
-                    <div class="bg-white rounded-xl overflow-hidden max-w-lg mx-auto w-full sm:max-w-lg border border-gray-200 shadow-2xl relative print:shadow-none print:border-none print:w-full">
+                    <div class="bg-white rounded-xl overflow-hidden max-w-lg mx-auto w-full sm:max-w-lg border border-gray-200 shadow-2xl relative print:shadow-none print:border-none print:w-full max-h-[85vh] overflow-y-auto">
                         <button onclick="closeStudentCardModal()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10 print:hidden"><i class="fas fa-times text-xl"></i></button>
                         
-                        <div class="p-4 sm:p-8 print:p-0">
+                        <div class="p-3 sm:p-4 print:p-0">
                             <!-- Header -->
-                            <div class="text-center mb-6">
-                                <h2 class="text-xl font-bold text-blue-800 uppercase tracking-wide">${schoolSettings.schoolName}</h2>
-                                <p class="text-gray-500 text-xs mt-1">${schoolSettings.schoolAddress}</p>
-                                <div class="mt-3">
-                                     <span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-gray-200">Monthly Report Card</span>
+                            <div class="text-center mb-3">
+                                <h2 class="text-base font-bold text-blue-800 uppercase tracking-wide">${schoolSettings.schoolName}</h2>
+                                <p class="text-gray-500 text-[10px] mt-0.5">${schoolSettings.schoolAddress}</p>
+                                <div class="mt-2">
+                                     <span class="bg-gray-100 text-gray-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-gray-200">Monthly Report Card</span>
                                 </div>
                             </div>
 
                             <!-- Student Details -->
-                            <div class="border-t border-b border-gray-100 py-4 mb-6">
-                                <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-bold text-gray-800 text-lg"><span class="text-gray-500 text-sm mr-1">Name:</span> ${student.name}</h3>
-                                    <span class="font-bold text-gray-800 text-sm">Roll: ${student.roll}</span>
+                            <div class="border-t border-b border-gray-100 py-2 mb-3">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold text-gray-800 text-sm"><span class="text-gray-500 text-xs mr-1">Name:</span> ${student.name}</h3>
+                                    <span class="font-bold text-gray-800 text-xs">Roll: ${student.roll}</span>
                                 </div>
-                                <div class="flex justify-between items-center text-sm text-gray-500">
+                                <div class="flex justify-between items-center text-xs text-gray-500">
                                     <span>Class: ${student.class} (${student.section})</span>
                                     <span>Date: ${y} / ${monthName}</span>
                                 </div>
                             </div>
 
                             <!-- Attendance Stats -->
-                            <div class="space-y-3 mb-6 text-sm">
-                                <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                            <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                                <div class="flex justify-between items-center p-1.5 bg-gray-50 rounded">
                                     <span class="text-gray-600 font-medium">School Days</span>
                                     <span class="font-bold text-gray-800">${schoolDays}</span>
                                 </div>
-                                <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                <div class="flex justify-between items-center p-1.5 bg-gray-50 rounded">
                                     <span class="text-gray-600 font-medium">Present Days</span>
                                     <span class="font-bold text-green-600">${present}</span>
                                 </div>
-                                 <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                 <div class="flex justify-between items-center p-1.5 bg-gray-50 rounded">
                                     <span class="text-gray-600 font-medium">Absent Days</span>
                                     <span class="font-bold text-red-600">${absent}</span>
                                 </div>
-                                <div class="flex justify-between items-center p-2 bg-blue-50 rounded border border-blue-100 mt-2">
+                                <div class="flex justify-between items-center p-1.5 bg-blue-50 rounded border border-blue-100">
                                     <span class="text-blue-800 font-bold">Attendance %</span>
                                     <span class="font-bold text-blue-700">${percentage}%</span>
                                 </div>
                             </div>
 
                             <!-- Payment/Fine Section -->
-                            <div class="bg-red-50 rounded-xl p-5 border border-red-100 mb-8">
+                            <div class="bg-red-50 rounded-lg p-3 border border-red-100 mb-4">
                                 <div class="flex justify-between items-center mb-2 text-sm">
                                     <span class="text-gray-600">Fine Rate (Per Day)</span>
                                     <span class="font-medium text-gray-800">Rs. ${rate}</span>
@@ -1660,7 +1660,7 @@
                             </div>
 
                             <!-- Signatures -->
-                            <div class="flex justify-between items-end pt-8 text-center text-xs text-gray-400 print:mt-10">
+                            <div class="flex justify-between items-end pt-4 text-center text-[10px] text-gray-400 print:mt-10">
                                 <div class="w-20 border-t border-gray-300 pt-1">Guardian</div>
                                 <div class="w-20 border-t border-gray-300 pt-1">Teacher</div>
                                 <div class="w-20 border-t border-gray-300 pt-1">Principal</div>
@@ -1999,7 +1999,10 @@
         };
 
         window.saveAttendance = async () => {
-            const dateKey = `${document.getElementById('att-y').value}-${document.getElementById('att-m').value}-${document.getElementById('att-d').value}`;
+            const y = parseInt(document.getElementById('att-y').value);
+            const m = parseInt(document.getElementById('att-m').value);
+            const d = parseInt(document.getElementById('att-d').value);
+            const dateKey = `${y}-${m}-${d}`;
 
             // UI Feedback
             currentDayHasUnsavedChanges = false; document.getElementById('att-save-footer').classList.add('hidden'); currentDayIsLocked = true; document.getElementById('att-lock-status-bar').classList.remove('hidden');
@@ -2008,7 +2011,14 @@
             let students = studentsData.filter(s => s.class == cls); if (sec !== 'all') students = students.filter(s => s.section == sec);
             renderAttendanceGrid(students, localAttendanceBuffer, true);
 
-            try { await setDoc(doc(db, "attendance", dateKey), localAttendanceBuffer, { merge: true }); alert("हाजिरी सुरक्षित भयो!"); }
+            try {
+                await setDoc(doc(db, "attendance", dateKey), localAttendanceBuffer, { merge: true });
+
+                // Update monthly summary (AM + AT calculation)
+                updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
+
+                alert("हाजिरी सुरक्षित भयो!");
+            }
             catch (e) { alert("अफलाइन सुरक्षित भयो (पछि सिंक हुनेछ)"); }
         };
 
@@ -2089,6 +2099,72 @@
             }, 300);
         };
 
+        // --- HELPER: UPDATE MONTHLY SUMMARY (AM + AT CALCULATION) ---
+        async function updateMonthlySummary(year, month, classValue) {
+            try {
+                const summaryId = `${year}-${month}-${classValue}`;
+                const daysInMonth = dateConverter.nepaliCalendarData[year] ? dateConverter.nepaliCalendarData[year][month - 1] : 30;
+
+                // Get all students for this class
+                let students = studentsData.filter(s => s.class == classValue);
+                if (students.length === 0) return;
+
+                // Fetch all attendance data for this month
+                const promises = [];
+                for (let d = 1; d <= daysInMonth; d++) {
+                    promises.push(getDoc(doc(db, "attendance", `${year}-${month}-${d}`)));
+                }
+                const snaps = await Promise.all(promises);
+
+                // Calculate AM (this month's present days) for each student
+                let summaryData = { students: {}, year, month, class: classValue, lastUpdated: new Date() };
+
+                students.forEach(student => {
+                    let presentCount = 0;
+                    snaps.forEach(snap => {
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            if (!data.isHoliday) {
+                                // Only count as valid school day if at least one student was present
+                                const hasAnyPresent = Object.values(data).some(status =>
+                                    status === 'P' || (typeof status === 'string' && status.startsWith('L'))
+                                );
+
+                                if (hasAnyPresent && data[student.id] === 'P') {
+                                    presentCount++;
+                                }
+                            }
+                        }
+                    });
+                    summaryData.students[student.id] = { am: presentCount, at: 0 }; // AT will be calculated next
+                });
+
+                // Fetch previous month's summary to get previous AT
+                let prevMonth = month - 1;
+                let prevYear = year;
+                if (prevMonth < 1) { prevMonth = 12; prevYear--; }
+
+                const prevSummaryId = `${prevYear}-${prevMonth}-${classValue}`;
+                const prevSnap = await getDoc(doc(db, "monthly_summaries", prevSummaryId));
+
+                // Calculate AT = previous AT + current AM
+                students.forEach(student => {
+                    let previousAT = 0;
+                    if (prevSnap.exists() && prevSnap.data().students?.[student.id]) {
+                        previousAT = prevSnap.data().students[student.id].at || 0;
+                    }
+                    const currentAM = summaryData.students[student.id].am;
+                    summaryData.students[student.id].at = previousAT + currentAM;
+                });
+
+                // Store summary
+                await setDoc(doc(db, "monthly_summaries", summaryId), summaryData);
+                console.log(`Monthly summary updated: ${summaryId}`);
+            } catch (e) {
+                console.error("Error updating monthly summary:", e);
+            }
+        }
+
         // --- REPORTS ---
         window.generateReport = async () => {
             const cls = document.getElementById('rep-class').value;
@@ -2124,35 +2200,31 @@
                 snaps.forEach((s, i) => { if (s.exists()) { monthData[i + 1] = s.data(); if (s.data().isHoliday) holidayMap[i + 1] = s.data().holidayTitle || "Holiday"; } });
             } catch (e) { console.log(e); }
 
-            // Fetch session data (Baishakh to current month) for AT column - ONLY IF ONLINE
-            let sessionData = {}; // studentId => total present days from Baishakh to current month
-            let showATColumn = !isOffline; // Hide AT column in offline mode
+            // Fetch monthly summary for AM and AT data (replaces expensive loop)
+            let sessionData = {}; // studentId => {am: number, at: number}
+            let showATColumn = true;
 
-            if (!isOffline) {
-                try {
-                    // Academic session starts from Baishakh (month 1)
-                    for (let month = 1; month <= m; month++) {
-                        const monthDays = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][month - 1] : 30;
-                        const monthPromises = [];
-                        for (let d = 1; d <= monthDays; d++) {
-                            monthPromises.push(getDoc(doc(db, "attendance", `${y}-${month}-${d}`)));
-                        }
-                        const monthSnaps = await Promise.all(monthPromises);
-                        monthSnaps.forEach(snap => {
-                            if (snap.exists()) {
-                                const data = snap.data();
-                                if (!data.isHoliday) {
-                                    students.forEach(student => {
-                                        if (data[student.id] === 'P') {
-                                            if (!sessionData[student.id]) sessionData[student.id] = 0;
-                                            sessionData[student.id]++;
-                                        }
-                                    });
-                                }
-                            }
-                        });
+            try {
+                const summaryId = `${y}-${m}-${cls}`;
+                const summarySnap = await getDoc(doc(db, "monthly_summaries", summaryId));
+
+                if (summarySnap.exists()) {
+                    const summaryInfo = summarySnap.data();
+                    if (summaryInfo.students) {
+                        sessionData = summaryInfo.students;
                     }
-                } catch (e) { console.log("Session data load error:", e); showATColumn = false; }
+                } else {
+                    // Fallback: If summary doesn't exist, try to calculate it now
+                    console.log("Summary not found, calculating...");
+                    await updateMonthlySummary(y, m, cls);
+                    const retrySnap = await getDoc(doc(db, "monthly_summaries", summaryId));
+                    if (retrySnap.exists() && retrySnap.data().students) {
+                        sessionData = retrySnap.data().students;
+                    }
+                }
+            } catch (e) {
+                console.log("Summary fetch error (offline?):", e);
+                showATColumn = false; // Hide AT in offline if summary unavailable
             }
 
             let holidayFooter = ""; if (Object.keys(holidayMap).length > 0) { const holidays = Object.entries(holidayMap).map(([d, title]) => `${d}=${title}`).join(', '); holidayFooter = `<div class="mt-2 text-xs border-t pt-1"><b>बिदा विवरण:</b> ${holidays}</div>`; }
@@ -2165,19 +2237,58 @@
             students.forEach((s) => {
                 let presentCount = 0; let rowCells = '';
                 for (let d = 1; d <= daysInMonth; d++) {
-                    const data = monthData[d]; let display = '', bgClass = ''; const dayCheck = dateConverter.bsToAd(y, m, d); const isSat = dayCheck && dayCheck.getDay() === 6;
-                    if (data && data.isHoliday) { display = 'H'; bgClass = 'bg-gray-200'; } else if (isSat) { display = 'S'; bgClass = 'bg-gray-200'; } else if (data) { const status = data[s.id]; if (status === 'P') { display = 'P'; bgClass = 'bg-green-100'; presentCount++; dailyPresentCounts[d]++; } else if (status && status.startsWith('L')) { display = 'L'; bgClass = 'bg-yellow-100'; } else if (status === 'A') { display = 'A'; bgClass = 'bg-red-100'; } else { display = '-'; } } else { display = '-'; }
+                    const data = monthData[d];
+                    let display = '', bgClass = '';
+                    const dayCheck = dateConverter.bsToAd(y, m, d);
+                    const isSat = dayCheck && dayCheck.getDay() === 6;
+
+                    if (data && data.isHoliday) {
+                        display = 'H'; bgClass = 'bg-gray-200';
+                    } else if (isSat) {
+                        display = 'S'; bgClass = 'bg-gray-200';
+                    } else if (data) {
+                        // Check if at least one student was present this day
+                        const hasAnyPresent = Object.values(data).some(status =>
+                            status === 'P' || (typeof status === 'string' && status.startsWith('L'))
+                        );
+
+                        if (!hasAnyPresent) {
+                            // All absent - don't count as school day, show blank
+                            display = '-';
+                        } else {
+                            const status = data[s.id];
+                            if (status === 'P') {
+                                display = 'P'; bgClass = 'bg-green-100'; presentCount++; dailyPresentCounts[d]++;
+                            } else if (status && status.startsWith('L')) {
+                                display = 'L'; bgClass = 'bg-yellow-100';
+                            } else if (status === 'A') {
+                                display = 'A'; bgClass = 'bg-red-100';
+                            } else {
+                                display = '-';
+                            }
+                        }
+                    } else {
+                        display = '-';
+                    }
                     rowCells += `<td class="border p-0 text-center ${bgClass}">${display}</td>`;
                 }
                 totalMonthPresent += presentCount;
-                const sessionTotal = sessionData[s.id] || 0;
-                html += `<tr><td class="border p-1 text-center">${s.roll}</td><td class="border p-1 text-left pl-2">${s.name}</td>${rowCells}<td class="border p-1 text-center font-bold bg-green-50">${presentCount}</td>`;
+
+                // Use pre-calculated AM and AT from monthly_summaries
+                const studentSummary = sessionData[s.id] || { am: presentCount, at: presentCount };
+                const monthTotal = studentSummary.am || presentCount; // AM from summary
+                const sessionTotal = studentSummary.at || presentCount; // AT from summary
+
+                html += `<tr><td class="border p-1 text-center">${s.roll}</td><td class="border p-1 text-left pl-2">${s.name}</td>${rowCells}<td class="border p-1 text-center font-bold bg-green-50">${monthTotal}</td>`;
                 if (showATColumn) html += `<td class="border p-1 text-center font-bold bg-blue-50">${sessionTotal}</td>`;
                 html += `</tr>`;
             });
 
             let totalSessionPresent = 0; // Calculate total AT
-            students.forEach(s => { totalSessionPresent += (sessionData[s.id] || 0); });
+            students.forEach(s => {
+                const studentSummary = sessionData[s.id] || { at: 0 };
+                totalSessionPresent += studentSummary.at || 0;
+            });
 
             html += `<tr class="bg-gray-200 font-bold"><td colspan="2" class="border p-1 text-right">Total Present</td>`;
             for (let d = 1; d <= daysInMonth; d++) { html += `<td class="border p-0 text-center text-[10px]">${dailyPresentCounts[d]}</td>`; }
@@ -2222,6 +2333,7 @@
             snaps.forEach((s, i) => { if (s.exists()) monthData[i + 1] = s.data(); });
 
             let paymentMap = {};
+            let paymentDataAvailable = true;
             try {
                 const qPay = query(collection(db, "collections"), where("year", "==", y), where("month", "==", m));
                 const snapPay = await getDocs(qPay);
@@ -2230,14 +2342,19 @@
                     if (!paymentMap[p.studentId]) paymentMap[p.studentId] = 0;
                     paymentMap[p.studentId] += parseInt(p.amount);
                 });
-            } catch (e) { console.log("Payment Load Error", e); }
+            } catch (e) {
+                console.log("Payment Load Error (offline?)", e);
+                paymentDataAvailable = false;
+            }
 
             const rate = schoolSettings.classFines?.[cls] || schoolSettings.fineRate || 10;
             let grandTotalFine = 0, grandTotalPaid = 0, grandTotalDue = 0;
 
             let html = `
                 <div class="flex justify-between items-center mb-4 no-print">
-                    <div></div>
+                    <div>
+                        ${!paymentDataAvailable ? '<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded border border-yellow-300"><i class="fas fa-exclamation-triangle mr-1"></i> Payment data offline</span>' : ''}
+                    </div>
                     <button onclick="openPaymentManagement()" class="bg-indigo-600 text-white px-4 py-2 rounded shadow font-bold hover:bg-indigo-700">
                         <i class="fas fa-wallet mr-2"></i>पेमेन्ट व्यवस्थापन
                     </button>
