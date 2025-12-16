@@ -51,20 +51,28 @@
         }
 
         .att-btn {
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             cursor: pointer;
             border: 2px solid #e5e7eb;
             background-color: white;
             color: #374151;
             transition: all 0.1s;
             touch-action: manipulation;
+        }
+
+        /* Mobile-First: Larger touch targets on small screens */
+        @media (max-width: 640px) {
+            .att-btn {
+                width: 52px;
+                height: 52px;
+            }
         }
 
         .att-btn:active {
@@ -276,6 +284,35 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #a0a0a0;
+        }
+
+        /* Mobile Navigation Styling */
+        .nav-btn-mobile {
+            color: #6b7280;
+        }
+
+        .nav-btn-mobile.active {
+            color: #4f46e5;
+            background-color: #eef2ff;
+        }
+
+        /* Mobile: Extra bottom padding to account for fixed nav */
+        @media (max-width: 640px) {
+            main {
+                padding-bottom: 80px !important;
+            }
+        }
+
+        /* Mobile-optimized table */
+        @media (max-width: 640px) {
+            table {
+                font-size: 9px;
+            }
+
+            th,
+            td {
+                padding: 2px !important;
+            }
         }
     </style>
 </head>
@@ -523,7 +560,8 @@
             </div>
         </header>
 
-        <nav class="bg-white shadow-sm p-2 flex gap-2 overflow-x-auto no-print border-b">
+        <!-- Desktop/Tablet: Top Navigation -->
+        <nav class="hidden sm:flex bg-white shadow-sm p-2 gap-2 overflow-x-auto no-print border-b">
             <button onclick="navigateSection('dashboard')"
                 class="nav-btn flex-1 py-3 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-sm whitespace-nowrap border border-indigo-100 transition"><i
                     class="fas fa-home mr-1"></i> होम</button>
@@ -539,6 +577,38 @@
             <button id="nav-admin" onclick="navigateSection('admin')"
                 class="nav-btn flex-1 py-3 rounded-lg hover:bg-gray-50 text-gray-600 font-bold text-sm whitespace-nowrap hidden border border-transparent transition"><i
                     class="fas fa-users-cog mr-1"></i> एडमिन</button>
+        </nav>
+
+        <!-- Mobile: Bottom Navigation (Fixed) -->
+        <nav
+            class="sm:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50 no-print">
+            <div class="flex justify-around items-center py-2">
+                <button onclick="navigateSection('dashboard')"
+                    class="nav-btn-mobile flex flex-col items-center justify-center py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-home text-xl mb-1"></i>
+                    <span class="text-[10px] font-semibold">होम</span>
+                </button>
+                <button onclick="navigateSection('attendance')"
+                    class="nav-btn-mobile flex flex-col items-center justify-center py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-check-circle text-xl mb-1"></i>
+                    <span class="text-[10px] font-semibold">हाजिरी</span>
+                </button>
+                <button onclick="navigateSection('reports')"
+                    class="nav-btn-mobile flex flex-col items-center justify-center py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-file-alt text-xl mb-1"></i>
+                    <span class="text-[10px] font-semibold">रिपोर्ट</span>
+                </button>
+                <button id="nav-students-mobile" onclick="navigateSection('student-mgmt')"
+                    class="nav-btn-mobile flex flex-col items-center justify-center py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-users text-xl mb-1"></i>
+                    <span class="text-[10px] font-semibold">विद्यार्थी</span>
+                </button>
+                <button id="nav-admin-mobile" onclick="navigateSection('admin')"
+                    class="nav-btn-mobile hidden flex-col items-center justify-center py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-users-cog text-xl mb-1"></i>
+                    <span class="text-[10px] font-semibold">एडमिन</span>
+                </button>
+            </div>
         </nav>
 
         <main class="flex-1 p-4 overflow-y-auto pb-24 bg-gray-50">
@@ -992,10 +1062,13 @@
 
             if (currentUserData.role === 'admin') {
                 document.getElementById('nav-admin').classList.remove('hidden');
+                document.getElementById('nav-admin-mobile').classList.remove('hidden');
+                document.getElementById('nav-admin-mobile').classList.add('flex'); // Enable flex for mobile
                 document.getElementById('btn-mark-holiday').classList.remove('hidden');
                 loadTeachers();
             } else {
                 document.getElementById('nav-students').classList.remove('hidden');
+                document.getElementById('nav-students-mobile').classList.remove('hidden');
             }
 
             updateClassDropdowns();
@@ -1581,9 +1654,13 @@
 
                 // 2. Fetch Payments for this month/year
                 let paidAmount = 0;
-                const qPay = query(collection(db, "collections"), where("studentId", "==", sid), where("year", "==", y), where("month", "==", m));
-                const paySnaps = await getDocs(qPay);
-                paySnaps.forEach(doc => { paidAmount += parseInt(doc.data().amount || 0); });
+                try {
+                    const qPay = query(collection(db, "collections"), where("studentId", "==", sid), where("year", "==", y), where("month", "==", m));
+                    const paySnaps = await getDocs(qPay);
+                    paySnaps.forEach(doc => { paidAmount += parseInt(doc.data().amount || 0); });
+                } catch (payErr) {
+                    console.warn("Payment data unavailable (offline?):", payErr);
+                }
 
                 // 3. Calculate Fine
                 const rate = schoolSettings.classFines?.[student.class] || schoolSettings.fineRate || 10;
@@ -1673,7 +1750,24 @@
 
             } catch (e) {
                 console.error(e);
-                content.innerHTML = `<p class="p-4 text-red-500 text-center">Error loading card: ${e.message}</p>`;
+                const isOfflineError = e.message && e.message.includes('offline');
+                content.innerHTML = `
+                    <div class="p-6 text-center">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-wifi-slash text-yellow-600 text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-2">${isOfflineError ? 'अफलाइन मोड' : 'त्रुटि'}</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            ${isOfflineError
+                        ? 'रिपोर्ट कार्ड अफलाइनमा उपलब्ध छैन। कृपया इन्टरनेट जडान गर्नुहोस्।'
+                        : `Error: ${e.message}`}
+                        </p>
+                        <button onclick="closeStudentCardModal()" 
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-bold">
+                            बन्द गर्नुहोस्
+                        </button>
+                    </div>
+                `;
             }
         };
 
@@ -1801,17 +1895,33 @@
         window.showSection = (id) => {
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+
+            // Desktop nav buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'border-indigo-100');
                 btn.classList.add('text-gray-600', 'border-transparent');
             });
 
+            // Mobile nav buttons
+            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
             const navBtnMap = { 'dashboard': 0, 'attendance': 1, 'reports': 2, 'student-mgmt': 3, 'admin': 4 };
+
+            // Update desktop nav
             const btns = document.querySelectorAll('.nav-btn');
             if (btns[navBtnMap[id]]) {
                 btns[navBtnMap[id]].classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-100');
                 btns[navBtnMap[id]].classList.remove('text-gray-600', 'border-transparent');
             }
+
+            // Update mobile nav
+            const mobileBtns = document.querySelectorAll('.nav-btn-mobile');
+            if (mobileBtns[navBtnMap[id]]) {
+                mobileBtns[navBtnMap[id]].classList.add('active');
+            }
+
             if (id === 'attendance') loadAtt();
             if (id === 'dashboard') updateDashboard();
         };
@@ -2004,11 +2114,50 @@
             const d = parseInt(document.getElementById('att-d').value);
             const dateKey = `${y}-${m}-${d}`;
 
-            // UI Feedback
-            currentDayHasUnsavedChanges = false; document.getElementById('att-save-footer').classList.add('hidden'); currentDayIsLocked = true; document.getElementById('att-lock-status-bar').classList.remove('hidden');
+            let cls = document.getElementById('att-class').value;
+            let sec = document.getElementById('att-sec').value;
+            let students = studentsData.filter(s => s.class == cls);
+            if (sec !== 'all') students = students.filter(s => s.section == sec);
 
-            let cls = document.getElementById('att-class').value; let sec = document.getElementById('att-sec').value;
-            let students = studentsData.filter(s => s.class == cls); if (sec !== 'all') students = students.filter(s => s.section == sec);
+            // Check if all students are absent (not a valid school day)
+            const hasAnyPresent = students.some(s => {
+                const status = localAttendanceBuffer[s.id];
+                return status === 'P' || (status && status.startsWith('L'));
+            });
+
+            if (!hasAnyPresent) {
+                // All absent - delete the record to unlock the day
+                try {
+                    await deleteDoc(doc(db, "attendance", dateKey));
+
+                    // UI Feedback - unlock the day
+                    currentDayHasUnsavedChanges = false;
+                    currentDayIsLocked = false;
+                    document.getElementById('att-save-footer').classList.add('hidden');
+                    document.getElementById('att-lock-status-bar').classList.add('hidden');
+                    document.getElementById('att-start-btn').classList.remove('hidden');
+
+                    // Clear the grid
+                    document.getElementById('att-grid').innerHTML = '';
+                    localAttendanceBuffer = {};
+
+                    alert("सबै विद्यार्थी अनुपस्थित भएकोले हाजिरी record मेटाइयो।\nयो दिन अब खुला (unlocked) छ।");
+
+                    // Update monthly summary (remove this day's contribution)
+                    updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
+                } catch (e) {
+                    console.error("Delete error:", e);
+                    alert("त्रुटि: Record delete गर्न सकिएन।\n" + (navigator.onLine ? "पुन: प्रयास गर्नुहोस्।" : "कृपया अनलाइन हुँदा delete गर्नुहोस्।"));
+                }
+                return;
+            }
+
+            // UI Feedback - Lock only if at least one student present
+            currentDayHasUnsavedChanges = false;
+            document.getElementById('att-save-footer').classList.add('hidden');
+            currentDayIsLocked = true;
+            document.getElementById('att-lock-status-bar').classList.remove('hidden');
+
             renderAttendanceGrid(students, localAttendanceBuffer, true);
 
             try {
@@ -2327,10 +2476,15 @@
             const daysInMonth = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 30;
             let monthData = {};
 
-            const promises = [];
-            for (let d = 1; d <= daysInMonth; d++) promises.push(getDoc(doc(db, "attendance", `${y}-${m}-${d}`)));
-            const snaps = await Promise.all(promises);
-            snaps.forEach((s, i) => { if (s.exists()) monthData[i + 1] = s.data(); });
+            try {
+                const promises = [];
+                for (let d = 1; d <= daysInMonth; d++) promises.push(getDoc(doc(db, "attendance", `${y}-${m}-${d}`)));
+                const snaps = await Promise.all(promises);
+                snaps.forEach((s, i) => { if (s.exists()) monthData[i + 1] = s.data(); });
+            } catch (e) {
+                console.log("Attendance fetch error (offline?):", e);
+                // Continue with empty monthData - will show 0 absents
+            }
 
             let paymentMap = {};
             let paymentDataAvailable = true;
@@ -2375,6 +2529,13 @@
                     const dayCheck = dateConverter.bsToAd(y, m, d);
                     if (!data || data.isHoliday) continue;
                     if (dayCheck && dayCheck.getDay() === 6) continue;
+
+                    // Skip if all students were absent (not a valid school day)
+                    const hasAnyPresent = Object.values(data).some(status =>
+                        status === 'P' || (typeof status === 'string' && status.startsWith('L'))
+                    );
+                    if (!hasAnyPresent) continue;
+
                     if (data[s.id] === 'A') absentCount++;
                 }
                 const fine = absentCount * rate;
