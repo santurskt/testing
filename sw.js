@@ -60,7 +60,7 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       caches.match(e.request).then((cachedResponse) => {
         if (cachedResponse) return cachedResponse; // Return from cache if available
-        
+
         return fetch(e.request).then((networkResponse) => {
           // Cache the new file for next time
           return caches.open(CACHE_NAME).then((cache) => {
@@ -84,13 +84,52 @@ self.addEventListener("fetch", (e) => {
   // 4. Stale-While-Revalidate for local assets and others
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      const fetchPromise = fetch(e.request).then((networkResponse) => {
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, networkResponse.clone());
+      const fetchPromise = fetch(e.request)
+        .then((networkResponse) => {
+          // Clone immediately to avoid "already used" error
+          const responseToCache = networkResponse.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+
+          return networkResponse;
+        })
+        .catch(() => {
+          // Network failed - return cache if available
+          return cachedResponse;
         });
-        return networkResponse;
-      });
+
+      // Return cache first if available, otherwise wait for network
       return cachedResponse || fetchPromise;
     })
   );
+});
+
+// NETWORK STATUS MESSAGING
+// Handle messages from main app requesting network status
+self.addEventListener('message', (event) => {
+  if (event.data.type === 'REQUEST_NETWORK_STATUS') {
+    event.ports[0].postMessage({
+      type: 'NETWORK_STATUS',
+      isOnline: navigator.onLine
+    });
+  }
+});
+
+// Broadcast network status changes to all clients
+self.addEventListener('online', () => {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({ type: 'NETWORK_STATUS_CHANGED', isOnline: true });
+    });
+  });
+});
+
+self.addEventListener('offline', () => {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({ type: 'NETWORK_STATUS_CHANGED', isOnline: false });
+    });
+  });
 });
