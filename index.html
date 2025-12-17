@@ -11,6 +11,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style id="print-style">
         @page {
@@ -960,7 +962,12 @@
         // Offline Guard
         function requireOnline() {
             if (!navigator.onLine) {
-                alert("माफ गर्नुहोला, डिलिट वा सम्पादन गर्न ईन्टरनेट अनिवार्य छ।\n(Internet required for this action)");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'इन्टरनेट आवश्यक छ',
+                    text: 'माफ गर्नुहोला, डिलिट वा सम्पादन गर्न ईन्टरनेट अनिवार्य छ।',
+                    confirmButtonText: 'ठिक छ'
+                });
                 return false;
             }
             return true;
@@ -981,7 +988,12 @@
         let pendingAction = null;
         window.confirmAction = (actionFn, title = "🔒 Admin Password Required") => {
             if (!navigator.onLine) {
-                alert("⚠️ सुरक्षा सूचना: यो कार्य अफलाइन मोडमा उपलब्ध छैन।");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'सुरक्षा सूचना',
+                    text: 'यो कार्य अफलाइन मोडमा उपलब्ध छैन।',
+                    confirmButtonText: 'ठिक छ'
+                });
                 return;
             }
             pendingAction = actionFn;
@@ -997,14 +1009,30 @@
 
         document.getElementById('confirm-action-btn').addEventListener('click', async () => {
             const pass = document.getElementById('confirm-pass').value;
-            if (!pass) return alert("पासवर्ड आवश्यक छ");
+            if (!pass) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'पासवर्ड आवश्यक छ',
+                    confirmButtonText: 'ठिक छ',
+                    timer: 2000
+                });
+                return;
+            }
             try {
                 const cred = EmailAuthProvider.credential(auth.currentUser.email, pass);
                 await reauthenticateWithCredential(auth.currentUser, cred);
                 const actionToRun = pendingAction;
                 closePassModal();
                 if (actionToRun) actionToRun();
-            } catch (e) { console.error(e); alert("गलत पासवर्ड!"); }
+            } catch (e) {
+                console.error(e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'गलत पासवर्ड!',
+                    text: 'कृपया फेरि प्रयास गर्नुहोस्।',
+                    confirmButtonText: 'ठिक छ'
+                });
+            }
         });
 
         function updateSyncStatus() {
@@ -1422,25 +1450,55 @@
                     </div>`;
             });
         }
-        window.deleteTeacher = async (uid) => { await deleteDoc(doc(db, "users", uid)); alert("शिक्षक हटाइयो"); loadTeachers(); }
+        window.deleteTeacher = async (uid) => {
+            await deleteDoc(doc(db, "users", uid));
+            Swal.fire({
+                icon: 'success',
+                title: 'सफल!',
+                text: 'शिक्षक हटाइयो',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            loadTeachers();
+        }
 
         // --- ADMIN: DELETE ATTENDANCE ---
         window.deleteAttendanceRecord = async () => {
             const y = document.getElementById('del-att-y').value;
             const m = document.getElementById('del-att-m').value;
             const d = document.getElementById('del-att-d').value;
-            if (!y || !m || !d) return alert("कृपया मान्य मिति प्रविष्ट गर्नुहोस्");
+            if (!y || !m || !d) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'कृपया मान्य मिति प्रविष्ट गर्नुहोस्',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
 
             confirmAction(async () => {
                 try {
                     const dateKey = `${y}-${m}-${d}`;
                     await deleteDoc(doc(db, "attendance", dateKey));
-                    alert(`${dateKey} को हाजिरी सफलतापूर्वक डिलिट भयो!`);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'सफल!',
+                        text: `${dateKey} को हाजिरी सफलतापूर्वक डिलिट भयो!`,
+                        timer: 2000
+                    });
                     // If current view is that day, reload
                     if (document.getElementById('att-y').value == y && document.getElementById('att-m').value == m && document.getElementById('att-d').value == d) {
                         loadAtt();
                     }
-                } catch (e) { alert("Error: " + e.message); }
+                } catch (e) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि',
+                        text: 'Error: ' + e.message,
+                        confirmButtonText: 'ठिक छ'
+                    });
+                }
             }, "Confirm Delete Attendance?");
         };
 
@@ -1505,7 +1563,15 @@
             // Allow offline saves
             if (!currentPayStudent) return;
             const amount = parseInt(document.getElementById('pay-new-amount').value);
-            if (!amount || amount <= 0) return alert("कृपया रकम प्रविष्ट गर्नुहोस्");
+            if (!amount || amount <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'कृपया रकम प्रविष्ट गर्नुहोस्',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
 
             try {
                 const todayBS = dateConverter.adToBs(new Date());
@@ -1524,19 +1590,49 @@
                     timestamp: new Date()
                 });
 
-                alert("भुक्तानी थपियो! (अनलाइन हुँदा सिंक हुनेछ)");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    html: 'भुक्तानी थपियो!<br><small>अनलाइन हुँदा सिंक हुनेछ</small>',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 document.getElementById('pay-new-amount').value = '';
                 loadStudentPaymentHistory(currentPayStudent.id);
-            } catch (err) { alert("Error: " + err.message); }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'Error: ' + err.message,
+                    confirmButtonText: 'ठिक छ'
+                });
+            }
         };
 
         window.deletePayment = async (docId) => {
             if (!requireOnline()) return;
-            if (confirm("यो भुक्तानी रेकर्ड डिलिट गर्ने?")) {
+            const result = await Swal.fire({
+                title: 'पक्का हुनुहुन्छ?',
+                text: 'यो भुक्तानी रेकर्ड डिलिट गर्ने?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'हो, डिलिट गर्नुहोस्',
+                cancelButtonText: 'रद्द गर्नुहोस्',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280'
+            });
+            if (result.isConfirmed) {
                 try {
                     await deleteDoc(doc(db, "collections", docId));
                     loadStudentPaymentHistory(currentPayStudent.id);
-                } catch (e) { alert("Error: " + e.message); }
+                } catch (e) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि',
+                        text: 'Error: ' + e.message,
+                        confirmButtonText: 'ठिक छ'
+                    });
+                }
             }
         };
 
@@ -1824,7 +1920,14 @@
             let classFines = {};
             fineInputs.forEach(inp => { classFines[inp.dataset.class] = parseInt(inp.value) || 0; });
             await setDoc(doc(db, "settings", "config"), { schoolName: name, schoolAddress: addr, classFines: classFines, classes: newClasses }, { merge: true });
-            alert("सेटिङ सुरक्षित भयो! रिलोड हुँदैछ..."); location.reload();
+            Swal.fire({
+                icon: 'success',
+                title: 'सफल!',
+                text: 'सेटिङ सुरक्षित भयो! रिलोड हुँदैछ...',
+                timer: 1500,
+                showConfirmButton: false
+            });
+            setTimeout(() => location.reload(), 1500);
         }
 
         window.editStudent = (id) => {
@@ -1842,16 +1945,37 @@
             const id = document.getElementById('edit-s-id').value;
             const newName = document.getElementById('edit-s-name').value;
             const newSec = document.getElementById('edit-s-sec').value;
-            if (!newName || !newSec) return alert("नाम र सेक्सन खाली हुन सक्दैन");
+            if (!newName || !newSec) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'नाम र सेक्सन खाली हुन सक्दैन',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
             try {
                 await updateDoc(doc(db, "students", id), { name: newName, section: newSec });
                 const s = studentsData.find(st => st.id === id);
                 if (s) { s.name = newName; s.section = newSec; }
-                alert("विवरण सफलतापूर्वक अपडेट भयो!");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    text: 'विवरण सफलतापूर्वक अपडेट भयो!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 document.getElementById('edit-student-modal').classList.add('hidden');
                 renderStudentMgmtList();
                 updateDashboard();
-            } catch (e) { alert("Error updating: " + e.message); }
+            } catch (e) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'Error updating: ' + e.message,
+                    confirmButtonText: 'ठिक छ'
+                });
+            }
         }
 
         window.deleteStudent = async (id) => {
@@ -1861,16 +1985,38 @@
                 studentsData = studentsData.filter(s => s.id !== id);
                 renderStudentMgmtList();
                 updateDashboard();
-                alert("विद्यार्थी सफलतापूर्वक डिलिट भयो");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    text: 'विद्यार्थी सफलतापूर्वक डिलिट भयो',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }, "🔒 Confirm Delete (Password Required)");
         }
 
         window.masterDeleteClass = async () => {
             if (!requireOnline()) return;
             const cls = document.getElementById('master-delete-class').value;
-            if (!cls) return alert("पहिले क्लास चयन गर्नुहोस्");
+            if (!cls) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'पहिले क्लास चयन गर्नुहोस्',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
             const toDelete = studentsData.filter(s => s.class == cls);
-            if (toDelete.length === 0) return alert(`No students found in Class ${cls}.`);
+            if (toDelete.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'सूचना',
+                    text: `No students found in Class ${cls}.`,
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
 
             // Just simulate auth check via confirmAction for simplicity, or keep original prompts
             confirmAction(async () => {
@@ -1884,11 +2030,23 @@
                         await batch.commit();
                         count += chunk.length;
                     }
-                    alert(`SUCCESS: Deleted ${count} students from Class ${cls}.`);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'सफल!',
+                        text: `SUCCESS: Deleted ${count} students from Class ${cls}.`,
+                        confirmButtonText: 'ठिक छ'
+                    });
                     studentsData = studentsData.filter(s => s.class != cls);
                     renderStudentMgmtList();
                     updateDashboard();
-                } catch (e) { alert("Error during deletion: " + e.message); }
+                } catch (e) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि',
+                        text: 'Error during deletion: ' + e.message,
+                        confirmButtonText: 'ठिक छ'
+                    });
+                }
             }, "Confirm MASTER DELETE?");
         }
 
@@ -1932,7 +2090,16 @@
             const pass = document.getElementById('login-pass').value;
             const btn = document.getElementById('login-btn');
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`; btn.disabled = true;
-            signInWithEmailAndPassword(auth, email, pass).catch(err => { alert("Login Failed: " + err.message); btn.innerHTML = `लगइन गर्नुहोस्`; btn.disabled = false; });
+            signInWithEmailAndPassword(auth, email, pass).catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'लगइन असफल',
+                    text: err.message,
+                    confirmButtonText: 'ठिक छ'
+                });
+                btn.innerHTML = `लगइन गर्नुहोस्`;
+                btn.disabled = false;
+            });
         };
         window.logout = () => signOut(auth);
 
@@ -1946,8 +2113,24 @@
             try {
                 await setDoc(doc(db, "students", id), { name, class: cls, section: sec, roll: parseInt(roll) });
                 if (!studentsData.find(s => s.id === id)) studentsData.push({ id, name, class: cls, section: sec, roll: parseInt(roll) });
-                alert("विद्यार्थी थपियो!"); e.target.reset(); updateDashboard(); renderStudentMgmtList();
-            } catch (e) { alert("Error: " + e.message); }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    text: 'विद्यार्थी थपियो!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                e.target.reset();
+                updateDashboard();
+                renderStudentMgmtList();
+            } catch (e) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'Error: ' + e.message,
+                    confirmButtonText: 'ठिक छ'
+                });
+            }
         };
 
         // Excel Upload (unchanged logic)
@@ -1959,7 +2142,15 @@
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                if (jsonData.length === 0) return alert("खाली फाइल");
+                if (jsonData.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि',
+                        text: 'खाली फाइल',
+                        confirmButtonText: 'ठिक छ'
+                    });
+                    return;
+                }
                 let count = 0;
                 let newClassesFound = false;
                 const batch = writeBatch(db);
@@ -1981,7 +2172,14 @@
                 }
                 if (batchCount > 0) await batch.commit();
                 if (newClassesFound && currentUserData.role === 'admin') { await setDoc(doc(db, "settings", "config"), { classes: CLASSES }, { merge: true }); updateClassDropdowns(); }
-                alert(`${count} विद्यार्थीहरू सफलतापूर्वक अपलोड भयो!`); renderStudentMgmtList(); updateDashboard();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    text: `${count} विद्यार्थीहरू सफलतापूर्वक अपलोड भयो!`,
+                    confirmButtonText: 'ठिक छ'
+                });
+                renderStudentMgmtList();
+                updateDashboard();
             };
             reader.readAsArrayBuffer(file);
         };
@@ -2014,10 +2212,32 @@
             const d = parseInt(document.getElementById('att-d').value);
             const dateKey = `${y}-${m}-${d}`;
 
-            if (currentDayHasUnsavedChanges) { if (!confirm("अहिले गरिएको परिवर्तन सेभ भएको छैन, बाहिर निस्कने हो र ?")) return; currentDayHasUnsavedChanges = false; document.getElementById('att-save-footer').classList.add('hidden'); }
+            if (currentDayHasUnsavedChanges) {
+                const result = await Swal.fire({
+                    title: 'चेतावनी!',
+                    text: 'अहिले गरिएको परिवर्तन सेभ भएको छैन। बाहिर निस्कने हो र ?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'हो, बाहिर निस्कने',
+                    cancelButtonText: 'रद्द गर्नुहोस्',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280'
+                });
+                if (!result.isConfirmed) return;
+                currentDayHasUnsavedChanges = false;
+                document.getElementById('att-save-footer').classList.add('hidden');
+            }
 
             const monthDays = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 32;
-            if (d > monthDays) { alert('यो महिनामा यति गते छैन!'); return; }
+            if (d > monthDays) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'यो महिनामा यति गते छैन!',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
             const dayCheck = dateConverter.bsToAd(y, m, d);
             const realDow = dayCheck ? dayCheck.getDay() : 0;
             document.getElementById('day-name').innerText = DAYS[realDow] + (realDow === 6 ? " (Sat)" : "");
@@ -2141,13 +2361,24 @@
                     document.getElementById('att-grid').innerHTML = '';
                     localAttendanceBuffer = {};
 
-                    alert("सबै विद्यार्थी अनुपस्थित भएकोले हाजिरी record मेटाइयो।\nयो दिन अब खुला (unlocked) छ।");
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'हाजिरी रेकर्ड मेटाइयो',
+                        text: 'सबै विद्यार्थी अनुपस्थित भएकोले हाजिरी record मेटाइयो। यो दिन अब खुला (unlocked) छ।',
+                        confirmButtonText: 'ठिक छ',
+                        timer: 3000
+                    });
 
                     // Update monthly summary (remove this day's contribution)
                     updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
                 } catch (e) {
                     console.error("Delete error:", e);
-                    alert("त्रुटि: Record delete गर्न सकिएन।\n" + (navigator.onLine ? "पुन: प्रयास गर्नुहोस्।" : "कृपया अनलाइन हुँदा delete गर्नुहोस्।"));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि!',
+                        text: 'Record delete गर्न सकिएन। ' + (navigator.onLine ? 'पुन: प्रयास गर्नुहोस्।' : 'कृपया अनलाइन हुँदा delete गर्नुहोस्।'),
+                        confirmButtonText: 'ठिक छ'
+                    });
                 }
                 return;
             }
@@ -2166,14 +2397,38 @@
                 // Update monthly summary (AM + AT calculation)
                 updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
 
-                alert("हाजिरी सुरक्षित भयो!");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    text: 'हाजिरी सुरक्षित भयो!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
-            catch (e) { alert("अफलाइन सुरक्षित भयो (पछि सिंक हुनेछ)"); }
+            catch (e) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'अफलाइन सुरक्षित भयो',
+                    html: 'तपाईंको डाटा स्थानीय रूपमा सुरक्षित भयो।<br><small>इन्टरनेट जडान हुँदा स्वतः sync हुनेछ।</small>',
+                    confirmButtonText: 'ठिक छ',
+                    timer: 3000
+                });
+            }
         };
 
-        window.unlockAttendance = () => {
+        window.unlockAttendance = async () => {
             // Edit previous attendance requires online check? User said "Offline mode... student details ... restricted, but payment ok". Attendance edits usually risky offline if conflict. But let's allow it as prompt didn't explicitly forbid.
-            if (!navigator.onLine && !confirm("चेतावनी: अफलाइन सम्पादन गर्दा विवाद हुन सक्छ। जारी राख्ने?")) return;
+            if (!navigator.onLine) {
+                const result = await Swal.fire({
+                    title: 'चेतावनी!',
+                    text: 'अफलाइन सम्पादन गर्दा विवाद हुन सक्छ। जारी राख्ने?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'हो, जारी राख्ने',
+                    cancelButtonText: 'रद्द गर्नुहोस्'
+                });
+                if (!result.isConfirmed) return;
+            }
 
             confirmAction(() => {
                 currentDayIsLocked = false; document.getElementById('att-lock-status-bar').classList.add('hidden');
@@ -2186,9 +2441,28 @@
 
         window.markHoliday = async () => {
             const dateKey = `${document.getElementById('att-y').value}-${document.getElementById('att-m').value}-${document.getElementById('att-d').value}`;
-            if (confirm("यो दिन बिदा मार्क गर्ने?")) {
-                const title = prompt("बिदाको शीर्षक:", "सार्वजनिक बिदा");
-                if (title) { await setDoc(doc(db, "attendance", dateKey), { isHoliday: true, holidayTitle: title }, { merge: true }); loadAtt(); }
+
+            const confirmResult = await Swal.fire({
+                title: 'बिदा मार्क गर्ने?',
+                text: 'यो दिन बिदा मार्क गर्ने?',
+                icon: 'question',
+                input: 'text',
+                inputLabel: 'बिदाको शीर्षक:',
+                inputPlaceholder: 'सार्वजनिक बिदा',
+                inputValue: 'सार्वजनिक बिदा',
+                showCancelButton: true,
+                confirmButtonText: 'हो, मार्क गर्नुहोस्',
+                cancelButtonText: 'रद्द गर्नुहोस्',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'बिदाको शीर्षक आवश्यक छ!'
+                    }
+                }
+            });
+
+            if (confirmResult.isConfirmed && confirmResult.value) {
+                await setDoc(doc(db, "attendance", dateKey), { isHoliday: true, holidayTitle: confirmResult.value }, { merge: true });
+                loadAtt();
             }
         };
 
