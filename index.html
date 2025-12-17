@@ -955,6 +955,15 @@
         // Date Converter (Same as before)
         const dateConverter = { nepaliCalendarData: { 2000: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2001: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2002: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2003: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2004: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2005: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2006: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2007: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2008: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2009: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2010: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2011: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2012: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2013: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2014: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2015: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2016: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2017: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2018: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2019: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2020: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2021: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2022: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2023: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2024: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2025: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2026: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2027: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2028: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2029: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2030: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2031: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2032: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2033: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2034: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2035: [30, 32, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2036: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2037: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2038: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2039: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2040: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2041: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2042: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2043: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2044: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2045: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2046: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2047: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2048: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2049: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2050: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2051: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2052: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2053: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2054: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2055: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2056: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2057: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2058: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2059: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2060: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2061: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2062: [30, 32, 31, 32, 31, 31, 29, 30, 29, 30, 29, 31], 2063: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2064: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2065: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2066: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2067: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2068: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2069: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2070: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2071: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2072: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2073: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2074: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2075: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2076: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2077: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2078: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2079: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2080: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2081: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2082: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2083: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2084: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2085: [31, 32, 31, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2086: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2087: [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30], 2088: [30, 31, 32, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2089: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2090: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30] }, referenceBS: { year: 2000, month: 1, day: 1 }, referenceAD: new Date(1943, 3, 14), bsToAd: function (a, b, c) { if (!this.nepaliCalendarData[a] || b < 1 || b > 12 || c < 1 || c > this.nepaliCalendarData[a][b - 1]) return null; let d = 0; for (let e = this.referenceBS.year; e < a; e++)this.nepaliCalendarData[e] && (d += this.nepaliCalendarData[e].reduce((f, g) => f + g, 0)); for (let e = 0; e < b - 1; e++)d += this.nepaliCalendarData[a][e]; d += c - 1; const e = new Date(this.referenceAD); return e.setDate(e.getDate() + d), e }, adToBs: function (a) { if (!(a instanceof Date)) return null; let b = a - this.referenceAD, c = Math.floor(b / 864e5), d = this.referenceBS.year, e = this.referenceBS.month, f = this.referenceBS.day; for (; ;) { if (!this.nepaliCalendarData[d]) break; const g = this.nepaliCalendarData[d][e - 1], h = g - f + 1; if (c >= h) { c -= h, e++, f = 1, e > 12 && (e = 1, d++); continue } f += c; break } return { year: d, month: e, day: f, dayOfWeek: a.getDay() } } };
 
+
+        // GLOBAL OFFLINE STATE MANAGEMENT
+        let isOfflineMode = !navigator.onLine;  // Initialize immediately
+        let offlineModeConfirmed = false;       // Service Worker confirmed status
+
+        // Offline-first data cache
+        let cachedStudentsData = null;
+        let cachedSettingsData = null;
+
         let currentUserData = null;
         let studentsData = [];
         let schoolSettings = { fineRate: 10, schoolName: "विद्यालयको नाम", schoolAddress: "ठेगाना", classFines: {}, classes: CLASSES };
@@ -966,7 +975,7 @@
 
         // Offline Guard
         function requireOnline() {
-            if (!navigator.onLine) {
+            if (isOfflineMode) {  // Use the priority state instead of navigator.onLine
                 Swal.fire({
                     icon: 'warning',
                     title: 'इन्टरनेट आवश्यक छ',
@@ -1044,7 +1053,8 @@
             const el = document.getElementById('sync-status');
             const offlineWarning = document.getElementById('offline-pay-warning');
 
-            if (navigator.onLine) {
+            // Use the priority offline state
+            if (!isOfflineMode) {
                 el.classList.remove('bg-red-500', 'offline-dot');
                 el.classList.add('bg-green-400', 'online-dot');
                 el.title = "Online";
@@ -1052,13 +1062,73 @@
             } else {
                 el.classList.remove('bg-green-400', 'online-dot');
                 el.classList.add('bg-red-500', 'offline-dot');
-                el.title = "Offline";
+                el.title = `Offline${offlineModeConfirmed ? ' (Confirmed)' : ''}`;
                 if (offlineWarning) offlineWarning.innerText = "Offline Mode (Read Only)";
             }
         }
 
-        window.addEventListener('online', updateSyncStatus);
-        window.addEventListener('offline', updateSyncStatus);
+        // PRIORITY OFFLINE DETECTION
+        // Listen for service worker messages
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'NETWORK_STATUS_CHANGED') {
+                    const wasOffline = isOfflineMode;
+                    isOfflineMode = !event.data.isOnline;
+                    offlineModeConfirmed = true;
+
+                    if (wasOffline !== isOfflineMode) {
+                        updateSyncStatus();
+                        console.log(`🔄 Network status changed: ${isOfflineMode ? 'OFFLINE' : 'ONLINE'}`);
+
+                        // Reload current view if switching from offline to online
+                        if (!isOfflineMode && !document.getElementById('app-interface').classList.contains('hidden')) {
+                            const activeSection = document.querySelector('section:not(.hidden)');
+                            if (activeSection && activeSection.id === 'attendance') {
+                                loadAtt();
+                            } else if (activeSection && activeSection.id === 'dashboard') {
+                                updateDashboard();
+                            }
+                        }
+                    }
+                } else if (event.data.type === 'NETWORK_STATUS') {
+                    isOfflineMode = !event.data.isOnline;
+                    offlineModeConfirmed = true;
+                    updateSyncStatus();
+                }
+            });
+
+            // Request initial network status from service worker
+            navigator.serviceWorker.ready.then(registration => {
+                if (registration.active) {
+                    const messageChannel = new MessageChannel();
+                    messageChannel.port1.onmessage = (event) => {
+                        if (event.data.type === 'NETWORK_STATUS') {
+                            isOfflineMode = !event.data.isOnline;
+                            offlineModeConfirmed = true;
+                            updateSyncStatus();
+                            console.log(`📡 Initial network status: ${isOfflineMode ? 'OFFLINE' : 'ONLINE'}`);
+                        }
+                    };
+                    registration.active.postMessage(
+                        { type: 'REQUEST_NETWORK_STATUS' },
+                        [messageChannel.port2]
+                    );
+                }
+            });
+        }
+
+        // Also listen to native browser events as backup
+        window.addEventListener('online', () => {
+            isOfflineMode = false;
+            updateSyncStatus();
+            console.log('✅ Browser online event');
+        });
+
+        window.addEventListener('offline', () => {
+            isOfflineMode = true;
+            updateSyncStatus();
+            console.log('❌ Browser offline event');
+        });
 
         onAuthStateChanged(auth, async (user) => {
             clearTimeout(loadTimer);
@@ -1644,14 +1714,36 @@
         // --- STUDENT MANAGEMENT & REPORT CARD ---
         async function loadStudents() {
             try {
-                // If offline, this pulls from cache if available
+                // OFFLINE-FIRST: Use cached data immediately if offline
+                if (isOfflineMode && cachedStudentsData) {
+                    console.log('📦 Using cached students data (offline mode)');
+                    studentsData = cachedStudentsData;
+                    renderStudentMgmtList();
+                    updateDashboard();
+                    return;
+                }
+
+                // Online or no cache: fetch from Firebase (with cache fallback)
                 const q = query(collection(db, "students"));
                 const snapshot = await getDocs(q);
                 studentsData = [];
                 snapshot.forEach(doc => studentsData.push({ id: doc.id, ...doc.data() }));
+
+                // Cache for offline use
+                cachedStudentsData = [...studentsData];
+
                 renderStudentMgmtList();
                 updateDashboard();
-            } catch (e) { console.warn("Error loading students: ", e); }
+            } catch (e) {
+                console.warn("Error loading students: ", e);
+                // Fallback to cached data if available
+                if (cachedStudentsData) {
+                    console.log('📦 Using cached students data (fallback)');
+                    studentsData = cachedStudentsData;
+                    renderStudentMgmtList();
+                    updateDashboard();
+                }
+            }
         }
 
         window.renderStudentMgmtList = () => {
@@ -1898,20 +1990,45 @@
 
         async function loadSettings() {
             try {
+                // OFFLINE-FIRST: Use cached settings if offline
+                if (isOfflineMode && cachedSettingsData) {
+                    console.log('📦 Using cached settings (offline mode)');
+                    schoolSettings = { ...schoolSettings, ...cachedSettingsData };
+                    if (schoolSettings.classes) CLASSES = schoolSettings.classes;
+                    if (currentUserData.role === 'admin') {
+                        document.getElementById('set-school-name').value = schoolSettings.schoolName || "";
+                        document.getElementById('set-school-address').value = schoolSettings.schoolAddress || "";
+                        document.getElementById('set-classes-list').value = (schoolSettings.classes || CLASSES).join(', ');
+                        renderFineRateSettings();
+                    }
+                    return;
+                }
+
                 const snap = await getDoc(doc(db, "settings", "config"));
                 if (snap.exists()) {
-                    schoolSettings = { ...schoolSettings, ...snap.data() };
+                    const data = snap.data();
+                    schoolSettings = { ...schoolSettings, ...data };
                     if (schoolSettings.classes) CLASSES = schoolSettings.classes;
+
+                    // Cache for offline use
+                    cachedSettingsData = { ...data };
                 }
                 if (currentUserData.role === 'admin') {
                     document.getElementById('set-school-name').value = schoolSettings.schoolName || "";
                     document.getElementById('set-school-address').value = schoolSettings.schoolAddress || "";
-                    document.getElementById('set-classes-list').value = CLASSES.join(',');
+                    document.getElementById('set-classes-list').value = (schoolSettings.classes || CLASSES).join(', ');
                     renderFineRateSettings();
                 }
-            } catch (e) { console.log("Offline settings load"); }
+            } catch (e) {
+                console.log("Offline settings load");
+                // Use cached data if available
+                if (cachedSettingsData) {
+                    console.log('📦 Using cached settings (fallback)');
+                    schoolSettings = { ...schoolSettings, ...cachedSettingsData };
+                    if (schoolSettings.classes) CLASSES = schoolSettings.classes;
+                }
+            }
         }
-
         function renderFineRateSettings() {
             const container = document.getElementById('fine-rates-container');
             container.innerHTML = CLASSES.map(c => `<div><label class="text-[10px] text-gray-500 block">Cls ${c}</label><input type="number" class="fine-input w-full border p-1 rounded text-sm focus:ring-1 focus:ring-blue-500" data-class="${c}" value="${schoolSettings.classFines?.[c] || 10}"></div>`).join('');
@@ -2056,6 +2173,7 @@
         }
 
         window.showSection = (id) => {
+            // INSTANT UI UPDATE: Show section immediately without waiting for data
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
 
@@ -2085,16 +2203,55 @@
                 mobileBtns[navBtnMap[id]].classList.add('active');
             }
 
-            // Prevent concurrent loads that cause freezing
-            if (id === 'attendance') {
-                // Cancel any pending loads and start fresh
-                if (window.loadAttInProgress) {
-                    console.log('Load already in progress, skipping...');
-                    return;
-                }
-                loadAtt();
+            // OPTIMIZED OFFLINE-FIRST DATA LOADING
+            // Cancel any pending deferred loads
+            if (window.pendingTabLoad) {
+                clearTimeout(window.pendingTabLoad);
+                window.pendingTabLoad = null;
             }
-            if (id === 'dashboard') updateDashboard();
+
+            // Instant response for offline mode
+            if (id === 'attendance') {
+                const grid = document.getElementById('att-grid');
+
+                if (isOfflineMode) {
+                    // OFFLINE: No delay, load immediately with cache
+                    console.log('⚡ Offline mode: Instant attendance load');
+                    if (!grid.innerHTML.trim()) {
+                        grid.innerHTML = '<p class="text-center p-4 text-gray-500"><i class="fas fa-wifi-slash mr-2"></i>Offline Mode - Loading from cache...</p>';
+                    }
+                    // Immediate execution (no setTimeout)
+                    if (!window.loadAttInProgress) {
+                        loadAtt();
+                    }
+                } else {
+                    // ONLINE: Small defer for smooth UI
+                    if (grid && !grid.innerHTML.trim()) {
+                        grid.innerHTML = '<p class="text-center p-8 text-gray-500 animate-pulse">Loading...</p>';
+                    }
+                    window.pendingTabLoad = setTimeout(() => {
+                        if (window.loadAttInProgress) {
+                            console.log('Load already in progress, skipping...');
+                            return;
+                        }
+                        loadAtt();
+                    }, 0);
+                }
+            }
+
+            if (id === 'dashboard') {
+                const listContainer = document.getElementById('dash-absent-list');
+                if (listContainer) {
+                    listContainer.innerHTML = '<p class="text-gray-400 italic animate-pulse">Loading...</p>';
+                }
+
+                if (isOfflineMode) {
+                    console.log('⚡ Offline mode: Instant dashboard update');
+                    updateDashboard();
+                } else {
+                    setTimeout(() => updateDashboard(), 0);
+                }
+            }
         };
 
         // Alias for HTML compatibility (navigateSection called in onclick handlers)
@@ -2507,16 +2664,24 @@
             let selectedClass = document.getElementById('dash-class-select') ? document.getElementById('dash-class-select').value : 'all';
             let selectedSec = document.getElementById('dash-sec-select') ? document.getElementById('dash-sec-select').value : 'all';
 
-            document.getElementById('dash-present').innerText = '-'; document.getElementById('dash-absent').innerText = '-';
-            const listContainer = document.getElementById('dash-absent-list'); listContainer.innerHTML = '<p class="text-gray-400 italic">Loading...</p>';
+            document.getElementById('dash-present').innerText = '-';
+            document.getElementById('dash-absent').innerText = '-';
+            const listContainer = document.getElementById('dash-absent-list');
+            listContainer.innerHTML = '<p class="text-gray-400 italic animate-pulse">Loading...</p>';
 
             try {
-                // Offline first approach or check?
+                // OPTIMIZED: Cache-first for instant offline loading
                 const snap = await getDoc(doc(db, "attendance", dateKey));
                 let present = 0, absent = 0; let absentNames = [];
+
                 if (snap.exists()) {
                     const data = snap.data();
-                    if (data.isHoliday) { listContainer.innerHTML = '<p class="text-purple-600 font-bold">आज बिदा हो</p>'; document.getElementById('dash-present').innerText = '0'; document.getElementById('dash-absent').innerText = '0'; return; }
+                    if (data.isHoliday) {
+                        listContainer.innerHTML = '<p class="text-purple-600 font-bold">आज बिदा हो</p>';
+                        document.getElementById('dash-present').innerText = '0';
+                        document.getElementById('dash-absent').innerText = '0';
+                        return;
+                    }
 
                     let targetStudents = studentsData.filter(s => {
                         if (selectedClass !== 'all' && s.class != selectedClass) return false;
@@ -2533,12 +2698,37 @@
                     });
 
                     targetStudents.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
-                    targetStudents.forEach(s => { const status = data[s.id]; if (status === 'P') present++; if (status === 'A') { absent++; absentNames.push(`${s.name} (${s.class}-${s.section})`); } });
+                    targetStudents.forEach(s => {
+                        const status = data[s.id];
+                        if (status === 'P') present++;
+                        if (status === 'A') {
+                            absent++;
+                            absentNames.push(`${s.name} (${s.class}-${s.section})`);
+                        }
+                    });
+                } else {
+                    // No data for today yet
+                    document.getElementById('dash-present').innerText = '0';
+                    document.getElementById('dash-absent').innerText = '0';
+                    listContainer.innerHTML = '<p class="text-gray-400 italic">आजको हाजिरी अझै भएको छैन</p>';
+                    return;
                 }
-                document.getElementById('dash-present').innerText = present; document.getElementById('dash-absent').innerText = absent;
-                if (absentNames.length > 0) listContainer.innerHTML = absentNames.map(name => `<div class="border-b pb-1 border-gray-100"><i class="fas fa-times-circle text-red-400 mr-2"></i>${name}</div>`).join('');
-                else listContainer.innerHTML = present > 0 ? '<p class="text-green-600 italic">सबै उपस्थित छन्!</p>' : '<p class="text-gray-400 italic">हाजिरी भएको छैन</p>';
-            } catch (e) { console.log("Dash Error (Offline?)", e); listContainer.innerHTML = "Offline - Data Unavailable"; }
+
+                document.getElementById('dash-present').innerText = present;
+                document.getElementById('dash-absent').innerText = absent;
+
+                if (absentNames.length > 0) {
+                    listContainer.innerHTML = absentNames.map(name => `<div class="border-b pb-1 border-gray-100"><i class="fas fa-times-circle text-red-400 mr-2"></i>${name}</div>`).join('');
+                } else {
+                    listContainer.innerHTML = present > 0 ? '<p class="text-green-600 italic">सबै उपस्थित छन्!</p>' : '<p class="text-gray-400 italic">हाजिरी भएको छैन</p>';
+                }
+            } catch (e) {
+                console.log("Dashboard Load Error:", e);
+                // Show friendly offline message
+                document.getElementById('dash-present').innerText = '?';
+                document.getElementById('dash-absent').innerText = '?';
+                listContainer.innerHTML = '<p class="text-yellow-600 italic"><i class="fas fa-wifi-slash mr-2"></i>Offline - आज को डाटा उपलब्ध छैन</p>';
+            }
         }
 
         window.updateReportStudentDropdown = () => { }
