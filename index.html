@@ -964,6 +964,93 @@
         let cachedStudentsData = null;
         let cachedSettingsData = null;
 
+        // PERFORMANCE: Smart Cache System with TTL
+        const dataCache = {
+            todayAttendance: { data: null, timestamp: null, dateKey: null },
+            dashboardStats: { data: null, timestamp: null, cacheKey: null },
+            CACHE_LIFETIME: 30000 // 30 seconds (ONLY applies when ONLINE)
+        };
+
+        function isCacheValid(cacheEntry) {
+            if (!cacheEntry || !cacheEntry.data || !cacheEntry.timestamp) return false;
+
+            // CRITICAL: Offline data NEVER expires!
+            // केवल online हुँदा मात्र 30s TTL check गर्ने
+            if (isOfflineMode) {
+                console.log('🔒 Offline mode: Cache never expires');
+                return true; // Always valid offline
+            }
+
+            // Online हुँदा TTL check गर्ने
+            const isStillFresh = (Date.now() - cacheEntry.timestamp) < dataCache.CACHE_LIFETIME;
+            if (!isStillFresh) {
+                console.log('⏰ Cache expired (online mode)');
+            }
+            return isStillFresh;
+        }
+
+        function setCacheData(key, data, metadata = {}) {
+            if (!dataCache[key]) dataCache[key] = {};
+            dataCache[key] = {
+                data: data,
+                timestamp: Date.now(),
+                ...metadata
+            };
+            console.log(`📦 Cached: ${key} ${isOfflineMode ? '(offline-persistent)' : '(30s TTL)'}`);
+        }
+
+        function getCacheData(key) {
+            const entry = dataCache[key];
+            if (isCacheValid(entry)) {
+                console.log(`⚡ Cache HIT: ${key} ${isOfflineMode ? '[offline]' : '[online]'}`);
+                return entry.data;
+            }
+            console.log(`❌ Cache MISS: ${key}`);
+            return null;
+        }
+
+        function clearCache(key = null) {
+            if (key) {
+                if (dataCache[key]) {
+                    dataCache[key] = { data: null, timestamp: null };
+                }
+            } else {
+                // Clear all caches
+                Object.keys(dataCache).forEach(k => {
+                    if (k !== 'CACHE_LIFETIME') {
+                        dataCache[k] = { data: null, timestamp: null };
+                    }
+                });
+            }
+        }
+
+        // PERFORMANCE: Debouncing and Loading State Management
+        let activeTabSwitch = null;
+        let navigationTimeout = null;
+        const NAVIGATION_DEBOUNCE = 150; // milliseconds
+
+        const loadingStates = {
+            attendance: false,
+            dashboard: false,
+            reports: false
+        };
+
+        function setLoadingState(section, isLoading) {
+            loadingStates[section] = isLoading;
+
+            // Visual feedback on navigation buttons
+            const navButtons = document.querySelectorAll('.nav-btn, .nav-btn-mobile');
+            navButtons.forEach(btn => {
+                if (isLoading) {
+                    btn.style.opacity = '0.6';
+                    btn.style.pointerEvents = 'none';
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                }
+            });
+        }
+
         let currentUserData = null;
         let studentsData = [];
         let schoolSettings = { fineRate: 10, schoolName: "विद्यालयको नाम", schoolAddress: "ठेगाना", classFines: {}, classes: CLASSES };
@@ -2255,7 +2342,54 @@
         };
 
         // Alias for HTML compatibility (navigateSection called in onclick handlers)
-        window.navigateSection = window.showSection;
+        window.navigateSection = function (sectionId) {
+            // PERFORMANCE: Debounce rapid navigation clicks
+            if (navigationTimeout) {
+                clearTimeout(navigationTimeout);
+            }
+
+            // Immediate UI update for perceived instant response
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            const targetEl = document.getElementById(sectionId);
+            if (targetEl) targetEl.classList.remove('hidden');
+
+            // Update navigation button states immediately
+            // Desktop nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'border-indigo-100');
+                btn.classList.add('text-gray-600', 'border-transparent');
+            });
+
+            // Mobile nav buttons
+            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const navBtnMap = { 'dashboard': 0, 'attendance': 1, 'reports': 2, 'student-mgmt': 3, 'admin': 4 };
+
+            // Update desktop nav
+            const btns = document.querySelectorAll('.nav-btn');
+            if (btns[navBtnMap[sectionId]]) {
+                btns[navBtnMap[sectionId]].classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-100');
+                btns[navBtnMap[sectionId]].classList.remove('text-gray-600', 'border-transparent');
+            }
+
+            // Update mobile nav
+            const mobileBtns = document.querySelectorAll('.nav-btn-mobile');
+            if (mobileBtns[navBtnMap[sectionId]]) {
+                mobileBtns[navBtnMap[sectionId]].classList.add('active');
+            }
+
+            // Debounced data loading (prevents rapid clicks from triggering multiple loads)
+            navigationTimeout = setTimeout(() => {
+                if (activeTabSwitch === sectionId) {
+                    console.log('⏭️ Already loading this tab, skipping');
+                    return;
+                }
+                activeTabSwitch = sectionId;
+                showSection(sectionId);
+            }, NAVIGATION_DEBOUNCE);
+        };
 
         window.handleLogin = (e) => {
             e.preventDefault();
@@ -2365,12 +2499,13 @@
         window.loadAtt = async () => {
             // Prevent concurrent executions
             if (window.loadAttInProgress) {
-                console.log('loadAtt already running, skipping duplicate call');
+                console.log('⏳ loadAtt already running, skipping duplicate call');
                 return;
             }
 
             try {
                 window.loadAttInProgress = true;
+                setLoadingState('attendance', true);
 
                 let cls = document.getElementById('att-class').value;
                 let sec = document.getElementById('att-sec').value;
@@ -2391,6 +2526,26 @@
                 const d = parseInt(document.getElementById('att-d').value);
                 const dateKey = `${y}-${m}-${d}`;
 
+                // CHECK CACHE FIRST for instant load
+                const cached = getCacheData('todayAttendance');
+                if (cached && cached.dateKey === dateKey && cached.cls === cls && cached.sec === sec) {
+                    console.log('⚡ Using cached attendance data for instant render');
+                    renderAttendanceGridOptimized(cached.students, cached.attData, cached.isLocked);
+
+                    // Update UI states
+                    const realDow = cached.realDow;
+                    document.getElementById('day-name').innerText = DAYS[realDow] + (realDow === 6 ? " (Sat)" : "");
+
+                    if (cached.isHoliday) {
+                        const grid = document.getElementById('att-grid');
+                        grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${cached.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
+                    }
+
+                    setLoadingState('attendance', false);
+                    window.loadAttInProgress = false;
+                    return;
+                }
+
                 if (currentDayHasUnsavedChanges) {
                     const result = await Swal.fire({
                         title: 'चेतावनी!',
@@ -2402,7 +2557,10 @@
                         confirmButtonColor: '#ef4444',
                         cancelButtonColor: '#6b7280'
                     });
-                    if (!result.isConfirmed) return;
+                    if (!result.isConfirmed) {
+                        setLoadingState('attendance', false);
+                        return;
+                    }
                     currentDayHasUnsavedChanges = false;
                     document.getElementById('att-save-footer').classList.add('hidden');
                 }
@@ -2415,8 +2573,10 @@
                         text: 'यो महिनामा यति गते छैन!',
                         confirmButtonText: 'ठिक छ'
                     });
+                    setLoadingState('attendance', false);
                     return;
                 }
+
                 const dayCheck = dateConverter.bsToAd(y, m, d);
                 const realDow = dayCheck ? dayCheck.getDay() : 0;
                 document.getElementById('day-name').innerText = DAYS[realDow] + (realDow === 6 ? " (Sat)" : "");
@@ -2433,15 +2593,37 @@
                 if (sec !== 'all') students = students.filter(s => s.section == sec);
                 students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
 
-                if (students.length === 0) { grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>'; return; }
+                if (students.length === 0) {
+                    grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>';
+                    setLoadingState('attendance', false);
+                    return;
+                }
 
-                // OPTIMIZED: Try cache first for instant load (offline or online)
+                // OPTIMIZED: Fetch with timeout to prevent indefinite hangs
                 try {
-                    const snap = await getDoc(doc(db, "attendance", dateKey));
+                    const snap = await Promise.race([
+                        getDoc(doc(db, "attendance", dateKey)),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                    ]);
+
+                    let attData = {};
+                    let isLocked = false;
+                    let isHoliday = false;
+                    let holidayTitle = '';
+
                     if (snap.exists()) {
-                        let attData = snap.data();
+                        attData = snap.data();
                         if (attData.isHoliday) {
-                            grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
+                            isHoliday = true;
+                            holidayTitle = attData.holidayTitle || "Holiday";
+                            grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${holidayTitle}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
+
+                            // Cache the holiday status
+                            setCacheData('todayAttendance', {
+                                students, attData, isLocked: false, isHoliday: true, holidayTitle,
+                                dateKey, cls, sec, realDow
+                            });
+                            setLoadingState('attendance', false);
                             return;
                         }
 
@@ -2450,8 +2632,9 @@
 
                         if (hasDataForClass) {
                             currentDayIsLocked = true;
+                            isLocked = true;
                             localAttendanceBuffer = attData;
-                            renderAttendanceGrid(students, attData, true);
+                            renderAttendanceGridOptimized(students, attData, true);
                             statusBar.classList.remove('hidden');
                         } else {
                             // No data for this class - show start button
@@ -2463,6 +2646,13 @@
                         if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
                         else startBtn.classList.remove('hidden');
                     }
+
+                    // Cache the result for instant future loads
+                    setCacheData('todayAttendance', {
+                        students, attData, isLocked, isHoliday: false,
+                        dateKey, cls, sec, realDow
+                    });
+
                 } catch (e) {
                     // Error fetching (could be offline or network issue)
                     console.log("Cache fetch error (likely offline):", e);
@@ -2472,6 +2662,7 @@
                 }
             } finally {
                 // Always clear the loading flag
+                setLoadingState('attendance', false);
                 window.loadAttInProgress = false;
             }
         };
@@ -2491,6 +2682,33 @@
                 div.innerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center font-bold border border-black/10 text-gray-700 shadow-sm">${s.roll}</div><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs font-semibold uppercase tracking-wider text-gray-600 status-text">${status === 'P' ? 'उपस्थित' : (status.startsWith('L') ? 'बिदा' : 'अनुपस्थित')}</div></div></div><div class="flex gap-3"><button onclick="window.toggleAtt('${s.id}', 'P', this)" class="att-btn ${pClass} ${isLocked ? 'disabled' : ''} hover:scale-105 shadow-sm">P</button><button onclick="window.toggleAtt('${s.id}', 'L', this)" class="att-btn ${lClass} ${isLocked ? 'disabled' : ''} hover:scale-105 shadow-sm">L</button></div>`;
                 grid.appendChild(div);
             });
+        }
+
+        // PERFORMANCE: Optimized rendering with DocumentFragment (batched DOM updates)
+        function renderAttendanceGridOptimized(students, attData, isLocked = false) {
+            const grid = document.getElementById('att-grid');
+            grid.innerHTML = '';
+
+            // DocumentFragment for batch DOM updates (HUGE performance boost)
+            const fragment = document.createDocumentFragment();
+
+            students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+            students.forEach(s => {
+                const status = attData[s.id] || 'A';
+                localAttendanceBuffer[s.id] = status;
+                let cardClass = status === 'P' ? 'card-present' : (status.startsWith('L') ? 'card-leave' : 'card-absent');
+                let pClass = status === 'P' ? 'active-p' : '';
+                let lClass = status.startsWith('L') ? 'active-l' : '';
+
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-lg shadow-sm border flex justify-between items-center student-card ${cardClass} mb-2 transition-all duration-200`;
+                div.innerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center font-bold border border-black/10 text-gray-700 shadow-sm">${s.roll}</div><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs font-semibold uppercase tracking-wider text-gray-600 status-text">${status === 'P' ? 'उपस्थित' : (status.startsWith('L') ? 'बिदा' : 'अनुपस्थित')}</div></div></div><div class="flex gap-3"><button onclick="window.toggleAtt('${s.id}', 'P', this)" class="att-btn ${pClass} ${isLocked ? 'disabled' : ''} hover:scale-105 shadow-sm">P</button><button onclick="window.toggleAtt('${s.id}', 'L', this)" class="att-btn ${lClass} ${isLocked ? 'disabled' : ''} hover:scale-105 shadow-sm">L</button></div>`;
+
+                fragment.appendChild(div);
+            });
+
+            // Single DOM update instead of one per student (FAST!)
+            grid.appendChild(fragment);
         }
 
         window.initDayAttendance = async () => {
@@ -2541,6 +2759,10 @@
                 try {
                     await deleteDoc(doc(db, "attendance", dateKey));
 
+                    // PERFORMANCE: Clear cache after delete
+                    clearCache('todayAttendance');
+                    clearCache('dashboardStats');
+
                     // UI Feedback - unlock the day
                     currentDayHasUnsavedChanges = false;
                     currentDayIsLocked = false;
@@ -2585,6 +2807,10 @@
 
             try {
                 await setDoc(doc(db, "attendance", dateKey), localAttendanceBuffer, { merge: true });
+
+                // PERFORMANCE: Clear cache after save so next load gets fresh data
+                clearCache('todayAttendance');
+                clearCache('dashboardStats');
 
                 // Update monthly summary (AM + AT calculation)
                 updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
@@ -2664,22 +2890,45 @@
             let selectedClass = document.getElementById('dash-class-select') ? document.getElementById('dash-class-select').value : 'all';
             let selectedSec = document.getElementById('dash-sec-select') ? document.getElementById('dash-sec-select').value : 'all';
 
+            const cacheKey = `dashboard-${selectedClass}-${selectedSec}-${dateKey}`;
+
+            // CHECK CACHE FIRST for instant load
+            const cached = getCacheData('dashboardStats');
+            if (cached && cached.cacheKey === cacheKey) {
+                console.log('⚡ Using cached dashboard data for instant render');
+                renderDashboardStats(cached.stats);
+                return;
+            }
+
+            // Show loading state
+            setLoadingState('dashboard', true);
             document.getElementById('dash-present').innerText = '-';
             document.getElementById('dash-absent').innerText = '-';
             const listContainer = document.getElementById('dash-absent-list');
             listContainer.innerHTML = '<p class="text-gray-400 italic animate-pulse">Loading...</p>';
 
             try {
-                // OPTIMIZED: Cache-first for instant offline loading
-                const snap = await getDoc(doc(db, "attendance", dateKey));
+                // OPTIMIZED: Fetch with timeout to prevent indefinite hangs
+                const snap = await Promise.race([
+                    getDoc(doc(db, "attendance", dateKey)),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+                ]);
+
                 let present = 0, absent = 0; let absentNames = [];
 
                 if (snap.exists()) {
                     const data = snap.data();
                     if (data.isHoliday) {
-                        listContainer.innerHTML = '<p class="text-purple-600 font-bold">आज बिदा हो</p>';
-                        document.getElementById('dash-present').innerText = '0';
-                        document.getElementById('dash-absent').innerText = '0';
+                        const stats = {
+                            present: 0,
+                            absent: 0,
+                            absentNames: [],
+                            isHoliday: true
+                        };
+                        renderDashboardStats(stats);
+
+                        // Cache the result
+                        setCacheData('dashboardStats', { stats, cacheKey });
                         return;
                     }
 
@@ -2706,28 +2955,56 @@
                             absentNames.push(`${s.name} (${s.class}-${s.section})`);
                         }
                     });
+
+                    const stats = {
+                        present,
+                        absent,
+                        absentNames,
+                        isHoliday: false
+                    };
+
+                    renderDashboardStats(stats);
+
+                    // Cache the result
+                    setCacheData('dashboardStats', { stats, cacheKey });
                 } else {
                     // No data for today yet
-                    document.getElementById('dash-present').innerText = '0';
-                    document.getElementById('dash-absent').innerText = '0';
-                    listContainer.innerHTML = '<p class="text-gray-400 italic">आजको हाजिरी अझै भएको छैन</p>';
-                    return;
-                }
+                    const stats = {
+                        present: 0,
+                        absent: 0,
+                        absentNames: [],
+                        noData: true
+                    };
+                    renderDashboardStats(stats);
 
-                document.getElementById('dash-present').innerText = present;
-                document.getElementById('dash-absent').innerText = absent;
-
-                if (absentNames.length > 0) {
-                    listContainer.innerHTML = absentNames.map(name => `<div class="border-b pb-1 border-gray-100"><i class="fas fa-times-circle text-red-400 mr-2"></i>${name}</div>`).join('');
-                } else {
-                    listContainer.innerHTML = present > 0 ? '<p class="text-green-600 italic">सबै उपस्थित छन्!</p>' : '<p class="text-gray-400 italic">हाजिरी भएको छैन</p>';
+                    // Cache the result
+                    setCacheData('dashboardStats', { stats, cacheKey });
                 }
             } catch (e) {
                 console.log("Dashboard Load Error:", e);
-                // Show friendly offline message
-                document.getElementById('dash-present').innerText = '?';
-                document.getElementById('dash-absent').innerText = '?';
-                listContainer.innerHTML = '<p class="text-yellow-600 italic"><i class="fas fa-wifi-slash mr-2"></i>Offline - आज को डाटा उपलब्ध छैन</p>';
+                document.getElementById('dash-present').innerText = '0';
+                document.getElementById('dash-absent').innerText = '0';
+                listContainer.innerHTML = '<p class="text-red-400 italic">Error loading data</p>';
+            } finally {
+                setLoadingState('dashboard', false);
+            }
+        };
+
+        // PERFORMANCE: Separate render function for dashboard stats
+        function renderDashboardStats(stats) {
+            const listContainer = document.getElementById('dash-absent-list');
+
+            document.getElementById('dash-present').innerText = stats.present;
+            document.getElementById('dash-absent').innerText = stats.absent;
+
+            if (stats.isHoliday) {
+                listContainer.innerHTML = '<p class="text-purple-600 font-bold">आज बिदा हो</p>';
+            } else if (stats.noData) {
+                listContainer.innerHTML = '<p class="text-gray-400 italic">आजको हाजिरी अझै भएको छैन</p>';
+            } else if (stats.absentNames.length > 0) {
+                listContainer.innerHTML = stats.absentNames.map(name => `<div class="border-b pb-1 border-gray-100"><i class="fas fa-times-circle text-red-400 mr-2"></i>${name}</div>`).join('');
+            } else {
+                listContainer.innerHTML = stats.present > 0 ? '<p class="text-green-600 italic">सबै उपस्थित छन्!</p>' : '<p class="text-gray-400 italic">हाजिरी भएको छैन</p>';
             }
         }
 
