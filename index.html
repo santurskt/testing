@@ -911,6 +911,10 @@
                         <button onclick="handleViewReport()"
                             class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700 transition"><i
                                 class="fas fa-eye mr-2"></i>View</button>
+                        <button onclick="refreshATSummary()"
+                            title="पुरानो हाजिरी सच्याए पछि AT (Academic Total) refresh गर्नुहोस्"
+                            class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-orange-700 transition"><i
+                                class="fas fa-sync-alt mr-1"></i>AT Refresh</button>
                     </div>
                     <button onclick="handlePrint()"
                         class="w-full bg-gray-700 text-white px-3 py-3 rounded-lg text-sm font-bold mt-2 desktop-only-print hover:bg-gray-800 transition"><i
@@ -2256,32 +2260,44 @@
 
             if (students.length === 0) { grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>'; return; }
 
-            try {
-                const snap = await getDoc(doc(db, "attendance", dateKey));
-                if (snap.exists()) {
-                    let attData = snap.data();
-                    if (attData.isHoliday) { grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`; return; }
+            // Check if offline to avoid slow Firestore timeout
+            const isOffline = !navigator.onLine;
 
-                    // Check if *any* student in this class has data in the doc
-                    const hasDataForClass = students.some(s => attData[s.id]);
+            if (isOffline) {
+                // Skip Firestore fetch when offline - load immediately
+                if (realDow === 6) {
+                    grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                } else {
+                    startBtn.classList.remove('hidden');
+                }
+            } else {
+                try {
+                    const snap = await getDoc(doc(db, "attendance", dateKey));
+                    if (snap.exists()) {
+                        let attData = snap.data();
+                        if (attData.isHoliday) { grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`; return; }
 
-                    if (hasDataForClass) {
-                        currentDayIsLocked = true;
-                        localAttendanceBuffer = attData;
-                        renderAttendanceGrid(students, attData, true);
-                        statusBar.classList.remove('hidden');
+                        // Check if *any* student in this class has data in the doc
+                        const hasDataForClass = students.some(s => attData[s.id]);
+
+                        if (hasDataForClass) {
+                            currentDayIsLocked = true;
+                            localAttendanceBuffer = attData;
+                            renderAttendanceGrid(students, attData, true);
+                            statusBar.classList.remove('hidden');
+                        } else {
+                            if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                            else startBtn.classList.remove('hidden');
+                        }
                     } else {
                         if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
                         else startBtn.classList.remove('hidden');
                     }
-                } else {
-                    if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
-                    else startBtn.classList.remove('hidden');
+                } catch (e) {
+                    // Offline fallback
+                    console.log("Offline mode or error", e);
+                    startBtn.classList.remove('hidden'); // Assume no data if error, allow start
                 }
-            } catch (e) {
-                // Offline fallback
-                console.log("Offline mode or error", e);
-                startBtn.classList.remove('hidden'); // Assume no data if error, allow start
             }
         };
 
@@ -2363,19 +2379,20 @@
 
                     Swal.fire({
                         icon: 'success',
-                        title: 'हाजिरी रेकर्ड मेटाइयो',
-                        text: 'सबै विद्यार्थी अनुपस्थित भएकोले हाजिरी record मेटाइयो। यो दिन अब खुला (unlocked) छ।',
+                        title: 'हाजिरी डिलिट भयो',
+                        text: 'सबै विद्यार्थी अनुपस्थित भएकोले हाजिरी डिलिट गरियो। यो दिन अब खुला छ।',
                         confirmButtonText: 'ठिक छ',
                         timer: 3000
                     });
 
-                    // Update monthly summary (remove this day's contribution)
-                    updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
+                    // Update monthly summary in background (non-blocking)
+                    // Note: If this fails, it doesn't affect the delete success above
+                    updateMonthlySummary(y, m, cls).catch(err => console.warn("[INFO] Summary update failed (delete was successful):", err));
                 } catch (e) {
                     console.error("Delete error:", e);
                     Swal.fire({
                         icon: 'error',
-                        title: 'त्रुटि!',
+                        title: 'डिलिट असफल!',
                         text: 'Record delete गर्न सकिएन। ' + (navigator.onLine ? 'पुन: प्रयास गर्नुहोस्।' : 'कृपया अनलाइन हुँदा delete गर्नुहोस्।'),
                         confirmButtonText: 'ठिक छ'
                     });
@@ -2409,7 +2426,7 @@
                 Swal.fire({
                     icon: 'info',
                     title: 'अफलाइन सुरक्षित भयो',
-                    html: 'तपाईंको डाटा स्थानीय रूपमा सुरक्षित भयो।<br><small>इन्टरनेट जडान हुँदा स्वतः sync हुनेछ।</small>',
+                    html: '<div class="text-center"><i class="fas fa-wifi-slash text-yellow-600 text-3xl mb-2"></i><p class="text-gray-700 font-medium mb-1">हाजिरी अफलाइनमा सुरक्षित भयो!</p><small class="text-gray-500">इन्टरनेट जडान भएपछि स्वतः sync हुनेछ।</small></div>',
                     confirmButtonText: 'ठिक छ',
                     timer: 3000
                 });
@@ -2588,6 +2605,84 @@
             }
         }
 
+        // --- AT SUMMARY REFRESH FUNCTION ---
+        window.refreshATSummary = async () => {
+            if (!navigator.onLine) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'इन्टरनेट आवश्यक छ',
+                    text: 'AT refresh गर्न इन्टरनेट जडान चाहिन्छ।',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
+
+            const cls = document.getElementById('rep-class').value;
+            const startYear = parseInt(document.getElementById('rep-year').value);
+            const startMonth = parseInt(document.getElementById('rep-month').value);
+            const currentBS = dateConverter.adToBs(new Date());
+
+            const result = await Swal.fire({
+                title: 'AT Summary Refresh?',
+                html: `<b>Class ${cls}</b> को लागि <br><b>${MONTHS[startMonth - 1]} ${startYear}</b> देखि अहिलेसम्मको <br>summary recalculate गर्ने हो?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'हो, refresh गर्नुहोस्',
+                cancelButtonText: 'रद्द गर्नुहोस्',
+                confirmButtonColor: '#f97316'
+            });
+
+            if (!result.isConfirmed) return;
+
+            // Show progress
+            Swal.fire({
+                title: 'Processing...',
+                html: 'Summary recalculating गर्दै...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                let year = startYear;
+                let month = startMonth;
+                let count = 0;
+
+                // Loop through all months from startYear/startMonth to current
+                while (year < currentBS.year || (year === currentBS.year && month <= currentBS.month)) {
+                    await updateMonthlySummary(year, month, cls);
+                    count++;
+
+                    // Move to next month
+                    month++;
+                    if (month > 12) {
+                        month = 1;
+                        year++;
+                    }
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    html: `<b>${count} महिना</b> को summary successfully recalculate भयो!<br><small>अब report फेरि generate गर्नुहोस्।</small>`,
+                    confirmButtonText: 'ठिक छ',
+                    timer: 4000
+                });
+
+                // Auto-refresh current report if it's attendance type
+                if (document.getElementById('report-type').value === 'list') {
+                    handleViewReport();
+                }
+            } catch (e) {
+                console.error('AT Refresh Error:', e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि!',
+                    text: 'Refresh गर्न सकिएन: ' + e.message,
+                    confirmButtonText: 'ठिक छ'
+                });
+            }
+        };
+
         // --- REPORTS ---
         window.generateReport = async () => {
             const cls = document.getElementById('rep-class').value;
@@ -2699,7 +2794,7 @@
 
                 // Use pre-calculated AM and AT from monthly_summaries
                 const studentSummary = sessionData[s.id] || { am: presentCount, at: presentCount };
-                const monthTotal = studentSummary.am || presentCount; // AM from summary
+                const monthTotal = presentCount; // Use actual count from current month data
                 const sessionTotal = studentSummary.at || presentCount; // AT from summary
 
                 html += `<tr><td class="border p-1 text-center">${s.roll}</td><td class="border p-1 text-left pl-2">${s.name}</td>${rowCells}<td class="border p-1 text-center font-bold bg-green-50">${monthTotal}</td>`;
