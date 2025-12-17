@@ -2085,7 +2085,15 @@
                 mobileBtns[navBtnMap[id]].classList.add('active');
             }
 
-            if (id === 'attendance') loadAtt();
+            // Prevent concurrent loads that cause freezing
+            if (id === 'attendance') {
+                // Cancel any pending loads and start fresh
+                if (window.loadAttInProgress) {
+                    console.log('Load already in progress, skipping...');
+                    return;
+                }
+                loadAtt();
+            }
             if (id === 'dashboard') updateDashboard();
         };
 
@@ -2198,103 +2206,116 @@
 
         // --- ATTENDANCE CORE ---
         window.loadAtt = async () => {
-            let cls = document.getElementById('att-class').value;
-            let sec = document.getElementById('att-sec').value;
-
-            // Check access if forced via url/console
-            if (currentUserData.role !== 'admin') {
-                const assigned = currentUserData.classes || [];
-                const hasWhole = assigned.includes(cls);
-                const hasSec = assigned.includes(`${cls}-${sec}`);
-                if (!hasWhole && !hasSec && sec !== 'all') {
-                    filterSectionDropdown('att-class', 'att-sec');
-                    sec = document.getElementById('att-sec').value;
-                }
-            }
-
-            const y = parseInt(document.getElementById('att-y').value);
-            const m = parseInt(document.getElementById('att-m').value);
-            const d = parseInt(document.getElementById('att-d').value);
-            const dateKey = `${y}-${m}-${d}`;
-
-            if (currentDayHasUnsavedChanges) {
-                const result = await Swal.fire({
-                    title: 'चेतावनी!',
-                    text: 'अहिले गरिएको परिवर्तन सेभ भएको छैन। बाहिर निस्कने हो र ?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'हो, बाहिर निस्कने',
-                    cancelButtonText: 'रद्द गर्नुहोस्',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280'
-                });
-                if (!result.isConfirmed) return;
-                currentDayHasUnsavedChanges = false;
-                document.getElementById('att-save-footer').classList.add('hidden');
-            }
-
-            const monthDays = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 32;
-            if (d > monthDays) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'त्रुटि',
-                    text: 'यो महिनामा यति गते छैन!',
-                    confirmButtonText: 'ठिक छ'
-                });
+            // Prevent concurrent executions
+            if (window.loadAttInProgress) {
+                console.log('loadAtt already running, skipping duplicate call');
                 return;
             }
-            const dayCheck = dateConverter.bsToAd(y, m, d);
-            const realDow = dayCheck ? dayCheck.getDay() : 0;
-            document.getElementById('day-name').innerText = DAYS[realDow] + (realDow === 6 ? " (Sat)" : "");
 
-            const grid = document.getElementById('att-grid');
-            const startBtn = document.getElementById('start-att-btn');
-            const statusBar = document.getElementById('att-lock-status-bar');
-            grid.innerHTML = '';
-
-            localAttendanceBuffer = {}; currentDayIsLocked = false;
-            statusBar.classList.add('hidden'); startBtn.classList.add('hidden');
-
-            let students = studentsData.filter(s => s.class == cls);
-            if (sec !== 'all') students = students.filter(s => s.section == sec);
-            students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
-
-            if (students.length === 0) { grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>'; return; }
-
-            // OPTIMIZED: Try cache first for instant load (offline or online)
             try {
-                const snap = await getDoc(doc(db, "attendance", dateKey));
-                if (snap.exists()) {
-                    let attData = snap.data();
-                    if (attData.isHoliday) {
-                        grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
-                        return;
+                window.loadAttInProgress = true;
+
+                let cls = document.getElementById('att-class').value;
+                let sec = document.getElementById('att-sec').value;
+
+                // Check access if forced via url/console
+                if (currentUserData.role !== 'admin') {
+                    const assigned = currentUserData.classes || [];
+                    const hasWhole = assigned.includes(cls);
+                    const hasSec = assigned.includes(`${cls}-${sec}`);
+                    if (!hasWhole && !hasSec && sec !== 'all') {
+                        filterSectionDropdown('att-class', 'att-sec');
+                        sec = document.getElementById('att-sec').value;
                     }
+                }
 
-                    // Check if *any* student in this class has data in the doc
-                    const hasDataForClass = students.some(s => attData[s.id]);
+                const y = parseInt(document.getElementById('att-y').value);
+                const m = parseInt(document.getElementById('att-m').value);
+                const d = parseInt(document.getElementById('att-d').value);
+                const dateKey = `${y}-${m}-${d}`;
 
-                    if (hasDataForClass) {
-                        currentDayIsLocked = true;
-                        localAttendanceBuffer = attData;
-                        renderAttendanceGrid(students, attData, true);
-                        statusBar.classList.remove('hidden');
+                if (currentDayHasUnsavedChanges) {
+                    const result = await Swal.fire({
+                        title: 'चेतावनी!',
+                        text: 'अहिले गरिएको परिवर्तन सेभ भएको छैन। बाहिर निस्कने हो र ?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'हो, बाहिर निस्कने',
+                        cancelButtonText: 'रद्द गर्नुहोस्',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280'
+                    });
+                    if (!result.isConfirmed) return;
+                    currentDayHasUnsavedChanges = false;
+                    document.getElementById('att-save-footer').classList.add('hidden');
+                }
+
+                const monthDays = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 32;
+                if (d > monthDays) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि',
+                        text: 'यो महिनामा यति गते छैन!',
+                        confirmButtonText: 'ठिक छ'
+                    });
+                    return;
+                }
+                const dayCheck = dateConverter.bsToAd(y, m, d);
+                const realDow = dayCheck ? dayCheck.getDay() : 0;
+                document.getElementById('day-name').innerText = DAYS[realDow] + (realDow === 6 ? " (Sat)" : "");
+
+                const grid = document.getElementById('att-grid');
+                const startBtn = document.getElementById('start-att-btn');
+                const statusBar = document.getElementById('att-lock-status-bar');
+                grid.innerHTML = '';
+
+                localAttendanceBuffer = {}; currentDayIsLocked = false;
+                statusBar.classList.add('hidden'); startBtn.classList.add('hidden');
+
+                let students = studentsData.filter(s => s.class == cls);
+                if (sec !== 'all') students = students.filter(s => s.section == sec);
+                students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+                if (students.length === 0) { grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>'; return; }
+
+                // OPTIMIZED: Try cache first for instant load (offline or online)
+                try {
+                    const snap = await getDoc(doc(db, "attendance", dateKey));
+                    if (snap.exists()) {
+                        let attData = snap.data();
+                        if (attData.isHoliday) {
+                            grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
+                            return;
+                        }
+
+                        // Check if *any* student in this class has data in the doc
+                        const hasDataForClass = students.some(s => attData[s.id]);
+
+                        if (hasDataForClass) {
+                            currentDayIsLocked = true;
+                            localAttendanceBuffer = attData;
+                            renderAttendanceGrid(students, attData, true);
+                            statusBar.classList.remove('hidden');
+                        } else {
+                            // No data for this class - show start button
+                            if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                            else startBtn.classList.remove('hidden');
+                        }
                     } else {
-                        // No data for this class - show start button
+                        // Document doesn't exist
                         if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
                         else startBtn.classList.remove('hidden');
                     }
-                } else {
-                    // Document doesn't exist
+                } catch (e) {
+                    // Error fetching (could be offline or network issue)
+                    console.log("Cache fetch error (likely offline):", e);
+                    // Show start button as fallback
                     if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
                     else startBtn.classList.remove('hidden');
                 }
-            } catch (e) {
-                // Error fetching (could be offline or network issue)
-                console.log("Cache fetch error (likely offline):", e);
-                // Show start button as fallback
-                if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
-                else startBtn.classList.remove('hidden');
+            } finally {
+                // Always clear the loading flag
+                window.loadAttInProgress = false;
             }
         };
 
@@ -2524,7 +2545,29 @@
 
         window.handleViewReport = () => {
             const type = document.getElementById('report-type').value;
-            if (type === 'list') generateReport(); else if (type === 'fine') generateFineReport();
+
+            // Set print orientation based on report type
+            const printStyle = document.getElementById('print-style');
+            if (type === 'fine') {
+                // Portrait for Fine Report (narrower table)
+                printStyle.innerHTML = `
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm;
+                    }
+                `;
+            } else {
+                // Landscape for Attendance Sheet (wide table with many columns)
+                printStyle.innerHTML = `
+                    @page {
+                        size: A4 landscape;
+                        margin: 10mm;
+                    }
+                `;
+            }
+
+            if (type === 'list') generateReport();
+            else if (type === 'fine') generateFineReport();
         };
 
         window.handlePrint = () => {
@@ -2738,8 +2781,16 @@
                     }
                 }
             } catch (e) {
-                console.log("Summary fetch error (offline?):", e);
-                showATColumn = false; // Hide AT in offline if summary unavailable
+                console.log("Summary fetch error (likely offline):", e);
+                // Even offline, we can still show report without AT column
+                // Calculate AM (present count) from monthData instead
+                if (!navigator.onLine) {
+                    console.log("Offline mode: Will calculate AM from cached attendance data");
+                    showATColumn = false; // Hide AT column offline
+                    // sessionData will be calculated below from monthData
+                } else {
+                    showATColumn = false;
+                }
             }
 
             let holidayFooter = ""; if (Object.keys(holidayMap).length > 0) { const holidays = Object.entries(holidayMap).map(([d, title]) => `${d}=${title}`).join(', '); holidayFooter = `<div class="mt-2 text-xs border-t pt-1"><b>बिदा विवरण:</b> ${holidays}</div>`; }
@@ -2789,10 +2840,11 @@
                 }
                 totalMonthPresent += presentCount;
 
-                // Use pre-calculated AM and AT from monthly_summaries
-                const studentSummary = sessionData[s.id] || { am: presentCount, at: presentCount };
-                const monthTotal = presentCount; // Use actual count from current month data
-                const sessionTotal = studentSummary.at || presentCount; // AT from summary
+                // Use pre-calculated AM and AT from monthly_summaries if available
+                // Otherwise calculate from current data (offline fallback)
+                const studentSummary = sessionData[s.id];
+                const monthTotal = studentSummary?.am || presentCount; // Prefer summary AM, fallback to counted
+                const sessionTotal = studentSummary?.at || presentCount; // AT from summary
 
                 html += `<tr><td class="border p-1 text-center">${s.roll}</td><td class="border p-1 text-left pl-2">${s.name}</td>${rowCells}<td class="border p-1 text-center font-bold bg-green-50">${monthTotal}</td>`;
                 if (showATColumn) html += `<td class="border p-1 text-center font-bold bg-blue-50">${sessionTotal}</td>`;
