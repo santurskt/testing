@@ -902,9 +902,9 @@
                                 class="w-full border p-2 rounded-lg text-sm bg-gray-50 outline-none"></select>
                         </div>
                     </div>
-                    <div class="flex gap-3 mb-2">
+                    <div class="flex flex-wrap gap-2 mb-2">
                         <select id="report-type"
-                            class="border p-2 rounded-lg text-sm flex-1 bg-gray-50 outline-none font-medium">
+                            class="border p-2 rounded-lg text-sm flex-1 min-w-[180px] bg-gray-50 outline-none font-medium">
                             <option value="list">Attendance Sheet (Monthly)</option>
                             <option value="fine">Fine & Payment Report</option>
                         </select>
@@ -913,8 +913,9 @@
                                 class="fas fa-eye mr-2"></i>View</button>
                         <button onclick="refreshATSummary()"
                             title="पुरानो हाजिरी सच्याए पछि AT (Academic Total) refresh गर्नुहोस्"
-                            class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-orange-700 transition"><i
-                                class="fas fa-sync-alt mr-1"></i>AT Refresh</button>
+                            class="bg-orange-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold shadow hover:bg-orange-700 transition whitespace-nowrap"><i
+                                class="fas fa-sync-alt mr-1"></i><span class="hidden sm:inline">AT
+                            </span>Refresh</button>
                     </div>
                     <button onclick="handlePrint()"
                         class="w-full bg-gray-700 text-white px-3 py-3 rounded-lg text-sm font-bold mt-2 desktop-only-print hover:bg-gray-800 transition"><i
@@ -2088,6 +2089,9 @@
             if (id === 'dashboard') updateDashboard();
         };
 
+        // Alias for HTML compatibility (navigateSection called in onclick handlers)
+        window.navigateSection = window.showSection;
+
         window.handleLogin = (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -2200,12 +2204,9 @@
             // Check access if forced via url/console
             if (currentUserData.role !== 'admin') {
                 const assigned = currentUserData.classes || [];
-                // If user doesn't have class access, fallback or stop?
-                // The dropdown filters handle UI, but logic check:
                 const hasWhole = assigned.includes(cls);
                 const hasSec = assigned.includes(`${cls}-${sec}`);
                 if (!hasWhole && !hasSec && sec !== 'all') {
-                    // Try to fix selection automatically
                     filterSectionDropdown('att-class', 'att-sec');
                     sec = document.getElementById('att-sec').value;
                 }
@@ -2260,44 +2261,40 @@
 
             if (students.length === 0) { grid.innerHTML = '<p class="text-center p-8 text-gray-500 bg-gray-50 rounded">विद्यार्थी छैनन् (No Students Found)।</p>'; return; }
 
-            // Check if offline to avoid slow Firestore timeout
-            const isOffline = !navigator.onLine;
+            // OPTIMIZED: Try cache first for instant load (offline or online)
+            try {
+                const snap = await getDoc(doc(db, "attendance", dateKey));
+                if (snap.exists()) {
+                    let attData = snap.data();
+                    if (attData.isHoliday) {
+                        grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
+                        return;
+                    }
 
-            if (isOffline) {
-                // Skip Firestore fetch when offline - load immediately
-                if (realDow === 6) {
-                    grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
-                } else {
-                    startBtn.classList.remove('hidden');
-                }
-            } else {
-                try {
-                    const snap = await getDoc(doc(db, "attendance", dateKey));
-                    if (snap.exists()) {
-                        let attData = snap.data();
-                        if (attData.isHoliday) { grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${attData.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`; return; }
+                    // Check if *any* student in this class has data in the doc
+                    const hasDataForClass = students.some(s => attData[s.id]);
 
-                        // Check if *any* student in this class has data in the doc
-                        const hasDataForClass = students.some(s => attData[s.id]);
-
-                        if (hasDataForClass) {
-                            currentDayIsLocked = true;
-                            localAttendanceBuffer = attData;
-                            renderAttendanceGrid(students, attData, true);
-                            statusBar.classList.remove('hidden');
-                        } else {
-                            if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
-                            else startBtn.classList.remove('hidden');
-                        }
+                    if (hasDataForClass) {
+                        currentDayIsLocked = true;
+                        localAttendanceBuffer = attData;
+                        renderAttendanceGrid(students, attData, true);
+                        statusBar.classList.remove('hidden');
                     } else {
+                        // No data for this class - show start button
                         if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
                         else startBtn.classList.remove('hidden');
                     }
-                } catch (e) {
-                    // Offline fallback
-                    console.log("Offline mode or error", e);
-                    startBtn.classList.remove('hidden'); // Assume no data if error, allow start
+                } else {
+                    // Document doesn't exist
+                    if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                    else startBtn.classList.remove('hidden');
                 }
+            } catch (e) {
+                // Error fetching (could be offline or network issue)
+                console.log("Cache fetch error (likely offline):", e);
+                // Show start button as fallback
+                if (realDow === 6) grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                else startBtn.classList.remove('hidden');
             }
         };
 
