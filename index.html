@@ -2066,14 +2066,7 @@
 
 
         // --- GENERIC FUNCTIONS (Existing Logic) ---
-        window.navigateSection = (sectionId) => {
-            if (currentDayHasUnsavedChanges) {
-                if (!confirm("तपाईंको हाजिरी सेभ भएको छैन! के तपाईं डाटा डिस्कार्ड (Discard) गरेर बाहिर निस्कन चाहनुहुन्छ?")) return;
-                currentDayHasUnsavedChanges = false;
-                document.getElementById('att-save-footer').classList.add('hidden');
-            }
-            showSection(sectionId);
-        }
+        // Note: navigateSection is defined below (line ~2345) with full debounce logic
 
         async function loadSettings() {
             try {
@@ -2342,7 +2335,30 @@
         };
 
         // Alias for HTML compatibility (navigateSection called in onclick handlers)
-        window.navigateSection = function (sectionId) {
+        window.navigateSection = async function (sectionId) {
+            // ✅ CHECK FOR UNSAVED CHANGES FIRST (before any navigation logic)
+            if (currentDayHasUnsavedChanges) {
+                const result = await Swal.fire({
+                    title: 'चेतावनी!',
+                    text: 'तपाईंको हाजिरी सेभ भएको छैन! के तपाईं डाटा डिस्कार्ड (Discard) गरेर बाहिर निस्कन चाहनुहुन्छ?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'हो, बाहिर निस्कने',
+                    cancelButtonText: 'रद्द गर्नुहोस्',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280'
+                });
+
+                if (!result.isConfirmed) {
+                    return; // User cancelled - stay on current tab
+                }
+
+                // User confirmed - reset unsaved changes state
+                currentDayHasUnsavedChanges = false;
+                const saveFooter = document.getElementById('att-save-footer');
+                if (saveFooter) saveFooter.classList.add('hidden');
+            }
+
             // PERFORMANCE: Debounce rapid navigation clicks
             if (navigationTimeout) {
                 clearTimeout(navigationTimeout);
@@ -2712,12 +2728,25 @@
         }
 
         window.initDayAttendance = async () => {
+            const startBtn = document.getElementById('start-att-btn');
+
+            // Hide start button FIRST (prevents race condition)
+            startBtn.classList.add('hidden');
+
             let cls = document.getElementById('att-class').value;
             let sec = document.getElementById('att-sec').value;
             let students = studentsData.filter(s => s.class == cls);
             if (sec !== 'all') students = students.filter(s => s.section == sec);
-            let initialData = {}; students.forEach(s => initialData[s.id] = 'A');
-            localAttendanceBuffer = initialData; document.getElementById('start-att-btn').classList.add('hidden'); renderAttendanceGrid(students, initialData, false); currentDayHasUnsavedChanges = true; document.getElementById('att-save-footer').classList.remove('hidden');
+
+            let initialData = {};
+            students.forEach(s => initialData[s.id] = 'A');
+            localAttendanceBuffer = initialData;
+
+            // Render grid AFTER hiding button
+            renderAttendanceGrid(students, initialData, false);
+
+            currentDayHasUnsavedChanges = true;
+            document.getElementById('att-save-footer').classList.remove('hidden');
         };
 
         window.toggleAtt = (sid, type, btnElement) => {
