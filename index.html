@@ -2000,6 +2000,8 @@
 
         // --- PAYMENT POPUP LOGIC ---
         let currentPayStudent = null;
+        let currentPaymentMonth = null; // Track which month's payment is being collected
+        let currentPaymentYear = null;
         window.openPayModal = async (sid, name) => {
             currentPayStudent = { id: sid, name: name };
             document.getElementById('pay-modal-title').innerText = name;
@@ -2070,14 +2072,18 @@
             }
 
             try {
+                // BUG FIX: Use report month/year if available, otherwise today's date
                 const todayBS = dateConverter.adToBs(new Date());
-                const dateString = `${todayBS.year}-${todayBS.month}-${todayBS.day}`;
+                const paymentYear = currentPaymentYear || todayBS.year;
+                const paymentMonth = currentPaymentMonth || todayBS.month;
+                const paymentDay = todayBS.day; // Day is always today
+                const dateString = `${paymentYear}-${paymentMonth}-${paymentDay}`;
 
                 await addDoc(collection(db, "collections"), {
                     date: dateString,
-                    year: todayBS.year,
-                    month: todayBS.month,
-                    day: todayBS.day,
+                    year: paymentYear,
+                    month: paymentMonth,
+                    day: paymentDay,
                     amount: amount,
                     studentId: currentPayStudent.id,
                     studentName: currentPayStudent.name,
@@ -2220,6 +2226,10 @@
             const m = d.month; // Current Month
 
             content.innerHTML = `<div class="p-6 text-center"><i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i><p class="mt-2 text-gray-500">Generating Report Card...</p></div>`;
+
+            // BUG FIX: Track current report month/year for payment collection
+            currentPaymentYear = y;
+            currentPaymentMonth = m;
 
             try {
                 // 1. Fetch Attendance
@@ -2880,7 +2890,14 @@
                 const cached = getCacheData('todayAttendance');
                 if (cached && cached.dateKey === dateKey && cached.cls === cls && cached.sec === sec) {
                     console.log('⚡ Using cached attendance data for instant render');
-                    renderAttendanceGridOptimized(cached.students, cached.attData, cached.isLocked);
+
+                    // BUG FIX #1: Only render grid if cache has actual attendance data
+                    // Don't render student list if it's just "Start Attendance" state
+                    const hasAttendanceData = cached.isLocked || (cached.attData && Object.keys(cached.attData).length > 0);
+
+                    if (hasAttendanceData) {
+                        renderAttendanceGridOptimized(cached.students, cached.attData, cached.isLocked);
+                    }
 
                     // Update UI states
                     const realDow = cached.realDow;
@@ -2889,6 +2906,15 @@
                     if (cached.isHoliday) {
                         const grid = document.getElementById('att-grid');
                         grid.innerHTML = `<div class="p-8 text-center bg-purple-50 rounded text-xl border border-purple-200"><div class="text-purple-700 font-bold mb-1"><i class="fas fa-umbrella-beach mr-2"></i>${cached.holidayTitle || "Holiday"}</div><div class="text-sm text-purple-500">(आज बिदा हो)</div></div>`;
+                    } else if (!hasAttendanceData) {
+                        // Cache exists but no attendance data - show appropriate message
+                        const grid = document.getElementById('att-grid');
+                        const startBtn = document.getElementById('start-att-btn');
+                        if (realDow === 6) {
+                            grid.innerHTML = `<div class="p-8 text-center text-blue-600 font-bold bg-blue-50 rounded">आज शनिबार हो।</div>`;
+                        } else {
+                            startBtn.classList.remove('hidden');
+                        }
                     }
 
                     setLoadingState('attendance', false);
@@ -3763,6 +3789,10 @@
 
             const rate = schoolSettings.classFines?.[cls] || schoolSettings.fineRate || 10;
             let grandTotalFine = 0, grandTotalPaid = 0, grandTotalDue = 0;
+
+            // BUG FIX: Track current report month/year for payment collection
+            currentPaymentYear = y;
+            currentPaymentMonth = m;
 
             let html = `
                 <div class="flex justify-between items-center mb-4 no-print">
