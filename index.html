@@ -1749,7 +1749,10 @@
                 let html = '';
                 messages.forEach(msg => {
                     const isRead = msg.readBy && msg.readBy.includes(userId);
-                    const date = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleDateString('ne-NP') : '';
+                    // Convert timestamp to Nepali BS date
+                    const dateAD = msg.timestamp ? new Date(msg.timestamp.seconds * 1000) : null;
+                    const dateBS = dateAD ? dateConverter.adToBs(dateAD) : null;
+                    const dateStr = dateBS ? `${dateBS.year}-${dateBS.month}-${dateBS.day}` : '';
 
                     html += `
                         <div class="p-4 rounded-lg border ${isRead ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300'} hover:shadow-md transition cursor-pointer" 
@@ -1759,7 +1762,7 @@
                                     ${!isRead ? '<span class="w-2 h-2 bg-blue-600 rounded-full"></span>' : ''}
                                     <span class="font-bold text-gray-800">${msg.subject || 'सूचना'}</span>
                                 </div>
-                                <span class="text-[10px] text-gray-500">${date}</span>
+                                <span class="text-[10px] text-gray-500">${dateStr}</span>
                             </div>
                             <p class="text-sm text-gray-700 ${isRead ? '' : 'font-medium'}">${msg.message}</p>
                             <div class="mt-2 text-[10px] text-gray-500">
@@ -2036,10 +2039,12 @@
                 } else {
                     let html = '';
                     payments.forEach(d => {
+                        // Display transaction date (actual payment date) if available, otherwise use date field
+                        const displayDate = d.transactionDate || d.date;
                         html += `
                             <div class="flex justify-between items-center p-3 border-b hover:bg-gray-50 last:border-0">
                                 <div>
-                                    <div class="font-bold text-gray-700 text-sm">${d.date}</div>
+                                    <div class="font-bold text-gray-700 text-sm">${displayDate}</div>
                                     <div class="text-[10px] text-gray-500">Rec: ${d.teacherName}</div>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -2072,15 +2077,23 @@
             }
 
             try {
-                // BUG FIX: Use report month/year if available, otherwise today's date
+                // Get today's date for transaction date display
                 const todayBS = dateConverter.adToBs(new Date());
+
+                // Use report month/year if available (for ledger assignment), otherwise today's date
                 const paymentYear = currentPaymentYear || todayBS.year;
                 const paymentMonth = currentPaymentMonth || todayBS.month;
                 const paymentDay = todayBS.day; // Day is always today
+
+                // Date string for ledger assignment (may be different month than transaction)
                 const dateString = `${paymentYear}-${paymentMonth}-${paymentDay}`;
 
+                // Transaction date (always today's date for display)
+                const transactionDate = `${todayBS.year}-${todayBS.month}-${todayBS.day}`;
+
                 await addDoc(collection(db, "collections"), {
-                    date: dateString,
+                    date: dateString, // Ledger month date
+                    transactionDate: transactionDate, // Actual payment date
                     year: paymentYear,
                     month: paymentMonth,
                     day: paymentDay,
