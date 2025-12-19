@@ -405,6 +405,27 @@
         </div>
     </div>
 
+    <!-- Messages Modal -->
+    <div id="messages-modal" class="modal-overlay hidden">
+        <div class="modal-content p-5 max-w-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-gray-800 text-xl"><i class="fas fa-envelope text-blue-600 mr-2"></i>खबर /
+                    Messages</h3>
+                <button onclick="closeMessagesModal()" class="text-gray-400 hover:text-red-500 transition"><i
+                        class="fas fa-times text-2xl"></i></button>
+            </div>
+
+            <div id="messages-container" class="space-y-3 max-h-96 overflow-y-auto">
+                <p class="text-center text-gray-400 py-8">Loading messages...</p>
+            </div>
+
+            <button onclick="markAllAsRead()"
+                class="mt-4 w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-bold text-sm hover:bg-gray-200 transition">
+                <i class="fas fa-check-double mr-1"></i> सबै पढिसकिएको
+            </button>
+        </div>
+    </div>
+
     <!-- Student Payment Popup (Add/Edit) -->
     <div id="student-pay-modal" class="modal-overlay hidden">
         <div class="modal-content p-5">
@@ -556,6 +577,12 @@
             <div class="flex items-center gap-3">
                 <span id="nepali-date"
                     class="text-sm font-bold text-yellow-300 hidden sm:block bg-white/10 px-2 py-1 rounded"></span>
+                <button onclick="openMessagesModal()"
+                    class="relative bg-blue-500/80 hover:bg-blue-600 p-2 rounded-lg text-xs shadow transition backdrop-blur-sm mr-2">
+                    <i class="fas fa-envelope fa-lg"></i>
+                    <span id="msg-badge"
+                        class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
+                </button>
                 <button onclick="logout()"
                     class="bg-red-500/80 hover:bg-red-600 p-2 rounded-lg text-xs shadow transition backdrop-blur-sm"><i
                         class="fas fa-sign-out-alt fa-lg"></i></button>
@@ -733,6 +760,49 @@
                     <div id="teacher-list-container" class="space-y-2 max-h-60 overflow-y-auto text-sm"></div>
                     <button onclick="loadTeachers()" class="text-xs text-blue-600 underline mt-2">Refresh List</button>
                 </div>
+
+                <!-- Admin: Send Messages to Teachers -->
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 class="font-bold text-lg text-green-800"><i class="fas fa-paper-plane mr-2"></i>शिक्षकलाई
+                            सन्देश पठाउनुहोस्</h3>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-500 font-bold uppercase block mb-1">विषय (Subject)</label>
+                            <input id="msg-subject" type="text" placeholder="सूचना"
+                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-bold uppercase block mb-1">सन्देश (Message)</label>
+                            <textarea id="msg-body" rows="4" placeholder="आफ्नो सन्देश यहाँ लेख्नुहोस्..."
+                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none"></textarea>
+                        </div>
+                        <div class="flex gap-3 items-center">
+                            <div class="flex-1">
+                                <label class="text-xs text-gray-500 font-bold uppercase block mb-1">प्राप्तकर्ता
+                                    (Recipients)</label>
+                                <select id="msg-recipients" multiple
+                                    class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none text-sm max-h-32">
+                                    <!-- Teachers will be populated here -->
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 hover:bg-blue-100 transition">
+                                    <input type="checkbox" id="msg-send-all" class="rounded">
+                                    <span class="text-sm font-bold text-blue-700">सबैलाई पठाउने</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button onclick="sendMessage()"
+                            class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow hover:bg-green-700 transition">
+                            <i class="fas fa-paper-plane mr-2"></i>सन्देश पठाउनुहोस्
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Other Admin Settings -->
                 <div class="bg-white p-5 rounded-xl shadow-sm">
                     <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">विद्यालय सेटिङ</h3>
@@ -932,7 +1002,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, getDocs, query, where, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, updateDoc, deleteDoc, writeBatch, deleteField, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, getDocs, query, where, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, updateDoc, deleteDoc, writeBatch, deleteField, addDoc, orderBy, serverTimestamp, arrayUnion, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD_ERgjNFwN2BEQfsd4u80mAge5d-3e2k4",
@@ -1288,6 +1358,10 @@
             await loadStudents();
             showSection('dashboard');
             document.getElementById('loader').classList.add('hidden');
+
+            // Setup messaging system
+            setupMessagesListener();
+            updateUnreadCount();
         }
 
         // --- ACCESS CONTROL: UPDATE DROPDOWNS ---
@@ -1611,6 +1685,11 @@
                         </div>
                     </div>`;
             });
+
+            // Populate message recipients for Admin
+            if (currentUserData.role === 'admin') {
+                populateMessageRecipients();
+            }
         }
         window.deleteTeacher = async (uid) => {
             await deleteDoc(doc(db, "users", uid));
@@ -1622,6 +1701,261 @@
                 showConfirmButton: false
             });
             loadTeachers();
+        }
+
+        // --- MESSAGING SYSTEM ---
+        let unreadMessagesCount = 0;
+        let messagesListener = null;
+
+        window.openMessagesModal = async () => {
+            document.getElementById('messages-modal').classList.remove('hidden');
+            await loadMessages();
+        };
+
+        window.closeMessagesModal = () => {
+            document.getElementById('messages-modal').classList.add('hidden');
+        };
+
+        async function loadMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '<p class="text-center text-gray-400 py-8">Loading...</p>';
+
+            try {
+                const userId = auth.currentUser.uid;
+                const q = query(
+                    collection(db, "messages"),
+                    orderBy("timestamp", "desc"),
+                    limit(50)
+                );
+
+                const snap = await getDocs(q);
+                let messages = [];
+
+                snap.forEach(doc => {
+                    const msg = doc.data();
+                    msg.id = doc.id;
+
+                    // Show message if: sent to all OR sent to this specific user
+                    if (msg.to === 'all' || (msg.to && msg.to.includes(userId))) {
+                        messages.push(msg);
+                    }
+                });
+
+                if (messages.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-8 italic">कुनै सन्देश छैन।</p>';
+                    return;
+                }
+
+                let html = '';
+                messages.forEach(msg => {
+                    const isRead = msg.readBy && msg.readBy.includes(userId);
+                    const date = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleDateString('ne-NP') : '';
+
+                    html += `
+                        <div class="p-4 rounded-lg border ${isRead ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300'} hover:shadow-md transition cursor-pointer" 
+                             onclick="markMessageAsRead('${msg.id}')">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    ${!isRead ? '<span class="w-2 h-2 bg-blue-600 rounded-full"></span>' : ''}
+                                    <span class="font-bold text-gray-800">${msg.subject || 'सूचना'}</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500">${date}</span>
+                            </div>
+                            <p class="text-sm text-gray-700 ${isRead ? '' : 'font-medium'}">${msg.message}</p>
+                            <div class="mt-2 text-[10px] text-gray-500">
+                                <i class="fas fa-user-shield mr-1"></i>From: Admin
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            } catch (e) {
+                console.error("Load messages error:", e);
+                container.innerHTML = '<p class="text-center text-red-500 py-8">Error loading messages</p>';
+            }
+        }
+
+        window.markMessageAsRead = async (messageId) => {
+            try {
+                const userId = auth.currentUser.uid;
+                const msgRef = doc(db, "messages", messageId);
+                const msgSnap = await getDoc(msgRef);
+
+                if (msgSnap.exists()) {
+                    const currentReadBy = msgSnap.data().readBy || [];
+                    if (!currentReadBy.includes(userId)) {
+                        await updateDoc(msgRef, {
+                            readBy: arrayUnion(userId)
+                        });
+                        loadMessages(); // Refresh
+                        updateUnreadCount(); // Update badge
+                    }
+                }
+            } catch (e) {
+                console.error("Mark as read error:", e);
+            }
+        };
+
+        window.markAllAsRead = async () => {
+            try {
+                const userId = auth.currentUser.uid;
+                const q = query(collection(db, "messages"));
+                const snap = await getDocs(q);
+
+                const batch = writeBatch(db);
+                let count = 0;
+
+                snap.forEach(docSnap => {
+                    const msg = docSnap.data();
+                    // Only mark if this user should see it
+                    if (msg.to === 'all' || (msg.to && msg.to.includes(userId))) {
+                        const readBy = msg.readBy || [];
+                        if (!readBy.includes(userId)) {
+                            batch.update(doc(db, "messages", docSnap.id), {
+                                readBy: arrayUnion(userId)
+                            });
+                            count++;
+                        }
+                    }
+                });
+
+                if (count > 0) {
+                    await batch.commit();
+                    loadMessages();
+                    updateUnreadCount();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'सफल!',
+                        text: `${count} सन्देशहरू पढिएको चिन्ह लगाइयो`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (e) {
+                console.error("Mark all as read error:", e);
+            }
+        };
+
+        // Admin: Send Message
+        window.sendMessage = async () => {
+            const subject = document.getElementById('msg-subject').value.trim();
+            const message = document.getElementById('msg-body').value.trim();
+            const sendToAll = document.getElementById('msg-send-all').checked;
+            const selectedRecipients = Array.from(document.getElementById('msg-recipients').selectedOptions).map(opt => opt.value);
+
+            if (!subject || !message) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'विषय र सन्देश दुवै आवश्यक छ!',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
+
+            if (!sendToAll && selectedRecipients.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'कृपया प्राप्तकर्ता छान्नुहोस् वा "सबैलाई पठाउने" चेक गर्नुहोस्!',
+                    confirmButtonText: 'ठिक छ'
+                });
+                return;
+            }
+
+            try {
+                const messageData = {
+                    from: 'admin',
+                    to: sendToAll ? 'all' : selectedRecipients,
+                    subject: subject,
+                    message: message,
+                    timestamp: serverTimestamp(),
+                    readBy: [auth.currentUser.uid] // Admin has already "read" it
+                };
+
+                await addDoc(collection(db, "messages"), messageData);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'सफल!',
+                    text: 'सन्देश सफलतापूर्वक पठाइयो!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Clear form
+                document.getElementById('msg-subject').value = '';
+                document.getElementById('msg-body').value = '';
+                document.getElementById('msg-send-all').checked = false;
+                document.getElementById('msg-recipients').selectedIndex = -1;
+
+            } catch (e) {
+                console.error("Send message error:", e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'सन्देश पठाउन सकिएन। पुन: प्रयास गर्नुहोस्।',
+                    confirmButtonText: 'ठिक छ'
+                });
+            }
+        };
+
+        // Populaterecipients dropdown (for Admin)
+        function populateMessageRecipients() {
+            const select = document.getElementById('msg-recipients');
+            if (!select || currentUserData.role !== 'admin') return;
+
+            select.innerHTML = '';
+            teachersList.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.id;
+                option.textContent = `${t.name} (${t.email})`;
+                select.appendChild(option);
+            });
+        }
+
+        // Real-time unread count update
+        function setupMessagesListener() {
+            if (!auth.currentUser) return;
+
+            const userId = auth.currentUser.uid;
+            const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+
+            messagesListener = onSnapshot(q, (snapshot) => {
+                updateUnreadCount();
+            });
+        }
+
+        async function updateUnreadCount() {
+            try {
+                const userId = auth.currentUser.uid;
+                const q = query(collection(db, "messages"));
+                const snap = await getDocs(q);
+
+                let count = 0;
+                snap.forEach(docSnap => {
+                    const msg = docSnap.data();
+                    // Count if: message is for this user AND not read yet
+                    if (msg.to === 'all' || (msg.to && msg.to.includes(userId))) {
+                        const readBy = msg.readBy || [];
+                        if (!readBy.includes(userId)) {
+                            count++;
+                        }
+                    }
+                });
+
+                unreadMessagesCount = count;
+                const badge = document.getElementById('msg-badge');
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (e) {
+                console.error("Update unread count error:", e);
+            }
         }
 
         // --- ADMIN: DELETE ATTENDANCE ---
@@ -2615,11 +2949,11 @@
                     return;
                 }
 
-                // OPTIMIZED: Fetch with timeout to prevent indefinite hangs
+                // OPTIMIZED: Fetch with timeout to prevent indefinite hangs (Bug #3: Reduced timeout)
                 try {
                     const snap = await Promise.race([
                         getDoc(doc(db, "attendance", dateKey)),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
                     ]);
 
                     let attData = {};
@@ -2844,21 +3178,33 @@
                 // Update monthly summary (AM + AT calculation)
                 updateMonthlySummary(y, m, cls).catch(err => console.warn("Summary update failed:", err));
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'सफल!',
-                    text: 'हाजिरी सुरक्षित भयो!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                // BUG FIX #2: Check if offline to show appropriate alert
+                if (isOfflineMode) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'डिभाइसमा सुरक्षित भयो',
+                        html: '<div class="text-center"><i class="fas fa-wifi-slash text-blue-600 text-3xl mb-2"></i><p class="text-gray-700 font-medium mb-1">हाजिरी डिभाइसमा सेभ भयो!</p><small class="text-gray-500">पछि अनलाइन सिंक हुनेछ।</small></div>',
+                        confirmButtonText: 'ठिक छ',
+                        timer: 3000
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'सफल!',
+                        text: 'हाजिरी सुरक्षित भयो!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
             }
             catch (e) {
+                // Rare error fallback
+                console.error("Save error:", e);
                 Swal.fire({
-                    icon: 'info',
-                    title: 'अफलाइन सुरक्षित भयो',
-                    html: '<div class="text-center"><i class="fas fa-wifi-slash text-yellow-600 text-3xl mb-2"></i><p class="text-gray-700 font-medium mb-1">हाजिरी अफलाइनमा सुरक्षित भयो!</p><small class="text-gray-500">इन्टरनेट जडान भएपछि स्वतः sync हुनेछ।</small></div>',
-                    confirmButtonText: 'ठिक छ',
-                    timer: 3000
+                    icon: 'error',
+                    title: 'त्रुटि',
+                    text: 'हाजिरी सेभ गर्न सकिएन। पुन: प्रयास गर्नुहोस्।',
+                    confirmButtonText: 'ठिक छ'
                 });
             }
         };
@@ -2937,10 +3283,10 @@
             listContainer.innerHTML = '<p class="text-gray-400 italic animate-pulse">Loading...</p>';
 
             try {
-                // OPTIMIZED: Fetch with timeout to prevent indefinite hangs
+                // OPTIMIZED: Fetch with timeout to prevent indefinite hangs (Bug #3: Reduced timeout)
                 const snap = await Promise.race([
                     getDoc(doc(db, "attendance", dateKey)),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
                 ]);
 
                 let present = 0, absent = 0; let absentNames = [];
