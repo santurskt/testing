@@ -1,3 +1,20 @@
+// Import Firebase scripts for push notifications
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+
+// Initialize Firebase in the service worker
+const firebaseConfig = {
+  apiKey: "AIzaSyD_ERgjNFwN2BEQfsd4u80mAge5d-3e2k4",
+  authDomain: "schoolattendance-7a711.firebaseapp.com",
+  projectId: "schoolattendance-7a711",
+  storageBucket: "schoolattendance-7a711.firebasestorage.app",
+  messagingSenderId: "647726152144",
+  appId: "1:647726152144:web:7996c0c49cbb034bc1a1d5"
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
 const CACHE_NAME = "attendance-cache"; // Main cache for PWA assets
 const ASSETS = [
   "./",
@@ -181,13 +198,13 @@ self.addEventListener('notificationclick', (event) => {
 
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || '/attendance/';
+  const urlToOpen = event.notification.data?.url || '/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // Check if there's already a window open
       for (let client of clientList) {
-        if (client.url.includes('/attendance') && 'focus' in client) {
+        if ('focus' in client) {
           return client.focus();
         }
       }
@@ -197,4 +214,27 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+});
+
+// FIREBASE CLOUD MESSAGING - Background Push Notifications
+// Handle background messages (when app is closed or in background)
+messaging.onBackgroundMessage((payload) => {
+  console.log('[SW] 📬 Background push notification received:', payload);
+
+  const notificationTitle = payload.notification?.title || 'नयाँ सन्देश';
+  const notificationOptions = {
+    body: payload.notification?.body || 'तपाईंलाई नयाँ सूचना प्राप्त भएको छ',
+    icon: payload.notification?.icon || 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png',
+    badge: 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png',
+    tag: 'attendance-notification',
+    requireInteraction: false,
+    data: payload.data || {},
+    vibrate: [200, 100, 200],
+    actions: [
+      { action: 'open', title: 'खोल्नुहोस्' },
+      { action: 'close', title: 'बन्द गर्नुहोस्' }
+    ]
+  };
+
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
