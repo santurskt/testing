@@ -1003,6 +1003,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, getDocs, query, where, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, updateDoc, deleteDoc, writeBatch, deleteField, addDoc, orderBy, serverTimestamp, arrayUnion, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD_ERgjNFwN2BEQfsd4u80mAge5d-3e2k4",
@@ -1016,6 +1017,15 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+
+        // Firebase Cloud Messaging
+        let messaging = null;
+        try {
+            messaging = getMessaging(app);
+            console.log('✅ Firebase Messaging initialized');
+        } catch (e) {
+            console.warn('⚠️ Firebase Messaging not supported:', e);
+        }
 
         const MONTHS = ["बैशाख", "जेष्ठ", "असार", "श्रावण", "भाद्र", "आश्विन", "कार्तिक", "मंसिर", "पुष", "माघ", "फाल्गुन", "चैत्र"];
         const DAYS = ["आईतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
@@ -1362,6 +1372,9 @@
             // Setup messaging system
             setupMessagesListener();
             updateUnreadCount();
+
+            // Initialize push notifications (request permission)
+            initializeNotifications();
         }
 
         // --- ACCESS CONTROL: UPDATE DROPDOWNS ---
@@ -1754,6 +1767,10 @@
                     const dateBS = dateAD ? dateConverter.adToBs(dateAD) : null;
                     const dateStr = dateBS ? `${dateBS.year}-${dateBS.month}-${dateBS.day}` : '';
 
+                    // Show delete button for admin only
+                    const deleteBtn = currentUserData.role === 'admin' ?
+                        `<button onclick="event.stopPropagation(); deleteMessage('${msg.id}')" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition" title="Delete Message"><i class="fas fa-trash text-sm"></i></button>` : '';
+
                     html += `
                         <div class="p-4 rounded-lg border ${isRead ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300'} hover:shadow-md transition cursor-pointer" 
                              onclick="markMessageAsRead('${msg.id}')">
@@ -1762,7 +1779,10 @@
                                     ${!isRead ? '<span class="w-2 h-2 bg-blue-600 rounded-full"></span>' : ''}
                                     <span class="font-bold text-gray-800">${msg.subject || 'सूचना'}</span>
                                 </div>
-                                <span class="text-[10px] text-gray-500">${dateStr}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] text-gray-500">${dateStr}</span>
+                                    ${deleteBtn}
+                                </div>
                             </div>
                             <p class="text-sm text-gray-700 ${isRead ? '' : 'font-medium'}">${msg.message}</p>
                             <div class="mt-2 text-[10px] text-gray-500">
@@ -1960,6 +1980,145 @@
                 console.error("Update unread count error:", e);
             }
         }
+
+        // --- PUSH NOTIFICATIONS ---
+        let fcmToken = null;
+
+        async function requestNotificationPermission() {
+            if (!messaging) {
+                console.warn('⚠️ Firebase Messaging not available');
+                return false;
+            }
+
+            try {
+                const permission = await Notification.requestPermission();
+                console.log('🔔 Notification permission:', permission);
+
+                if (permission === 'granted') {
+                    // Get FCM token
+                    // NOTE: तपाईंले Firebase Console बाट VAPID key लिनुपर्छ
+                    // Project Settings > Cloud Messaging > Web Push certificates
+                    const vapidKey = 'BL0nXWvXMVfYhtViqdQDFJgL2vxRAHb4DjCMqb8mtige8iwGWP-jG_5woyuK8Ep1rrnJFZuKbD2R8eLLFui-40Y';
+
+                    fcmToken = await getToken(messaging, { vapidKey });
+                    console.log('🔑 FCM Token:', fcmToken);
+
+                    // Store token in user profile for sending notifications
+                    if (auth.currentUser) {
+                        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                            fcmToken: fcmToken,
+                            fcmTokenUpdated: new Date()
+                        });
+                        console.log('✅ FCM token saved to database');
+                    }
+
+                    return true;
+                } else {
+                    console.log('❌ Notification permission denied');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error requesting notification permission:', error);
+                return false;
+            }
+        }
+
+        // Handle foreground messages (when app is open)
+        if (messaging) {
+            onMessage(messaging, (payload) => {
+                console.log('📬 Foreground message received:', payload);
+
+                const notificationTitle = payload.notification?.title || 'नयाँ सन्देश';
+                const notificationOptions = {
+                    body: payload.notification?.body || 'तपाईंलाई नयाँ सूचना प्राप्त भएको छ',
+                    icon: payload.notification?.icon || 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png',
+                    badge: 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png'
+                };
+
+                // Show notification even when app is in foreground
+                if (Notification.permission === 'granted') {
+                    new Notification(notificationTitle, notificationOptions);
+                }
+
+                // Refresh messages list and unread count
+                updateUnreadCount();
+                if (document.getElementById('messages-modal').classList.contains('hidden') === false) {
+                    loadMessages();
+                }
+            });
+        }
+
+        // Request permission after user logs in (called in onAuthStateChanged)
+        async function initializeNotifications() {
+            // Auto-request permission for better UX
+            // or show a nice UI explaining why notifications are useful
+            setTimeout(async () => {
+                if (Notification.permission === 'default') {
+                    const result = await Swal.fire({
+                        title: '🔔 Notifications',
+                        text: 'Admin ले पठाएको सूचना तुरुन्त प्राप्त गर्न notification अनुमति दिनुहोस्।',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'अनुमति दिनुहोस्',
+                        cancelButtonText: 'पछि',
+                        confirmButtonColor: '#3b82f6'
+                    });
+
+                    if (result.isConfirmed) {
+                        await requestNotificationPermission();
+                    }
+                }
+            }, 3000); // Wait 3 seconds after login
+        }
+
+        // Delete Message (Admin only)
+        window.deleteMessage = async (messageId) => {
+            if (currentUserData.role !== 'admin') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'केवल Admin ले सन्देश डिलिट गर्न सक्छ।',
+                    confirmButtonText: 'ठीक छ'
+                });
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'पक्का हुनुहुन्छ?',
+                text: 'यो सन्देश सबैका लागि डिलिट हुनेछ। यो action undo गर्न सकिँदैन।',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'हो, डिलिट गर्नुहोस्',
+                cancelButtonText: 'रद्द गर्नुहोस्',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await deleteDoc(doc(db, "messages", messageId));
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'सफल!',
+                        text: 'सन्देश डिलिट भयो',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    loadMessages();
+                    updateUnreadCount();
+                } catch (e) {
+                    console.error("Delete message error:", e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'त्रुटि',
+                        text: 'सन्देश डिलिट गर्न सकिएन। Error: ' + e.message,
+                        confirmButtonText: 'ठीक छ'
+                    });
+                }
+            }
+        };
 
         // --- ADMIN: DELETE ATTENDANCE ---
         window.deleteAttendanceRecord = async () => {
