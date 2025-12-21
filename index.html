@@ -1374,7 +1374,8 @@
             updateUnreadCount();
 
             // Initialize push notifications (request permission)
-            initializeNotifications();
+            // Disabled - Server Key not available for Legacy FCM API
+            // initializeNotifications();
         }
 
         // --- ACCESS CONTROL: UPDATE DROPDOWNS ---
@@ -1923,6 +1924,7 @@
                 });
             }
         };
+
 
         // Populaterecipients dropdown (for Admin)
         function populateMessageRecipients() {
