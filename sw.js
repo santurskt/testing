@@ -133,3 +133,68 @@ self.addEventListener('offline', () => {
     });
   });
 });
+
+// PUSH NOTIFICATIONS HANDLING
+self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Push Notification received', event);
+
+  let notificationData = {
+    title: 'नयाँ सन्देश',
+    body: 'तपाईंलाई नयाँ सूचना प्राप्त भएको छ',
+    icon: 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png',
+    badge: 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png',
+    data: { url: '/attendance/' }
+  };
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      if (payload.notification) {
+        notificationData = {
+          title: payload.notification.title || notificationData.title,
+          body: payload.notification.body || notificationData.body,
+          icon: payload.notification.icon || notificationData.icon,
+          badge: payload.notification.badge || notificationData.badge,
+          data: payload.data || notificationData.data
+        };
+      }
+    } catch (e) {
+      console.error('[Service Worker] Failed to parse push data:', e);
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      tag: 'attendance-notification',
+      requireInteraction: false,
+      data: notificationData.data
+    })
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Notification clicked:', event.notification);
+
+  event.notification.close();
+
+  const urlToOpen = event.notification.data?.url || '/attendance/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Check if there's already a window open
+      for (let client of clientList) {
+        if (client.url.includes('/attendance') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If no window is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});
