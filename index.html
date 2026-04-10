@@ -405,26 +405,6 @@
         </div>
     </div>
 
-    <!-- Messages Modal -->
-    <div id="messages-modal" class="modal-overlay hidden">
-        <div class="modal-content p-5 max-w-2xl">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="font-bold text-gray-800 text-xl"><i class="fas fa-envelope text-blue-600 mr-2"></i>खबर /
-                    Messages</h3>
-                <button onclick="closeMessagesModal()" class="text-gray-400 hover:text-red-500 transition"><i
-                        class="fas fa-times text-2xl"></i></button>
-            </div>
-
-            <div id="messages-container" class="space-y-3 max-h-96 overflow-y-auto">
-                <p class="text-center text-gray-400 py-8">Loading messages...</p>
-            </div>
-
-            <button onclick="markAllAsRead()"
-                class="mt-4 w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-bold text-sm hover:bg-gray-200 transition">
-                <i class="fas fa-check-double mr-1"></i> सबै पढिसकिएको
-            </button>
-        </div>
-    </div>
 
     <!-- Student Payment Popup (Add/Edit) -->
     <div id="student-pay-modal" class="modal-overlay hidden">
@@ -483,22 +463,47 @@
 
     <!-- Edit Student Details Modal -->
     <div id="edit-student-modal" class="modal-overlay hidden">
-        <div class="modal-content p-6">
+        <div class="modal-content p-6" style="max-height:90vh; overflow-y:auto;">
             <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">विद्यार्थी विवरण सच्याउनुहोस्</h3>
             <input type="hidden" id="edit-s-id">
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-700 mb-1">नाम (Name)</label>
-                <input id="edit-s-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">नाम (Name)</label>
+                    <input id="edit-s-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">सेक्सन (Section)</label>
+                    <select id="edit-s-sec" class="w-full border p-2 rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">रोल नं (Roll)</label>
+                    <input id="edit-s-roll" type="number" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">दर्ता नं (Reg No)</label>
+                    <input id="edit-s-regNo" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">जन्म मिति (DOB)</label>
+                    <input id="edit-s-dob" placeholder="YYYY-MM-DD" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">बुबाको नाम (Father)</label>
+                    <input id="edit-s-father" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">आमाको नाम (Mother)</label>
+                    <input id="edit-s-mother" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ठेगाना (Address)</label>
+                    <input id="edit-s-address" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
             </div>
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-700 mb-1">सेक्सन (Section)</label>
-                <select id="edit-s-sec"
-                    class="w-full border p-2 rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option value="A">Section A</option>
-                    <option value="B">Section B</option>
-                </select>
-            </div>
-            <div class="flex justify-end gap-3 mt-6">
+            <div class="flex justify-end gap-3 mt-4">
                 <button onclick="document.getElementById('edit-student-modal').classList.add('hidden')"
                     class="px-4 py-2 rounded text-gray-600 hover:bg-gray-100 font-medium">Cancel</button>
                 <button onclick="saveStudentEdit()"
@@ -577,12 +582,7 @@
             <div class="flex items-center gap-3">
                 <span id="nepali-date"
                     class="text-sm font-bold text-yellow-300 hidden sm:block bg-white/10 px-2 py-1 rounded"></span>
-                <button onclick="openMessagesModal()"
-                    class="relative bg-blue-500/80 hover:bg-blue-600 p-2 rounded-lg text-xs shadow transition backdrop-blur-sm mr-2">
-                    <i class="fas fa-envelope fa-lg"></i>
-                    <span id="msg-badge"
-                        class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
-                </button>
+
                 <button onclick="logout()"
                     class="bg-red-500/80 hover:bg-red-600 p-2 rounded-lg text-xs shadow transition backdrop-blur-sm"><i
                         class="fas fa-sign-out-alt fa-lg"></i></button>
@@ -706,11 +706,22 @@
                     </div>
 
                     <div class="mt-4 border-t pt-4 space-y-4">
+                        <!-- Roll Management (Admin Only) -->
+                        <div id="roll-mgmt-container" class="bg-indigo-50 p-3 rounded-lg border border-indigo-200 hidden">
+                            <h4 class="font-bold text-xs mb-2 text-indigo-800 uppercase tracking-wide"><i class="fas fa-sort-numeric-down mr-1"></i>रोल नं व्यवस्थापन:</h4>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="reorderRollsAlphabetical()" class="bg-indigo-600 text-white px-3 py-2 rounded text-xs font-bold hover:bg-indigo-700 shadow transition"><i class="fas fa-sort-alpha-down mr-1"></i>Re-order Rolls (A-Z)</button>
+                                <button id="btn-lock-rolls" onclick="toggleLockRolls()" class="bg-orange-500 text-white px-3 py-2 rounded text-xs font-bold hover:bg-orange-600 shadow transition"><i class="fas fa-lock mr-1"></i>Lock Rolls</button>
+                                <button onclick="suspendAllStudents()" class="bg-red-500 text-white px-3 py-2 rounded text-xs font-bold hover:bg-red-600 shadow transition"><i class="fas fa-ban mr-1"></i>Suspend All</button>
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Lock गरेपछि रोल नं कायम हुनेछ। Unlock गर्दा Accept गर्दा alphabetical order मा रोल नं दिइनेछ।</p>
+                        </div>
+
                         <div class="bg-gray-50 p-3 rounded-lg border border-dashed border-gray-300">
                             <h4 class="font-bold text-sm mb-2 text-gray-600"><i class="fas fa-plus-circle mr-1"></i>नयाँ
                                 विद्यार्थी थप्नुहोस्:</h4>
                             <form onsubmit="addStudent(event)" class="grid grid-cols-2 gap-2">
-                                <input id="s-name" placeholder="Name"
+                                <input id="s-name" placeholder="नाम (Name) *"
                                     class="col-span-2 border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                                     required>
                                 <select id="s-class"
@@ -720,9 +731,18 @@
                                     <option value="A">A</option>
                                     <option value="B">B</option>
                                 </select>
-                                <input id="s-roll" type="number" placeholder="Roll"
-                                    class="col-span-2 border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                    required>
+                                <input id="s-roll" type="number" placeholder="रोल नं (Roll)"
+                                    class="border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input id="s-regNo" placeholder="दर्ता नं (Reg No)"
+                                    class="border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input id="s-dob" placeholder="जन्म मिति (DOB)"
+                                    class="border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input id="s-father" placeholder="बुबाको नाम (Father)"
+                                    class="border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input id="s-mother" placeholder="आमाको नाम (Mother)"
+                                    class="col-span-2 border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input id="s-address" placeholder="ठेगाना (Address)"
+                                    class="col-span-2 border p-2 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                                 <button
                                     class="col-span-2 bg-green-600 text-white py-2 rounded font-bold shadow hover:bg-green-700 transition">Add
                                     Student</button>
@@ -761,47 +781,6 @@
                     <button onclick="loadTeachers()" class="text-xs text-blue-600 underline mt-2">Refresh List</button>
                 </div>
 
-                <!-- Admin: Send Messages to Teachers -->
-                <div class="bg-white p-5 rounded-xl shadow-sm">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <h3 class="font-bold text-lg text-green-800"><i class="fas fa-paper-plane mr-2"></i>शिक्षकलाई
-                            सन्देश पठाउनुहोस्</h3>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-xs text-gray-500 font-bold uppercase block mb-1">विषय (Subject)</label>
-                            <input id="msg-subject" type="text" placeholder="सूचना"
-                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 font-bold uppercase block mb-1">सन्देश (Message)</label>
-                            <textarea id="msg-body" rows="4" placeholder="आफ्नो सन्देश यहाँ लेख्नुहोस्..."
-                                class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none"></textarea>
-                        </div>
-                        <div class="flex gap-3 items-center">
-                            <div class="flex-1">
-                                <label class="text-xs text-gray-500 font-bold uppercase block mb-1">प्राप्तकर्ता
-                                    (Recipients)</label>
-                                <select id="msg-recipients" multiple
-                                    class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none text-sm max-h-32">
-                                    <!-- Teachers will be populated here -->
-                                </select>
-                            </div>
-                            <div class="flex items-end">
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 hover:bg-blue-100 transition">
-                                    <input type="checkbox" id="msg-send-all" class="rounded">
-                                    <span class="text-sm font-bold text-blue-700">सबैलाई पठाउने</span>
-                                </label>
-                            </div>
-                        </div>
-                        <button onclick="sendMessage()"
-                            class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow hover:bg-green-700 transition">
-                            <i class="fas fa-paper-plane mr-2"></i>सन्देश पठाउनुहोस्
-                        </button>
-                    </div>
-                </div>
 
                 <!-- Other Admin Settings -->
                 <div class="bg-white p-5 rounded-xl shadow-sm">
@@ -827,9 +806,157 @@
                             <input id="set-classes-list" type="text" placeholder="e.g. 1,2,3,4,5 (Comma separated)"
                                 class="w-full border p-2 rounded bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
+                        <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+                            <label class="block text-xs font-bold text-red-700 mb-1 uppercase">Active Academic Year :</label>
+                            <input id="set-academic-year" type="number" placeholder="e.g. 2081"
+                                class="w-full border p-2 rounded bg-white focus:ring-2 focus:ring-red-500 outline-none font-bold text-red-700">
+                            <p class="text-[10px] text-gray-600 mt-1"><i class="fas fa-lock mr-1 text-red-500"></i>यो वर्ष लक हुनेछ र ड्यासबोर्ड तथा हाजिरीमा यही वर्षका विद्यार्थी मात्र देखिनेछन्।</p>
+                        </div>
                         <button onclick="confirmAction(saveSettings)"
                             class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-700 transition">Save
                             Settings</button>
+
+                        <!-- JSON Admission Import -->
+                        <div class="mt-6 pt-4 border-t border-blue-200">
+                            <h4 class="text-blue-700 font-bold text-sm mb-3"><i
+                                    class="fas fa-file-import mr-1"></i> भर्ना डाटा इम्पोर्ट (JSON Import)</h4>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <p class="text-xs text-gray-600 mb-3">JSON फायलबाट नयाँ शैक्षिक सत्रका विद्यार्थीहरूको विवरण इम्पोर्ट गर्नुहोस्। इम्पोर्ट भएका विद्यार्थीहरू "Pending" अवस्थामा रहनेछन् र Admin ले Accept गरेपछि मात्र हाजिरीमा देखिनेछन्।</p>
+                                <div class="flex gap-2">
+                                    <label class="bg-blue-600 text-white px-4 py-2 rounded text-xs cursor-pointer hover:bg-blue-700 font-bold shadow transition">
+                                        <i class="fas fa-upload mr-1"></i> Import JSON
+                                        <input type="file" id="json-import-file" accept=".json" class="hidden" onchange="importAdmissionJSON(this)">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Student Acceptance Panel -->
+                        <div class="mt-6 pt-4 border-t border-green-200">
+                            <h4 class="text-green-700 font-bold text-sm mb-3"><i
+                                    class="fas fa-user-check mr-1"></i> विद्यार्थी स्वीकृति (Student Acceptance)</h4>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <p class="text-xs text-gray-600 mb-3">इम्पोर्ट भएका Pending विद्यार्थीहरूलाई एक-एक गरेर Accept गर्नुहोस्। Accept नभएका विद्यार्थी हाजिरी, रिपोर्ट र विद्यार्थी सूचीमा देखिने छैनन्।</p>
+                                <div class="flex gap-2 items-center mb-3 flex-wrap">
+                                    <select id="accept-class-select" onchange="renderPendingStudentList()" class="border p-2 rounded text-sm bg-white flex-1">
+                                        <option value="">-- कक्षा छान्नुहोस् --</option>
+                                    </select>
+                                    <button onclick="approveAllStudents()" class="bg-green-600 text-white px-3 py-2 rounded text-xs font-bold hover:bg-green-700 shadow transition whitespace-nowrap">
+                                        <i class="fas fa-check-double mr-1"></i>Accept All
+                                    </button>
+                                    <span id="pending-total-badge" class="text-xs font-bold text-orange-600"></span>
+                                </div>
+                                <div id="pending-students-list" class="max-h-64 overflow-y-auto space-y-1 text-sm">
+                                    <p class="text-gray-400 text-xs italic">कक्षा छानेपछि Pending विद्यार्थी देखिनेछन्</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Open Attendance for Any User -->
+                        <div class="mt-6 pt-4 border-t border-cyan-200">
+                            <h4 class="text-cyan-700 font-bold text-sm mb-3"><i class="fas fa-door-open mr-1"></i> हाजिरी खुला गर्नुहोस् (Open Attendance)</h4>
+                            <div class="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
+                                <p class="text-xs text-gray-600 mb-3">कुनै कक्षालाई कुनै मितिमा जुनसुकै युजरले हाजिरी गर्न सक्ने गरी खुला गर्नुहोस्।</p>
+                                <div class="flex gap-1 items-end flex-wrap mb-3">
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">साल</label>
+                                        <select id="oa-y" class="border p-1.5 rounded text-sm bg-white w-20"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">महिना</label>
+                                        <select id="oa-m" class="border p-1.5 rounded text-sm bg-white"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">गते</label>
+                                        <input type="number" id="oa-d" placeholder="गते" class="w-14 border p-1.5 rounded text-sm text-center bg-white" min="1" max="32">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">कक्षा</label>
+                                        <select id="oa-class" class="border p-1.5 rounded text-sm bg-white w-24"></select>
+                                    </div>
+                                    <button onclick="openAttendanceForAll()" class="bg-cyan-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-cyan-700 shadow transition whitespace-nowrap">
+                                        <i class="fas fa-door-open mr-1"></i>खुला गर्नुहोस्
+                                    </button>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-cyan-200">
+                                    <h5 class="text-xs font-bold text-cyan-800 mb-2 uppercase"><i class="fas fa-list mr-1"></i>खुला गरिएका कक्षाहरू:</h5>
+                                    <div id="open-attendance-list" class="space-y-1 max-h-32 overflow-y-auto">
+                                        <p class="text-gray-400 text-xs italic">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Single Day Holiday -->
+                        <div class="mt-6 pt-4 border-t border-purple-200">
+                            <h4 class="text-purple-700 font-bold text-sm mb-3"><i
+                                    class="fas fa-calendar-day mr-1"></i> बिदा व्यवस्थापन (Holiday Management)</h4>
+                            
+                            <!-- Single Day Holiday -->
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200 mb-4">
+                                <h5 class="font-bold text-xs text-purple-800 mb-2 uppercase"><i class="fas fa-calendar-day mr-1"></i>एक दिन बिदा (Single Day)</h5>
+                                <div class="flex gap-1 items-end flex-wrap mb-2">
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">साल</label>
+                                        <select id="sh-y" class="border p-1.5 rounded text-sm bg-white w-20"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">महिना</label>
+                                        <select id="sh-m" class="border p-1.5 rounded text-sm bg-white"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 block">गते</label>
+                                        <input type="number" id="sh-d" placeholder="गते" class="w-14 border p-1.5 rounded text-sm text-center bg-white" min="1" max="32">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="text-[10px] text-gray-500 block">शीर्षक</label>
+                                        <input type="text" id="sh-title" placeholder="सार्वजनिक बिदा" class="w-full border p-1.5 rounded text-sm bg-white">
+                                    </div>
+                                    <button onclick="saveSingleHoliday()" class="bg-purple-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-purple-700 shadow transition whitespace-nowrap">
+                                        <i class="fas fa-check mr-1"></i>मार्क गर्नुहोस्
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Long Holiday -->
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <h5 class="font-bold text-xs text-purple-800 mb-2 uppercase"><i class="fas fa-umbrella-beach mr-1"></i>लामो बिदा (Date Range)</h5>
+                                <p class="text-xs text-gray-600 mb-3">कुनै मिति देखि कुनै मिति सम्मको लामो बिदा राख्नुहोस्।</p>
+                                
+                                <div class="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">सुरू मिति (From)</label>
+                                        <div class="flex gap-1">
+                                            <select id="lh-from-y" class="border p-1.5 rounded text-sm bg-white w-20"></select>
+                                            <select id="lh-from-m" class="border p-1.5 rounded text-sm bg-white flex-1"></select>
+                                            <input type="number" id="lh-from-d" placeholder="गते" class="w-14 border p-1.5 rounded text-sm text-center bg-white" min="1" max="32">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">अन्तिम मिति (To)</label>
+                                        <div class="flex gap-1">
+                                            <select id="lh-to-y" class="border p-1.5 rounded text-sm bg-white w-20"></select>
+                                            <select id="lh-to-m" class="border p-1.5 rounded text-sm bg-white flex-1"></select>
+                                            <input type="number" id="lh-to-d" placeholder="गते" class="w-14 border p-1.5 rounded text-sm text-center bg-white" min="1" max="32">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-[10px] text-gray-500 font-bold uppercase block mb-1">बिदाको शीर्षक</label>
+                                    <input type="text" id="lh-title" placeholder="जस्तै: दशैं बिदा, बार्षिक परीक्षा बिदा" class="w-full border p-2 rounded text-sm bg-white focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                                <button onclick="saveLongHoliday()" class="w-full bg-purple-600 text-white py-2 rounded font-bold shadow hover:bg-purple-700 transition text-sm">
+                                    <i class="fas fa-calendar-check mr-1"></i>लामो बिदा मार्क गर्नुहोस्
+                                </button>
+
+                                <!-- Existing Long Holidays List -->
+                                <div class="mt-4 pt-3 border-t border-purple-200">
+                                    <h5 class="text-xs font-bold text-purple-800 mb-2 uppercase"><i class="fas fa-list mr-1"></i>राखिएका लामो बिदाहरू:</h5>
+                                    <div id="long-holidays-list" class="space-y-1 max-h-40 overflow-y-auto">
+                                        <p class="text-gray-400 text-xs italic">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Danger Zones -->
                         <div class="mt-8 pt-6 border-t border-red-200">
@@ -895,9 +1022,6 @@
                     </div>
                     <div class="flex justify-between items-center px-1">
                         <p id="day-name" class="text-sm font-bold text-indigo-600"></p>
-                        <button id="btn-mark-holiday" onclick="markHoliday()"
-                            class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-bold hover:bg-purple-200 hidden transition">Mark
-                            Holiday (Admin)</button>
                     </div>
                 </div>
 
@@ -1002,8 +1126,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, getDocs, query, where, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, updateDoc, deleteDoc, writeBatch, deleteField, addDoc, orderBy, serverTimestamp, arrayUnion, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, getDocs, query, where, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, updateDoc, deleteDoc, writeBatch, deleteField, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD_ERgjNFwN2BEQfsd4u80mAge5d-3e2k4",
@@ -1016,16 +1139,14 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        
+        // FIX: file:// environments share minimal localStorage quota leading to QuotaExceededError.
+        // We safely clear it here before Firestore initialization because Firestore offline data + Auth
+        // are actually stored in IndexedDB, not localStorage. This only clears the tabManager locks.
+        try { localStorage.clear(); } catch(e) {}
+        
         const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 
-        // Firebase Cloud Messaging
-        let messaging = null;
-        try {
-            messaging = getMessaging(app);
-            console.log('✅ Firebase Messaging initialized');
-        } catch (e) {
-            console.warn('⚠️ Firebase Messaging not supported:', e);
-        }
 
         const MONTHS = ["बैशाख", "जेष्ठ", "असार", "श्रावण", "भाद्र", "आश्विन", "कार्तिक", "मंसिर", "पुष", "माघ", "फाल्गुन", "चैत्र"];
         const DAYS = ["आईतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
@@ -1033,7 +1154,7 @@
         const SECTIONS = ["A", "B"];  // Only sections A and B allowed
 
         // Date Converter (Same as before)
-        const dateConverter = { nepaliCalendarData: { 2000: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2001: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2002: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2003: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2004: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2005: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2006: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2007: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2008: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2009: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2010: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2011: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2012: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2013: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2014: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2015: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2016: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2017: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2018: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2019: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2020: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2021: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2022: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2023: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2024: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2025: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2026: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2027: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2028: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2029: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2030: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2031: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2032: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2033: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2034: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2035: [30, 32, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2036: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2037: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2038: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2039: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2040: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2041: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2042: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2043: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2044: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2045: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2046: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2047: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2048: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2049: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2050: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2051: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2052: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2053: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2054: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2055: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2056: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2057: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2058: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2059: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2060: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2061: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2062: [30, 32, 31, 32, 31, 31, 29, 30, 29, 30, 29, 31], 2063: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2064: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2065: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2066: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2067: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2068: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2069: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2070: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2071: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2072: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2073: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2074: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2075: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2076: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2077: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2078: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2079: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2080: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2081: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2082: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2083: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2084: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2085: [31, 32, 31, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2086: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2087: [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30], 2088: [30, 31, 32, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2089: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2090: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30] }, referenceBS: { year: 2000, month: 1, day: 1 }, referenceAD: new Date(1943, 3, 14), bsToAd: function (a, b, c) { if (!this.nepaliCalendarData[a] || b < 1 || b > 12 || c < 1 || c > this.nepaliCalendarData[a][b - 1]) return null; let d = 0; for (let e = this.referenceBS.year; e < a; e++)this.nepaliCalendarData[e] && (d += this.nepaliCalendarData[e].reduce((f, g) => f + g, 0)); for (let e = 0; e < b - 1; e++)d += this.nepaliCalendarData[a][e]; d += c - 1; const e = new Date(this.referenceAD); return e.setDate(e.getDate() + d), e }, adToBs: function (a) { if (!(a instanceof Date)) return null; let b = a - this.referenceAD, c = Math.floor(b / 864e5), d = this.referenceBS.year, e = this.referenceBS.month, f = this.referenceBS.day; for (; ;) { if (!this.nepaliCalendarData[d]) break; const g = this.nepaliCalendarData[d][e - 1], h = g - f + 1; if (c >= h) { c -= h, e++, f = 1, e > 12 && (e = 1, d++); continue } f += c; break } return { year: d, month: e, day: f, dayOfWeek: a.getDay() } } };
+        const dateConverter = { nepaliCalendarData: { 2000: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2001: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2002: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2003: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2004: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2005: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2006: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2007: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2008: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2009: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2010: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2011: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2012: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2013: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2014: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2015: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2016: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2017: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2018: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2019: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2020: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2021: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2022: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2023: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2024: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2025: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2026: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2027: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2028: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2029: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2030: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2031: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2032: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2033: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2034: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2035: [30, 32, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2036: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2037: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2038: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2039: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2040: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2041: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2042: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2043: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2044: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2045: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2046: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2047: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2048: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2049: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2050: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2051: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2052: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2053: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2054: [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2055: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2056: [31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30], 2057: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2058: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], 2059: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2060: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2061: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2062: [30, 32, 31, 32, 31, 31, 29, 30, 29, 30, 29, 31], 2063: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2064: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2065: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2066: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], 2067: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2068: [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2069: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2070: [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], 2071: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2072: [31, 32, 31, 32, 31, 30, 30, 29, 30, 29, 30, 30], 2073: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2074: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2075: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2076: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2077: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], 2078: [31, 31, 31, 32, 31, 31, 30, 29, 30, 29, 30, 30], 2079: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2080: [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30], 2081: [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2082: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2083: [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], 2084: [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], 2085: [31, 32, 31, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2086: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2087: [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30], 2088: [30, 31, 32, 32, 30, 31, 30, 30, 29, 30, 30, 30], 2089: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], 2090: [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30] }, referenceBS: { year: 2000, month: 1, day: 1 }, referenceAD: new Date(1943, 3, 14), bsToAd: function (a, b, c) { if (!this.nepaliCalendarData[a] || b < 1 || b > 12 || c < 1 || c > this.nepaliCalendarData[a][b - 1]) return null; let d = 0; for (let e = this.referenceBS.year; e < a; e++)this.nepaliCalendarData[e] && (d += this.nepaliCalendarData[e].reduce((f, g) => f + g, 0)); for (let e = 0; e < b - 1; e++)d += this.nepaliCalendarData[a][e]; d += c - 1; const e = new Date(this.referenceAD); return e.setDate(e.getDate() + d), e }, adToBs: function (a) { if (!(a instanceof Date)) return null; let b = a - this.referenceAD, c = Math.floor(b / 864e5), d = this.referenceBS.year, e = this.referenceBS.month, f = this.referenceBS.day; for (; ;) { if (!this.nepaliCalendarData[d]) break; const g = this.nepaliCalendarData[d][e - 1], h = g - f + 1; if (c >= h) { c -= h, e++, f = 1, e > 12 && (e = 1, d++); continue } f += c; break } return { year: d, month: e, day: f, dayOfWeek: a.getDay() } } };
 
 
         // GLOBAL OFFLINE STATE MANAGEMENT
@@ -1133,7 +1254,7 @@
 
         let currentUserData = null;
         let studentsData = [];
-        let schoolSettings = { fineRate: 10, schoolName: "विद्यालयको नाम", schoolAddress: "ठेगाना", classFines: {}, classes: CLASSES };
+        let schoolSettings = { fineRate: 10, schoolName: "विद्यालयको नाम", schoolAddress: "ठेगाना", classFines: {}, classes: CLASSES, academicYear: 2081 };
         let localAttendanceBuffer = {};
         let currentDayHasUnsavedChanges = false;
         let currentDayIsLocked = false;
@@ -1321,25 +1442,33 @@
         async function initApp() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-interface').classList.remove('hidden');
-            document.getElementById('user-role-display').innerText = `${currentUserData.name} (${currentUserData.role})`;
+            
+            await loadSettings();
+            
+            document.getElementById('user-role-display').innerText = `${currentUserData.name} (${currentUserData.role}) | सत्र: ${schoolSettings.academicYear || 2081}`;
 
             if (currentUserData.role !== 'admin') {
                 const excelContainer = document.getElementById('excel-upload-container');
                 if (excelContainer) excelContainer.style.display = 'none';
             }
 
-            await loadSettings();
-
             if (currentUserData.role === 'admin') {
                 document.getElementById('nav-admin').classList.remove('hidden');
                 document.getElementById('nav-admin-mobile').classList.remove('hidden');
                 document.getElementById('nav-admin-mobile').classList.add('flex'); // Enable flex for mobile
-                document.getElementById('btn-mark-holiday').classList.remove('hidden');
+                document.getElementById('roll-mgmt-container').classList.remove('hidden');
                 loadTeachers();
+                initLongHolidayForm();
+                loadLongHolidays();
+                initOpenAttendanceForm();
+                loadOpenAttendanceList();
             } else {
                 document.getElementById('nav-students').classList.remove('hidden');
                 document.getElementById('nav-students-mobile').classList.remove('hidden');
             }
+
+            // Load open attendance overrides for ALL users (so teachers can see open classes)
+            await loadOpenAttendanceOverridesForAll();
 
             updateClassDropdowns();
 
@@ -1348,7 +1477,6 @@
 
             const d = dateConverter.adToBs(new Date());
             const currentYear = d.year;
-            // Show only current year as per academic session requirement
             const yearsHTML = `<option value="${currentYear}" selected>${currentYear}</option>`;
             document.getElementById('rep-year').innerHTML = yearsHTML;
             document.getElementById('rep-month').value = d.month;
@@ -1366,16 +1494,17 @@
             document.getElementById('del-att-d').value = d.day;
 
             await loadStudents();
+            
+            // Populate rep-year dynamically after loading students
+            let uniqueYears = [...new Set(studentsData.map(s => s.academicYear).filter(Boolean))];
+            if (!uniqueYears.includes(schoolSettings.academicYear?.toString() || "2081")) {
+                uniqueYears.push(schoolSettings.academicYear?.toString() || "2081");
+            }
+            if (!uniqueYears.includes(currentYear.toString())) uniqueYears.push(currentYear.toString());
+            uniqueYears.sort((a, b) => parseInt(b) - parseInt(a));
+            document.getElementById('rep-year').innerHTML = uniqueYears.map(yr => `<option value="${yr}" ${yr == currentYear ? 'selected' : ''}>${yr}</option>`).join('');
             showSection('dashboard');
             document.getElementById('loader').classList.add('hidden');
-
-            // Setup messaging system
-            setupMessagesListener();
-            updateUnreadCount();
-
-            // Initialize push notifications (request permission)
-            // Disabled - Server Key not available for Legacy FCM API
-            // initializeNotifications();
         }
 
         // --- ACCESS CONTROL: UPDATE DROPDOWNS ---
@@ -1387,6 +1516,14 @@
             } else if (currentUserData.classes) {
                 // If teacher, extract unique class numbers from "9" or "9-A"
                 visibleClasses = [...new Set(currentUserData.classes.map(c => c.split('-')[0]))];
+
+                // Also add any classes that are open for all users (from overrides)
+                if (openAttendanceOverrides && openAttendanceOverrides.length > 0) {
+                    const openClasses = [...new Set(openAttendanceOverrides.map(o => o.class))];
+                    openClasses.forEach(c => {
+                        if (!visibleClasses.includes(c)) visibleClasses.push(c);
+                    });
+                }
 
                 // Sort classes
                 visibleClasses.sort((a, b) => {
@@ -1700,10 +1837,6 @@
                     </div>`;
             });
 
-            // Populate message recipients for Admin
-            if (currentUserData.role === 'admin') {
-                populateMessageRecipients();
-            }
         }
         window.deleteTeacher = async (uid) => {
             await deleteDoc(doc(db, "users", uid));
@@ -1716,411 +1849,6 @@
             });
             loadTeachers();
         }
-
-        // --- MESSAGING SYSTEM ---
-        let unreadMessagesCount = 0;
-        let messagesListener = null;
-
-        window.openMessagesModal = async () => {
-            document.getElementById('messages-modal').classList.remove('hidden');
-            await loadMessages();
-        };
-
-        window.closeMessagesModal = () => {
-            document.getElementById('messages-modal').classList.add('hidden');
-        };
-
-        async function loadMessages() {
-            const container = document.getElementById('messages-container');
-            container.innerHTML = '<p class="text-center text-gray-400 py-8">Loading...</p>';
-
-            try {
-                const userId = auth.currentUser.uid;
-                const q = query(
-                    collection(db, "messages"),
-                    orderBy("timestamp", "desc"),
-                    limit(50)
-                );
-
-                const snap = await getDocs(q);
-                let messages = [];
-
-                snap.forEach(doc => {
-                    const msg = doc.data();
-                    msg.id = doc.id;
-
-                    // Show message if: sent to all OR sent to this specific user
-                    if (msg.to === 'all' || (msg.to && msg.to.includes(userId))) {
-                        messages.push(msg);
-                    }
-                });
-
-                if (messages.length === 0) {
-                    container.innerHTML = '<p class="text-center text-gray-500 py-8 italic">कुनै सन्देश छैन।</p>';
-                    return;
-                }
-
-                let html = '';
-                messages.forEach(msg => {
-                    const isRead = msg.readBy && msg.readBy.includes(userId);
-                    // Convert timestamp to Nepali BS date
-                    const dateAD = msg.timestamp ? new Date(msg.timestamp.seconds * 1000) : null;
-                    const dateBS = dateAD ? dateConverter.adToBs(dateAD) : null;
-                    const dateStr = dateBS ? `${dateBS.year}-${dateBS.month}-${dateBS.day}` : '';
-
-                    // Show delete button for admin only
-                    const deleteBtn = currentUserData.role === 'admin' ?
-                        `<button onclick="event.stopPropagation(); deleteMessage('${msg.id}')" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition" title="Delete Message"><i class="fas fa-trash text-sm"></i></button>` : '';
-
-                    html += `
-                        <div class="p-4 rounded-lg border ${isRead ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-300'} hover:shadow-md transition cursor-pointer" 
-                             onclick="markMessageAsRead('${msg.id}')">
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="flex items-center gap-2">
-                                    ${!isRead ? '<span class="w-2 h-2 bg-blue-600 rounded-full"></span>' : ''}
-                                    <span class="font-bold text-gray-800">${msg.subject || 'सूचना'}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] text-gray-500">${dateStr}</span>
-                                    ${deleteBtn}
-                                </div>
-                            </div>
-                            <p class="text-sm text-gray-700 ${isRead ? '' : 'font-medium'}">${msg.message}</p>
-                            <div class="mt-2 text-[10px] text-gray-500">
-                                <i class="fas fa-user-shield mr-1"></i>From: Admin
-                            </div>
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-            } catch (e) {
-                console.error("Load messages error:", e);
-                container.innerHTML = '<p class="text-center text-red-500 py-8">Error loading messages</p>';
-            }
-        }
-
-        window.markMessageAsRead = async (messageId) => {
-            try {
-                const userId = auth.currentUser.uid;
-                const msgRef = doc(db, "messages", messageId);
-                const msgSnap = await getDoc(msgRef);
-
-                if (msgSnap.exists()) {
-                    const currentReadBy = msgSnap.data().readBy || [];
-                    if (!currentReadBy.includes(userId)) {
-                        await updateDoc(msgRef, {
-                            readBy: arrayUnion(userId)
-                        });
-                        loadMessages(); // Refresh
-                        updateUnreadCount(); // Update badge
-                    }
-                }
-            } catch (e) {
-                console.error("Mark as read error:", e);
-            }
-        };
-
-        window.markAllAsRead = async () => {
-            try {
-                const userId = auth.currentUser.uid;
-                const q = query(collection(db, "messages"));
-                const snap = await getDocs(q);
-
-                const batch = writeBatch(db);
-                let count = 0;
-
-                snap.forEach(docSnap => {
-                    const msg = docSnap.data();
-                    // Only mark if this user should see it
-                    if (msg.to === 'all' || (msg.to && msg.to.includes(userId))) {
-                        const readBy = msg.readBy || [];
-                        if (!readBy.includes(userId)) {
-                            batch.update(doc(db, "messages", docSnap.id), {
-                                readBy: arrayUnion(userId)
-                            });
-                            count++;
-                        }
-                    }
-                });
-
-                if (count > 0) {
-                    await batch.commit();
-                    loadMessages();
-                    updateUnreadCount();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'सफल!',
-                        text: `${count} सन्देशहरू पढिएको चिन्ह लगाइयो`,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                }
-            } catch (e) {
-                console.error("Mark all as read error:", e);
-            }
-        };
-
-        // Admin: Send Message
-        window.sendMessage = async () => {
-            const subject = document.getElementById('msg-subject').value.trim();
-            const message = document.getElementById('msg-body').value.trim();
-            const sendToAll = document.getElementById('msg-send-all').checked;
-            const selectedRecipients = Array.from(document.getElementById('msg-recipients').selectedOptions).map(opt => opt.value);
-
-            if (!subject || !message) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'त्रुटि',
-                    text: 'विषय र सन्देश दुवै आवश्यक छ!',
-                    confirmButtonText: 'ठिक छ'
-                });
-                return;
-            }
-
-            if (!sendToAll && selectedRecipients.length === 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'त्रुटि',
-                    text: 'कृपया प्राप्तकर्ता छान्नुहोस् वा "सबैलाई पठाउने" चेक गर्नुहोस्!',
-                    confirmButtonText: 'ठिक छ'
-                });
-                return;
-            }
-
-            try {
-                const messageData = {
-                    from: 'admin',
-                    to: sendToAll ? 'all' : selectedRecipients,
-                    subject: subject,
-                    message: message,
-                    timestamp: serverTimestamp(),
-                    readBy: [auth.currentUser.uid] // Admin has already "read" it
-                };
-
-                await addDoc(collection(db, "messages"), messageData);
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'सफल!',
-                    text: 'सन्देश सफलतापूर्वक पठाइयो!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                // Clear form
-                document.getElementById('msg-subject').value = '';
-                document.getElementById('msg-body').value = '';
-                document.getElementById('msg-send-all').checked = false;
-                document.getElementById('msg-recipients').selectedIndex = -1;
-
-            } catch (e) {
-                console.error("Send message error:", e);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'त्रुटि',
-                    text: 'सन्देश पठाउन सकिएन। पुन: प्रयास गर्नुहोस्।',
-                    confirmButtonText: 'ठिक छ'
-                });
-            }
-        };
-
-
-        // Populaterecipients dropdown (for Admin)
-        function populateMessageRecipients() {
-            const select = document.getElementById('msg-recipients');
-            if (!select || currentUserData.role !== 'admin') return;
-
-            select.innerHTML = '';
-            teachersList.forEach(t => {
-                const option = document.createElement('option');
-                option.value = t.id;
-                option.textContent = `${t.name} (${t.email})`;
-                select.appendChild(option);
-            });
-        }
-
-        // Real-time unread count update
-        function setupMessagesListener() {
-            if (!auth.currentUser) return;
-
-            const userId = auth.currentUser.uid;
-            const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
-
-            messagesListener = onSnapshot(q, (snapshot) => {
-                updateUnreadCount();
-            });
-        }
-
-        async function updateUnreadCount() {
-            try {
-                const userId = auth.currentUser.uid;
-                const q = query(collection(db, "messages"));
-                const snap = await getDocs(q);
-
-                let count = 0;
-                snap.forEach(docSnap => {
-                    const msg = docSnap.data();
-                    // Count if: message is for this user AND not read yet
-                    if (msg.to === 'all' || (msg.to && msg.to.includes(userId))) {
-                        const readBy = msg.readBy || [];
-                        if (!readBy.includes(userId)) {
-                            count++;
-                        }
-                    }
-                });
-
-                unreadMessagesCount = count;
-                const badge = document.getElementById('msg-badge');
-                if (count > 0) {
-                    badge.textContent = count;
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
-            } catch (e) {
-                console.error("Update unread count error:", e);
-            }
-        }
-
-        // --- PUSH NOTIFICATIONS ---
-        let fcmToken = null;
-
-        async function requestNotificationPermission() {
-            if (!messaging) {
-                console.warn('⚠️ Firebase Messaging not available');
-                return false;
-            }
-
-            try {
-                const permission = await Notification.requestPermission();
-                console.log('🔔 Notification permission:', permission);
-
-                if (permission === 'granted') {
-                    // Get FCM token
-                    // NOTE: तपाईंले Firebase Console बाट VAPID key लिनुपर्छ
-                    // Project Settings > Cloud Messaging > Web Push certificates
-                    const vapidKey = 'BL0nXWvXMVfYhtViqdQDFJgL2vxRAHb4DjCMqb8mtige8iwGWP-jG_5woyuK8Ep1rrnJFZuKbD2R8eLLFui-40Y';
-
-                    fcmToken = await getToken(messaging, { vapidKey });
-                    console.log('🔑 FCM Token:', fcmToken);
-
-                    // Store token in user profile for sending notifications
-                    if (auth.currentUser) {
-                        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                            fcmToken: fcmToken,
-                            fcmTokenUpdated: new Date()
-                        });
-                        console.log('✅ FCM token saved to database');
-                    }
-
-                    return true;
-                } else {
-                    console.log('❌ Notification permission denied');
-                    return false;
-                }
-            } catch (error) {
-                console.error('❌ Error requesting notification permission:', error);
-                return false;
-            }
-        }
-
-        // Handle foreground messages (when app is open)
-        if (messaging) {
-            onMessage(messaging, (payload) => {
-                console.log('📬 Foreground message received:', payload);
-
-                const notificationTitle = payload.notification?.title || 'नयाँ सन्देश';
-                const notificationOptions = {
-                    body: payload.notification?.body || 'तपाईंलाई नयाँ सूचना प्राप्त भएको छ',
-                    icon: payload.notification?.icon || 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png',
-                    badge: 'https://cdn-icons-png.flaticon.com/512/3413/3413535.png'
-                };
-
-                // Show notification even when app is in foreground
-                if (Notification.permission === 'granted') {
-                    new Notification(notificationTitle, notificationOptions);
-                }
-
-                // Refresh messages list and unread count
-                updateUnreadCount();
-                if (document.getElementById('messages-modal').classList.contains('hidden') === false) {
-                    loadMessages();
-                }
-            });
-        }
-
-        // Request permission after user logs in (called in onAuthStateChanged)
-        async function initializeNotifications() {
-            // Auto-request permission for better UX
-            // or show a nice UI explaining why notifications are useful
-            setTimeout(async () => {
-                if (Notification.permission === 'default') {
-                    const result = await Swal.fire({
-                        title: '🔔 Notifications',
-                        text: 'Admin ले पठाएको सूचना तुरुन्त प्राप्त गर्न notification अनुमति दिनुहोस्।',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'अनुमति दिनुहोस्',
-                        cancelButtonText: 'पछि',
-                        confirmButtonColor: '#3b82f6'
-                    });
-
-                    if (result.isConfirmed) {
-                        await requestNotificationPermission();
-                    }
-                }
-            }, 3000); // Wait 3 seconds after login
-        }
-
-        // Delete Message (Admin only)
-        window.deleteMessage = async (messageId) => {
-            if (currentUserData.role !== 'admin') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Access Denied',
-                    text: 'केवल Admin ले सन्देश डिलिट गर्न सक्छ।',
-                    confirmButtonText: 'ठीक छ'
-                });
-                return;
-            }
-
-            const result = await Swal.fire({
-                title: 'पक्का हुनुहुन्छ?',
-                text: 'यो सन्देश सबैका लागि डिलिट हुनेछ। यो action undo गर्न सकिँदैन।',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'हो, डिलिट गर्नुहोस्',
-                cancelButtonText: 'रद्द गर्नुहोस्',
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280'
-            });
-
-            if (result.isConfirmed) {
-                try {
-                    await deleteDoc(doc(db, "messages", messageId));
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'सफल!',
-                        text: 'सन्देश डिलिट भयो',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-
-                    loadMessages();
-                    updateUnreadCount();
-                } catch (e) {
-                    console.error("Delete message error:", e);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'त्रुटि',
-                        text: 'सन्देश डिलिट गर्न सकिएन। Error: ' + e.message,
-                        confirmButtonText: 'ठीक छ'
-                    });
-                }
-            }
-        };
 
         // --- ADMIN: DELETE ATTENDANCE ---
         window.deleteAttendanceRecord = async () => {
@@ -2181,7 +1909,9 @@
             list.innerHTML = '<p class="p-2 text-gray-400">Loading history...</p>';
 
             try {
-                const q = query(collection(db, "collections"), where("studentId", "==", sid));
+                const student = studentsData.find(s => s.id === sid);
+                const queryIds = student && student.oldId ? [sid, student.oldId] : [sid];
+                const q = query(collection(db, "collections"), where("studentId", "in", queryIds));
                 // Use default caching behavior (online first, fallback cache)
                 const snap = await getDocs(q);
 
@@ -2328,12 +2058,24 @@
                 const q = query(collection(db, "students"));
                 const snapshot = await getDocs(q);
                 studentsData = [];
-                snapshot.forEach(doc => studentsData.push({ id: doc.id, ...doc.data() }));
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (!data.academicYear) {
+                        data.academicYear = "2082";
+                        updateDoc(doc(db, "students", docSnap.id), { academicYear: "2082" }).catch(e=>console.log(e));
+                    }
+                    // Existing students without approved field are considered approved
+                    if (data.approved === undefined || data.approved === null) {
+                        data.approved = true;
+                    }
+                    studentsData.push({ id: docSnap.id, ...data });
+                });
 
                 // Cache for offline use
                 cachedStudentsData = [...studentsData];
 
                 renderStudentMgmtList();
+                populateAcceptClassDropdown();
                 updateDashboard();
             } catch (e) {
                 console.warn("Error loading students: ", e);
@@ -2354,12 +2096,14 @@
             const sec = document.getElementById('mgmt-sec').value;
             const search = document.getElementById('mgmt-search').value.toLowerCase();
 
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2082";
             let filtered = studentsData.filter(s => {
+                if (s.approved === false) return false; // Hide pending students everywhere
+                if (s.academicYear !== activeYear) return false;
                 if (s.class != cls) return false;
                 if (sec !== 'all' && s.section !== sec) return false;
-                if (search && !s.name.toLowerCase().includes(search) && !s.roll.toString().includes(search)) return false;
+                if (search && !s.name.toLowerCase().includes(search) && !(s.roll || '').toString().includes(search) && !(s.regNo || '').toLowerCase().includes(search) && !(s.father || '').toLowerCase().includes(search)) return false;
 
-                // Admin sees all. Teachers only see assigned.
                 if (currentUserData.role !== 'admin') {
                     const assignments = currentUserData.classes || [];
                     const hasWholeClass = assignments.includes(s.class);
@@ -2369,21 +2113,30 @@
                 return true;
             });
 
-            container.innerHTML = filtered.sort((a, b) => parseInt(a.roll) - parseInt(b.roll)).map(s => `
-                <div class="flex justify-between border-b p-3 items-center hover:bg-white transition last:border-0">
+            container.innerHTML = filtered.sort((a, b) => parseInt(a.roll) - parseInt(b.roll)).map(s => {
+                const isSuspended = s.suspended === true;
+                const statusBadge = s.status === 'Repeater' ? '<span class="bg-red-100 text-red-700 text-[9px] px-1 rounded font-bold ml-1">Repeater</span>' : '';
+                const suspendedBadge = isSuspended ? '<span class="bg-gray-200 text-gray-600 text-[9px] px-1.5 py-0.5 rounded font-bold ml-1 border border-gray-300"><i class="fas fa-ban mr-0.5"></i>Suspended</span>' : '';
+                const cardBg = isSuspended ? 'bg-gray-100 opacity-60' : '';
+                const suspendBtn = isSuspended
+                    ? `<button onclick="restoreStudent('${s.id}')" class="text-green-600 bg-green-50 p-2 rounded-lg hover:bg-green-100 transition" title="Restore"><i class="fas fa-undo"></i></button>`
+                    : `<button onclick="suspendStudent('${s.id}')" class="text-yellow-600 bg-yellow-50 p-2 rounded-lg hover:bg-yellow-100 transition" title="Suspend"><i class="fas fa-ban"></i></button>`;
+                return `<div class="flex justify-between border-b p-3 items-center hover:bg-white transition last:border-0 ${cardBg}">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">${s.roll}</div>
+                        <div class="w-8 h-8 rounded-full ${isSuspended ? 'bg-gray-200 text-gray-500' : 'bg-blue-100 text-blue-700'} flex items-center justify-center font-bold text-xs">${s.roll || '-'}</div>
                         <div>
-                            <span class="font-bold text-gray-800 block">${s.name}</span>
-                            <span class="text-[10px] text-gray-500 uppercase font-semibold">Class: ${s.class}-${s.section}</span>
+                            <span class="font-bold ${isSuspended ? 'text-gray-500 line-through' : 'text-gray-800'} block">${s.name}${statusBadge}${suspendedBadge}</span>
+                            <span class="text-[10px] text-gray-500 font-semibold">${s.class}-${s.section}${s.regNo ? ' | दर्ता: ' + s.regNo : ''}${s.father ? ' | ' + s.father : ''}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button onclick="viewStudentCard('${s.id}')" class="text-indigo-600 bg-indigo-50 p-2 rounded-lg hover:bg-indigo-100 transition" title="Report Card"><i class="fas fa-id-card"></i></button>
+                        ${!isSuspended ? `<button onclick="viewStudentCard('${s.id}')" class="text-indigo-600 bg-indigo-50 p-2 rounded-lg hover:bg-indigo-100 transition" title="Report Card"><i class="fas fa-id-card"></i></button>` : ''}
                         <button onclick="editStudent('${s.id}')" class="text-blue-600 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition"><i class="fas fa-edit"></i></button>
+                        ${suspendBtn}
                         <button onclick="deleteStudent('${s.id}')" class="text-red-600 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition"><i class="fas fa-trash"></i></button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
         // --- STUDENT REPORT CARD MODAL ---
@@ -2437,9 +2190,11 @@
 
                             if (hasAnyPresent) {
                                 schoolDays++; // Valid attendance day
-                                if (data[sid] === 'P') { present++; }
-                                else if (data[sid] === 'A') { absent++; }
-                                else if (data[sid] && data[sid].startsWith('L')) { /* Leave */ }
+                                const student = studentsData.find(s => s.id === sid);
+                                const status = data[sid] || (student && student.oldId ? data[student.oldId] : null);
+                                if (status === 'P') { present++; }
+                                else if (status === 'A') { absent++; }
+                                else if (status && status.startsWith('L')) { /* Leave */ }
                             }
                             // If all students absent, don't count as school day
                         }
@@ -2486,12 +2241,20 @@
                             <div class="border-t border-b border-gray-100 py-2 mb-3">
                                 <div class="flex justify-between items-center mb-1">
                                     <h3 class="font-bold text-gray-800 text-sm"><span class="text-gray-500 text-xs mr-1">Name:</span> ${student.name}</h3>
-                                    <span class="font-bold text-gray-800 text-xs">Roll: ${student.roll}</span>
+                                    <span class="font-bold text-gray-800 text-xs">Roll: ${student.roll || '-'}</span>
                                 </div>
-                                <div class="flex justify-between items-center text-xs text-gray-500">
+                                <div class="flex justify-between items-center text-xs text-gray-500 mb-1">
                                     <span>Class: ${student.class} (${student.section})</span>
                                     <span>Date: ${y} / ${monthName}</span>
                                 </div>
+                                ${student.regNo || student.dob || student.father || student.mother ? `
+                                <div class="grid grid-cols-2 gap-x-4 text-[10px] text-gray-500 mt-1 pt-1 border-t border-dashed border-gray-200">
+                                    ${student.regNo ? `<span><b>दर्ता नं:</b> ${student.regNo}</span>` : ''}
+                                    ${student.dob ? `<span><b>जन्म मिति:</b> ${student.dob}</span>` : ''}
+                                    ${student.father ? `<span><b>बुबा:</b> ${student.father}</span>` : ''}
+                                    ${student.mother ? `<span><b>आमा:</b> ${student.mother}</span>` : ''}
+                                </div>
+                                ` : ''}
                             </div>
 
                             <!-- Attendance Stats -->
@@ -2597,6 +2360,7 @@
                         document.getElementById('set-school-name').value = schoolSettings.schoolName || "";
                         document.getElementById('set-school-address').value = schoolSettings.schoolAddress || "";
                         document.getElementById('set-classes-list').value = (schoolSettings.classes || CLASSES).join(', ');
+                        document.getElementById('set-academic-year').value = schoolSettings.academicYear || 2081;
                         renderFineRateSettings();
                     }
                     return;
@@ -2615,7 +2379,9 @@
                     document.getElementById('set-school-name').value = schoolSettings.schoolName || "";
                     document.getElementById('set-school-address').value = schoolSettings.schoolAddress || "";
                     document.getElementById('set-classes-list').value = (schoolSettings.classes || CLASSES).join(', ');
+                    document.getElementById('set-academic-year').value = schoolSettings.academicYear || 2081;
                     renderFineRateSettings();
+                    updateLockRollsButton();
                 }
             } catch (e) {
                 console.log("Offline settings load");
@@ -2635,11 +2401,12 @@
             const name = document.getElementById('set-school-name').value;
             const addr = document.getElementById('set-school-address').value;
             const classesInput = document.getElementById('set-classes-list').value;
+            const activeYear = document.getElementById('set-academic-year').value || "2081";
             const newClasses = classesInput.split(',').map(s => s.trim()).filter(s => s);
             const fineInputs = document.querySelectorAll('.fine-input');
             let classFines = {};
             fineInputs.forEach(inp => { classFines[inp.dataset.class] = parseInt(inp.value) || 0; });
-            await setDoc(doc(db, "settings", "config"), { schoolName: name, schoolAddress: addr, classFines: classFines, classes: newClasses }, { merge: true });
+            await setDoc(doc(db, "settings", "config"), { schoolName: name, schoolAddress: addr, classFines: classFines, classes: newClasses, academicYear: activeYear.toString() }, { merge: true });
             Swal.fire({
                 icon: 'success',
                 title: 'सफल!',
@@ -2650,13 +2417,508 @@
             setTimeout(() => location.reload(), 1500);
         }
 
+        // --- LONG HOLIDAY MANAGEMENT ---
+        // Helper: increment BS date by one day
+        function nextBSDate(y, m, d) {
+            const daysInMonth = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 30;
+            d++;
+            if (d > daysInMonth) {
+                d = 1;
+                m++;
+                if (m > 12) {
+                    m = 1;
+                    y++;
+                }
+            }
+            return { year: y, month: m, day: d };
+        }
+
+        // Compare two BS dates: returns -1, 0, or 1
+        function compareBSDates(y1, m1, d1, y2, m2, d2) {
+            if (y1 !== y2) return y1 < y2 ? -1 : 1;
+            if (m1 !== m2) return m1 < m2 ? -1 : 1;
+            if (d1 !== d2) return d1 < d2 ? -1 : 1;
+            return 0;
+        }
+
+        // Helper: populate a year select dropdown, defaulting to current BS year
+        function populateYearDropdown(selectId, currentYear) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            sel.innerHTML = '';
+            for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+                sel.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
+            }
+        }
+
+        // Helper: populate a month select dropdown, defaulting to given month
+        function populateMonthDropdown(selectId, defaultMonth) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            sel.innerHTML = '';
+            MONTHS.forEach((name, i) => {
+                sel.innerHTML += `<option value="${i + 1}" ${(i + 1) === defaultMonth ? 'selected' : ''}>${name}</option>`;
+            });
+        }
+
+        // Initialize the long holiday & single holiday form dropdowns
+        function initLongHolidayForm() {
+            const d = dateConverter.adToBs(new Date());
+            const cy = d.year;
+            const cm = d.month;
+
+            // Long holiday: year dropdowns
+            populateYearDropdown('lh-from-y', cy);
+            populateYearDropdown('lh-to-y', cy);
+            populateMonthDropdown('lh-from-m', cm);
+            populateMonthDropdown('lh-to-m', cm);
+
+            // Single holiday: year & month dropdowns
+            populateYearDropdown('sh-y', cy);
+            populateMonthDropdown('sh-m', cm);
+        }
+
+        // --- SINGLE DAY HOLIDAY ---
+        window.saveSingleHoliday = async () => {
+            if (!requireOnline()) return;
+
+            const y = parseInt(document.getElementById('sh-y').value);
+            const m = parseInt(document.getElementById('sh-m').value);
+            const d = parseInt(document.getElementById('sh-d').value);
+            const title = document.getElementById('sh-title').value.trim() || '\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u092c\u093f\u0926\u093e';
+
+            if (!y || !m || !d) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: '\u0915\u0943\u092a\u092f\u093e \u0938\u093e\u0932, \u092e\u0939\u093f\u0928\u093e \u0930 \u0917\u0924\u0947 \u092d\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d!' });
+                return;
+            }
+
+            const dateKey = `${y}-${m}-${d}`;
+            const confirmResult = await Swal.fire({
+                title: '\u092c\u093f\u0926\u093e \u092e\u093e\u0930\u094d\u0915 \u0917\u0930\u094d\u0928\u0947?',
+                html: `<p><b>${y}/${MONTHS[m-1]}/${d}</b> \u092e\u093e "<b>${title}</b>" \u092c\u093f\u0926\u093e \u0930\u093e\u0916\u094d\u0928\u0947 \u0939\u094b?</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '\u0939\u094b, \u0930\u093e\u0916\u094d\u0928\u0941\u0939\u094b\u0938\u094d',
+                cancelButtonText: '\u0930\u0926\u094d\u0926',
+                confirmButtonColor: '#7c3aed'
+            });
+            if (!confirmResult.isConfirmed) return;
+
+            try {
+                await setDoc(doc(db, "attendance", dateKey), { isHoliday: true, holidayTitle: title }, { merge: true });
+                clearCache('todayAttendance');
+                clearCache('dashboardStats');
+                Swal.fire({ icon: 'success', title: '\u0938\u092b\u0932!', text: `${y}/${MONTHS[m-1]}/${d} \u092e\u093e "${title}" \u092c\u093f\u0926\u093e \u092e\u093e\u0930\u094d\u0915 \u092d\u092f\u094b!`, timer: 2000, showConfirmButton: false });
+                document.getElementById('sh-d').value = '';
+                document.getElementById('sh-title').value = '';
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: e.message });
+            }
+        };
+
+        window.saveLongHoliday = async () => {
+            if (!requireOnline()) return;
+
+            const fromY = parseInt(document.getElementById('lh-from-y').value);
+            const fromM = parseInt(document.getElementById('lh-from-m').value);
+            const fromD = parseInt(document.getElementById('lh-from-d').value);
+            const toY = parseInt(document.getElementById('lh-to-y').value);
+            const toM = parseInt(document.getElementById('lh-to-m').value);
+            const toD = parseInt(document.getElementById('lh-to-d').value);
+            const title = document.getElementById('lh-title').value.trim();
+
+            if (!fromY || !fromM || !fromD || !toY || !toM || !toD || !title) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: '\u0938\u092c\u0948 \u092b\u093f\u0932\u094d\u0921 \u092d\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d!' });
+                return;
+            }
+
+            if (compareBSDates(fromY, fromM, fromD, toY, toM, toD) > 0) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: '\u0938\u0941\u0930\u0942 \u092e\u093f\u0924\u093f \u0905\u0928\u094d\u0924\u093f\u092e \u092e\u093f\u0924\u093f\u092d\u0928\u094d\u0926\u093e \u0905\u0917\u093e\u0921\u093f \u0939\u0941\u0928\u0941\u092a\u0930\u094d\u091b!' });
+                return;
+            }
+
+            // Calculate number of days
+            let dayCount = 0;
+            let cur = { year: fromY, month: fromM, day: fromD };
+            while (compareBSDates(cur.year, cur.month, cur.day, toY, toM, toD) <= 0) {
+                dayCount++;
+                cur = nextBSDate(cur.year, cur.month, cur.day);
+                if (dayCount > 365) break; // Safety limit
+            }
+
+            const confirmResult = await Swal.fire({
+                title: '\u0932\u093e\u092e\u094b \u092c\u093f\u0926\u093e \u0930\u093e\u0916\u094d\u0928\u0947?',
+                html: `<p>"<b>${title}</b>" \u0928\u093e\u092e\u0915\u094b \u092c\u093f\u0926\u093e</p>
+                       <p class="text-sm mt-1"><b>${fromY}/${MONTHS[fromM-1]}/${fromD}</b> \u0926\u0947\u0916\u093f <b>${toY}/${MONTHS[toM-1]}/${toD}</b> \u0938\u092e\u094d\u092e</p>
+                       <p class="text-sm text-gray-500 mt-1">\u091c\u092e\u094d\u092e\u093e <b>${dayCount} \u0926\u093f\u0928</b> \u092c\u093f\u0926\u093e \u092e\u093e\u0930\u094d\u0915 \u0939\u0941\u0928\u0947\u091b\u0964</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '\u0939\u094b, \u092c\u093f\u0926\u093e \u0930\u093e\u0916\u094d\u0928\u0941\u0939\u094b\u0938\u094d',
+                cancelButtonText: '\u0930\u0926\u094d\u0926 \u0917\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d',
+                confirmButtonColor: '#7c3aed'
+            });
+            if (!confirmResult.isConfirmed) return;
+
+            try {
+                Swal.fire({ title: '\u092c\u093f\u0926\u093e \u092e\u093e\u0930\u094d\u0915 \u0917\u0930\u094d\u0926\u0948\u091b...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                let batch = writeBatch(db);
+                let batchCount = 0;
+                let markedDays = 0;
+                cur = { year: fromY, month: fromM, day: fromD };
+
+                while (compareBSDates(cur.year, cur.month, cur.day, toY, toM, toD) <= 0) {
+                    const dateKey = `${cur.year}-${cur.month}-${cur.day}`;
+                    batch.set(doc(db, "attendance", dateKey), { isHoliday: true, holidayTitle: title }, { merge: true });
+                    markedDays++;
+                    batchCount++;
+
+                    if (batchCount >= 450) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        batchCount = 0;
+                    }
+
+                    cur = nextBSDate(cur.year, cur.month, cur.day);
+                    if (markedDays > 365) break;
+                }
+
+                if (batchCount > 0) await batch.commit();
+
+                // Save long holiday record for listing
+                const holidayId = `lh-${fromY}-${fromM}-${fromD}-${toY}-${toM}-${toD}`;
+                await setDoc(doc(db, "long_holidays", holidayId), {
+                    title,
+                    fromYear: fromY, fromMonth: fromM, fromDay: fromD,
+                    toYear: toY, toMonth: toM, toDay: toD,
+                    days: markedDays,
+                    createdAt: new Date()
+                });
+
+                // Clear attendance cache
+                clearCache('todayAttendance');
+                clearCache('dashboardStats');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '\u0938\u092b\u0932!',
+                    html: `<b>${title}</b> \u0915\u094b <b>${markedDays} \u0926\u093f\u0928</b> \u092c\u093f\u0926\u093e \u092e\u093e\u0930\u094d\u0915 \u092d\u092f\u094b!`,
+                    confirmButtonText: '\u0920\u093f\u0915 \u091b'
+                });
+
+                document.getElementById('lh-title').value = '';
+                document.getElementById('lh-from-d').value = '';
+                document.getElementById('lh-to-d').value = '';
+                loadLongHolidays();
+            } catch (e) {
+                console.error('Long Holiday Error:', e);
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: e.message });
+            }
+        };
+
+        // Load and render existing long holidays
+        async function loadLongHolidays() {
+            const container = document.getElementById('long-holidays-list');
+            if (!container) return;
+
+            try {
+                const q = query(collection(db, "long_holidays"));
+                const snap = await getDocs(q);
+                const holidays = [];
+                snap.forEach(docSnap => {
+                    holidays.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                if (holidays.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400 text-xs italic">\u0915\u0941\u0928\u0948 \u0932\u093e\u092e\u094b \u092c\u093f\u0926\u093e \u0930\u093e\u0916\u093f\u090f\u0915\u094b \u091b\u0948\u0928\u0964</p>';
+                    return;
+                }
+
+                // Sort by fromYear, fromMonth, fromDay descending (newest first)
+                holidays.sort((a, b) => compareBSDates(b.fromYear, b.fromMonth, b.fromDay, a.fromYear, a.fromMonth, a.fromDay));
+
+                container.innerHTML = holidays.map(h => `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border border-purple-100 hover:border-purple-300 transition">
+                        <div>
+                            <span class="font-bold text-gray-800 text-xs">${h.title}</span>
+                            <span class="text-[10px] text-gray-500 block">${h.fromYear}/${MONTHS[h.fromMonth-1]}/${h.fromDay} - ${h.toYear}/${MONTHS[h.toMonth-1]}/${h.toDay} (${h.days} \u0926\u093f\u0928)</span>
+                        </div>
+                        <button onclick="deleteLongHoliday('${h.id}', ${h.fromYear}, ${h.fromMonth}, ${h.fromDay}, ${h.toYear}, ${h.toMonth}, ${h.toDay})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition" title="Delete"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.warn('Long holidays load error:', e);
+                container.innerHTML = '<p class="text-gray-400 text-xs italic">\u0932\u094b\u0921 \u0917\u0930\u094d\u0928 \u0938\u0915\u093f\u090f\u0928\u0964</p>';
+            }
+        }
+
+        window.deleteLongHoliday = async (holidayId, fromY, fromM, fromD, toY, toM, toD) => {
+            if (!requireOnline()) return;
+
+            const confirmResult = await Swal.fire({
+                title: '\u092c\u093f\u0926\u093e \u0939\u091f\u093e\u0909\u0928\u0947?',
+                text: '\u092f\u094b \u0932\u093e\u092e\u094b \u092c\u093f\u0926\u093e \u0939\u091f\u093e\u0909\u0928\u0947 \u0939\u094b? \u0924\u0940 \u0938\u092c\u0948 \u0926\u093f\u0928\u0939\u0930\u0942\u092c\u093e\u091f \u092c\u093f\u0926\u093e \u0939\u091f\u093e\u0907\u0928\u0947\u091b\u0964',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '\u0939\u094b, \u0939\u091f\u093e\u0909\u0928\u0941\u0939\u094b\u0938\u094d',
+                cancelButtonText: '\u0930\u0926\u094d\u0926',
+                confirmButtonColor: '#ef4444'
+            });
+            if (!confirmResult.isConfirmed) return;
+
+            try {
+                Swal.fire({ title: '\u0939\u091f\u093e\u0909\u0901\u0926\u0948\u091b...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                // Delete holiday marks from all days in range
+                let batch = writeBatch(db);
+                let batchCount = 0;
+                let cur = { year: fromY, month: fromM, day: fromD };
+                let count = 0;
+
+                while (compareBSDates(cur.year, cur.month, cur.day, toY, toM, toD) <= 0) {
+                    const dateKey = `${cur.year}-${cur.month}-${cur.day}`;
+                    batch.delete(doc(db, "attendance", dateKey));
+                    batchCount++;
+                    count++;
+
+                    if (batchCount >= 450) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        batchCount = 0;
+                    }
+
+                    cur = nextBSDate(cur.year, cur.month, cur.day);
+                    if (count > 365) break;
+                }
+
+                if (batchCount > 0) await batch.commit();
+
+                // Delete the long_holidays record
+                await deleteDoc(doc(db, "long_holidays", holidayId));
+
+                clearCache('todayAttendance');
+                clearCache('dashboardStats');
+
+                Swal.fire({ icon: 'success', title: '\u0938\u092b\u0932!', text: `${count} \u0926\u093f\u0928\u0915\u094b \u092c\u093f\u0926\u093e \u0939\u091f\u093e\u0907\u092f\u094b\u0964`, timer: 2000, showConfirmButton: false });
+                loadLongHolidays();
+            } catch (e) {
+                console.error('Delete Long Holiday Error:', e);
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: e.message });
+            }
+        };
+
+        // --- BULK ACCEPT ALL ---
+        window.approveAllStudents = async () => {
+            if (!requireOnline()) return;
+            const selectedClass = document.getElementById('accept-class-select').value;
+            if (!selectedClass) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: '\u0915\u0943\u092a\u092f\u093e \u092a\u0939\u093f\u0932\u093e \u0915\u0915\u094d\u0937\u093e \u091b\u093e\u0928\u094d\u0928\u0941\u0939\u094b\u0938\u094d!' });
+                return;
+            }
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2082";
+            const pending = studentsData.filter(s => s.approved === false && s.academicYear === activeYear && s.class == selectedClass);
+            if (pending.length === 0) {
+                Swal.fire({ icon: 'info', title: '\u091b\u0948\u0928', text: '\u092f\u094b \u0915\u0915\u094d\u0937\u093e\u092e\u093e Pending \u0935\u093f\u0926\u094d\u092f\u093e\u0930\u094d\u0925\u0940 \u091b\u0948\u0928\u0928\u094d\u0964' });
+                return;
+            }
+
+            confirmAction(async () => {
+                try {
+                    Swal.fire({ title: '\u0938\u092c\u0948 Accept \u0917\u0930\u094d\u0926\u0948\u091b...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    let batch = writeBatch(db);
+                    let batchCount = 0;
+
+                    for (const s of pending) {
+                        batch.update(doc(db, "students", s.id), { approved: true });
+                        s.approved = true;
+                        batchCount++;
+                        if (batchCount >= 450) { await batch.commit(); batch = writeBatch(db); batchCount = 0; }
+                    }
+                    if (batchCount > 0) await batch.commit();
+
+                    // Auto re-order rolls if not locked
+                    if (!schoolSettings.rollsLocked) {
+                        const sections = [...new Set(pending.map(s => s.section))];
+                        for (const sec of sections) {
+                            await autoReorderRolls(selectedClass, sec);
+                        }
+                    }
+
+                    renderPendingStudentList();
+                    populateAcceptClassDropdown();
+                    renderStudentMgmtList();
+                    updateDashboard();
+                    Swal.fire({ icon: 'success', title: '\u0938\u092b\u0932!', text: `\u0915\u0915\u094d\u0937\u093e ${selectedClass} \u0915\u093e ${pending.length} \u0935\u093f\u0926\u094d\u092f\u093e\u0930\u094d\u0925\u0940 \u0938\u094d\u0935\u0940\u0915\u0943\u0924 \u092d\u090f!`, timer: 2500, showConfirmButton: false });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: err.message });
+                }
+            }, `\u0915\u0915\u094d\u0937\u093e ${selectedClass} \u0915\u093e \u0938\u092c\u0948 ${pending.length} Pending \u0935\u093f\u0926\u094d\u092f\u093e\u0930\u094d\u0925\u0940 Accept \u0917\u0930\u094d\u0928\u0947?`);
+        };
+
+        // --- BULK SUSPEND ALL ---
+        window.suspendAllStudents = async () => {
+            if (!requireOnline()) return;
+            const cls = document.getElementById('mgmt-class').value;
+            const sec = document.getElementById('mgmt-sec').value;
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2082";
+
+            let targets = studentsData.filter(s => s.academicYear === activeYear && s.class == cls && s.approved !== false && s.suspended !== true);
+            if (sec !== 'all') targets = targets.filter(s => s.section === sec);
+
+            if (targets.length === 0) {
+                Swal.fire({ icon: 'info', title: '\u091b\u0948\u0928', text: '\u092f\u094b \u0915\u0915\u094d\u0937\u093e/\u0938\u0947\u0915\u094d\u0938\u0928\u092e\u093e \u0938\u0938\u094d\u092a\u0947\u0928\u094d\u0921 \u0917\u0930\u094d\u0928 \u092e\u093f\u0932\u094d\u0928\u0947 \u0935\u093f\u0926\u094d\u092f\u093e\u0930\u094d\u0925\u0940 \u091b\u0948\u0928\u0928\u094d\u0964' });
+                return;
+            }
+
+            confirmAction(async () => {
+                try {
+                    Swal.fire({ title: '\u0938\u092c\u0948 Suspend \u0917\u0930\u094d\u0926\u0948\u091b...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    let batch = writeBatch(db);
+                    let batchCount = 0;
+
+                    for (const s of targets) {
+                        batch.update(doc(db, "students", s.id), { suspended: true });
+                        s.suspended = true;
+                        batchCount++;
+                        if (batchCount >= 450) { await batch.commit(); batch = writeBatch(db); batchCount = 0; }
+                    }
+                    if (batchCount > 0) await batch.commit();
+
+                    renderStudentMgmtList();
+                    updateDashboard();
+                    Swal.fire({ icon: 'success', title: '\u0938\u092b\u0932!', text: `${targets.length} \u0935\u093f\u0926\u094d\u092f\u093e\u0930\u094d\u0925\u0940 \u0938\u0938\u094d\u092a\u0947\u0928\u094d\u0921 \u092d\u090f!`, timer: 2000, showConfirmButton: false });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: err.message });
+                }
+            }, `\u0915\u0915\u094d\u0937\u093e ${cls}${sec !== 'all' ? '-' + sec : ''} \u0915\u093e \u0938\u092c\u0948 ${targets.length} \u0935\u093f\u0926\u094d\u092f\u093e\u0930\u094d\u0925\u0940 Suspend \u0917\u0930\u094d\u0928\u0947?`);
+        };
+
+        // --- OPEN ATTENDANCE FOR ANY USER ---
+        let openAttendanceOverrides = []; // In-memory cache
+
+        function initOpenAttendanceForm() {
+            const d = dateConverter.adToBs(new Date());
+            populateYearDropdown('oa-y', d.year);
+            populateMonthDropdown('oa-m', d.month);
+            // Populate class dropdown
+            const oaCls = document.getElementById('oa-class');
+            if (oaCls) {
+                oaCls.innerHTML = CLASSES.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+        }
+
+        window.openAttendanceForAll = async () => {
+            if (!requireOnline()) return;
+            const y = parseInt(document.getElementById('oa-y').value);
+            const m = parseInt(document.getElementById('oa-m').value);
+            const d = parseInt(document.getElementById('oa-d').value);
+            const cls = document.getElementById('oa-class').value;
+
+            if (!y || !m || !d || !cls) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: '\u0938\u092c\u0948 \u092b\u093f\u0932\u094d\u0921 \u092d\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d!' });
+                return;
+            }
+
+            const dateKey = `${y}-${m}-${d}`;
+            const overrideId = `${dateKey}-${cls}`;
+
+            const confirmResult = await Swal.fire({
+                title: '\u0939\u093e\u091c\u093f\u0930\u0940 \u0916\u0941\u0932\u093e \u0917\u0930\u094d\u0928\u0947?',
+                html: `<p>\u0915\u0915\u094d\u0937\u093e <b>${cls}</b> \u0932\u093e\u0908 <b>${y}/${MONTHS[m-1]}/${d}</b> \u092e\u093e \u091c\u0941\u0928\u0938\u0941\u0915\u0948 \u092f\u0941\u091c\u0930\u0932\u0947 \u0939\u093e\u091c\u093f\u0930\u0940 \u0917\u0930\u094d\u0928 \u0938\u0915\u094d\u0928\u0947 \u0939\u0941\u0928\u0947\u091b\u0964</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '\u0939\u094b, \u0916\u0941\u0932\u093e \u0917\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d',
+                cancelButtonText: '\u0930\u0926\u094d\u0926',
+                confirmButtonColor: '#0891b2'
+            });
+            if (!confirmResult.isConfirmed) return;
+
+            try {
+                await setDoc(doc(db, "attendance_overrides", overrideId), {
+                    dateKey, class: cls, year: y, month: m, day: d, openForAll: true, createdAt: new Date()
+                });
+                openAttendanceOverrides.push({ id: overrideId, dateKey, class: cls, year: y, month: m, day: d });
+                Swal.fire({ icon: 'success', title: '\u0938\u092b\u0932!', text: `\u0915\u0915\u094d\u0937\u093e ${cls} \u0915\u094b \u0939\u093e\u091c\u093f\u0930\u0940 ${y}/${MONTHS[m-1]}/${d} \u092e\u093e \u0938\u092c\u0948\u0932\u093e\u0908 \u0916\u0941\u0932\u093e \u0917\u0930\u093f\u092f\u094b!`, timer: 2000, showConfirmButton: false });
+                document.getElementById('oa-d').value = '';
+                loadOpenAttendanceList();
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: e.message });
+            }
+        };
+
+        async function loadOpenAttendanceList() {
+            const container = document.getElementById('open-attendance-list');
+            if (!container) return;
+
+            try {
+                const snap = await getDocs(collection(db, "attendance_overrides"));
+                openAttendanceOverrides = [];
+                snap.forEach(docSnap => {
+                    openAttendanceOverrides.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                if (openAttendanceOverrides.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400 text-xs italic">\u0915\u0941\u0928\u0948 \u0916\u0941\u0932\u093e \u0917\u0930\u093f\u090f\u0915\u094b \u091b\u0948\u0928\u0964</p>';
+                    return;
+                }
+
+                container.innerHTML = openAttendanceOverrides.map(o => `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border border-cyan-100 hover:border-cyan-300 transition">
+                        <div>
+                            <span class="font-bold text-gray-800 text-xs">\u0915\u0915\u094d\u0937\u093e ${o.class}</span>
+                            <span class="text-[10px] text-gray-500 block">${o.year}/${MONTHS[(o.month || 1)-1]}/${o.day} - \u0938\u092c\u0948\u0932\u093e\u0908 \u0916\u0941\u0932\u093e</span>
+                        </div>
+                        <button onclick="deleteOpenAttendance('${o.id}')" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition" title="Delete"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<p class="text-gray-400 text-xs italic">\u0932\u094b\u0921 \u0917\u0930\u094d\u0928 \u0938\u0915\u093f\u090f\u0928\u0964</p>';
+            }
+        }
+
+        window.deleteOpenAttendance = async (overrideId) => {
+            if (!requireOnline()) return;
+            try {
+                await deleteDoc(doc(db, "attendance_overrides", overrideId));
+                openAttendanceOverrides = openAttendanceOverrides.filter(o => o.id !== overrideId);
+                loadOpenAttendanceList();
+                Swal.fire({ icon: 'success', title: '\u0939\u091f\u093e\u0907\u092f\u094b!', timer: 1500, showConfirmButton: false });
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: '\u0924\u094d\u0930\u0941\u091f\u093f', text: e.message });
+            }
+        };
+
+        // Check if a class is open for all users on a specific date
+        function isClassOpenForAll(dateKey, cls) {
+            return openAttendanceOverrides.some(o => o.dateKey === dateKey && o.class == cls);
+        }
+
+        // Load all overrides for ALL users (lightweight, no UI)
+        async function loadOpenAttendanceOverridesForAll() {
+            try {
+                const snap = await getDocs(collection(db, "attendance_overrides"));
+                openAttendanceOverrides = [];
+                snap.forEach(docSnap => {
+                    openAttendanceOverrides.push({ id: docSnap.id, ...docSnap.data() });
+                });
+            } catch (e) {
+                console.warn('Open attendance overrides load error:', e);
+            }
+        }
+
         window.editStudent = (id) => {
             if (!requireOnline()) return;
             const s = studentsData.find(st => st.id === id);
             if (!s) return;
             document.getElementById('edit-s-id').value = id;
-            document.getElementById('edit-s-name').value = s.name;
-            document.getElementById('edit-s-sec').value = s.section;
+            document.getElementById('edit-s-name').value = s.name || '';
+            document.getElementById('edit-s-sec').value = s.section || 'A';
+            document.getElementById('edit-s-roll').value = s.roll || '';
+            document.getElementById('edit-s-regNo').value = s.regNo || '';
+            document.getElementById('edit-s-dob').value = s.dob || '';
+            document.getElementById('edit-s-father').value = s.father || '';
+            document.getElementById('edit-s-mother').value = s.mother || '';
+            document.getElementById('edit-s-address').value = s.address || '';
             document.getElementById('edit-student-modal').classList.remove('hidden');
         }
 
@@ -2665,6 +2927,12 @@
             const id = document.getElementById('edit-s-id').value;
             const newName = document.getElementById('edit-s-name').value;
             const newSec = document.getElementById('edit-s-sec').value;
+            const newRoll = parseInt(document.getElementById('edit-s-roll').value) || 0;
+            const newRegNo = document.getElementById('edit-s-regNo').value.trim();
+            const newDob = document.getElementById('edit-s-dob').value.trim();
+            const newFather = document.getElementById('edit-s-father').value.trim();
+            const newMother = document.getElementById('edit-s-mother').value.trim();
+            const newAddress = document.getElementById('edit-s-address').value.trim();
             if (!newName || !newSec) {
                 Swal.fire({
                     icon: 'error',
@@ -2675,9 +2943,10 @@
                 return;
             }
             try {
-                await updateDoc(doc(db, "students", id), { name: newName, section: newSec });
+                const updateData = { name: newName, section: newSec, roll: newRoll, regNo: newRegNo, dob: newDob, father: newFather, mother: newMother, address: newAddress };
+                await updateDoc(doc(db, "students", id), updateData);
                 const s = studentsData.find(st => st.id === id);
-                if (s) { s.name = newName; s.section = newSec; }
+                if (s) { Object.assign(s, updateData); }
                 Swal.fire({
                     icon: 'success',
                     title: 'सफल!',
@@ -2714,6 +2983,193 @@
                 });
             }, "🔒 Confirm Delete (Password Required)");
         }
+
+        // --- JSON ADMISSION IMPORT ---
+        window.importAdmissionJSON = async (input) => {
+            if (!requireOnline()) return;
+            if (currentUserData.role !== 'admin') {
+                Swal.fire({ icon: 'error', title: 'अनुमति छैन', text: 'Admin मात्रले इम्पोर्ट गर्न सक्छन्' });
+                return;
+            }
+            const file = input.files[0];
+            if (!file) return;
+            input.value = ''; // Reset so same file can be re-selected
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!Array.isArray(data) || data.length === 0) {
+                    Swal.fire({ icon: 'error', title: 'त्रुटि', text: 'JSON फायलमा विद्यार्थी डाटा फेला परेन।' });
+                    return;
+                }
+
+                const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2083";
+
+                const confirm = await Swal.fire({
+                    title: `${data.length} विद्यार्थी इम्पोर्ट गर्ने?`,
+                    html: `<p>शैक्षिक सत्र: <b>${activeYear}</b></p><p class="text-sm text-gray-500">सबै विद्यार्थी "Pending" अवस्थामा रहनेछन्।<br>Admin ले Accept गरेपछि मात्र हाजिरीमा देखिनेछन्।</p>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'हो, इम्पोर्ट गर्नुहोस्',
+                    cancelButtonText: 'रद्द गर्नुहोस्'
+                });
+                if (!confirm.isConfirmed) return;
+
+                Swal.fire({ title: 'इम्पोर्ट हुँदैछ...', html: '<p>कृपया पर्खनुहोस्...</p>', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                // Group by class and sort alphabetically within each class for roll assignment
+                const grouped = {};
+                data.forEach(s => {
+                    const cls = String(s.class || '').trim();
+                    if (!grouped[cls]) grouped[cls] = [];
+                    grouped[cls].push(s);
+                });
+
+                // Sort each class alphabetically by name
+                Object.keys(grouped).forEach(cls => {
+                    grouped[cls].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                });
+
+                let count = 0, batchCount = 0;
+                let batch = writeBatch(db);
+                const classSummary = {};
+
+                for (const cls of Object.keys(grouped).sort((a, b) => parseInt(a) - parseInt(b))) {
+                    classSummary[cls] = grouped[cls].length;
+                    let roll = 1;
+                    for (const student of grouped[cls]) {
+                        const name = (student.name || '').replace(/\t/g, ' ').replace(/\s+/g, ' ').trim();
+                        if (!name) continue;
+
+                        const studentData = {
+                            name: name,
+                            class: cls,
+                            section: 'A',
+                            roll: roll,
+                            regNo: (student.regNo || '').trim(),
+                            dob: (student.dob || '').trim(),
+                            father: (student.father || '').trim(),
+                            mother: (student.mother || '').trim(),
+                            address: (student.address || '').trim(),
+                            status: (student.status || 'Promoted').trim(),
+                            academicYear: activeYear,
+                            approved: false
+                        };
+
+                        const id = doc(collection(db, "students")).id;
+                        batch.set(doc(db, "students", id), studentData);
+                        studentsData.push({ id, ...studentData });
+                        roll++;
+                        count++;
+                        batchCount++;
+
+                        if (batchCount >= 450) {
+                            await batch.commit();
+                            batch = writeBatch(db);
+                            batchCount = 0;
+                        }
+                    }
+                }
+
+                if (batchCount > 0) await batch.commit();
+
+                // Build summary HTML
+                let summaryHTML = '<table class="w-full text-sm mt-2"><thead><tr class="bg-gray-100"><th class="p-1 text-left">कक्षा</th><th class="p-1 text-right">विद्यार्थी</th></tr></thead><tbody>';
+                for (const [cls, cnt] of Object.entries(classSummary).sort((a, b) => parseInt(a[0]) - parseInt(b[0]))) {
+                    summaryHTML += `<tr><td class="p-1 border-b">कक्षा ${cls}</td><td class="p-1 border-b text-right font-bold">${cnt}</td></tr>`;
+                }
+                summaryHTML += `<tr class="bg-green-50 font-bold"><td class="p-1">जम्मा</td><td class="p-1 text-right">${count}</td></tr></tbody></table>`;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: `${count} विद्यार्थी इम्पोर्ट भयो!`,
+                    html: `<p class="text-sm text-orange-600 mb-2"><i class="fas fa-clock mr-1"></i>सबै "Pending" अवस्थामा छन्। कृपया सेटिङ्गको "विद्यार्थी स्वीकृति" बाट Accept गर्नुहोस्।</p>${summaryHTML}`
+                });
+
+                renderStudentMgmtList();
+                populateAcceptClassDropdown();
+                renderPendingStudentList();
+            } catch (e) {
+                console.error('JSON Import Error:', e);
+                Swal.fire({ icon: 'error', title: 'इम्पोर्ट त्रुटि', text: e.message });
+            }
+        };
+
+        // --- APPROVE STUDENTS (Settings Panel) ---
+        window.approveStudent = async (id) => {
+            if (!requireOnline()) return;
+            try {
+                await updateDoc(doc(db, "students", id), { approved: true });
+                const s = studentsData.find(st => st.id === id);
+                if (s) s.approved = true;
+
+                // Auto re-order rolls alphabetically if not locked
+                if (!schoolSettings.rollsLocked && s) {
+                    await autoReorderRolls(s.class, s.section);
+                }
+
+                renderPendingStudentList(); // Re-render settings pending list
+                populateAcceptClassDropdown(); // Update class dropdown counts
+                renderStudentMgmtList(); // Update student management (will now show this student)
+                Swal.fire({ icon: 'success', title: 'स्वीकृत!', text: `${s ? s.name : ''} स्वीकृत भयो।`, timer: 1500, showConfirmButton: false });
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: 'त्रुटि', text: e.message });
+            }
+        };
+
+        // Render pending students in Admin Settings panel
+        window.renderPendingStudentList = () => {
+            const container = document.getElementById('pending-students-list');
+            const badge = document.getElementById('pending-total-badge');
+            const clsSelect = document.getElementById('accept-class-select');
+            if (!container || !clsSelect) return;
+
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2082";
+            const allPending = studentsData.filter(s => s.approved === false && s.academicYear === activeYear);
+
+            // Update total badge
+            if (badge) badge.textContent = allPending.length > 0 ? `जम्मा ${allPending.length} Pending` : '';
+
+            const selectedClass = clsSelect.value;
+            if (!selectedClass) {
+                container.innerHTML = '<p class="text-gray-400 text-xs italic">कक्षा छानेपछि Pending विद्यार्थी देखिनेछन्</p>';
+                return;
+            }
+
+            const pending = allPending.filter(s => s.class == selectedClass);
+            if (pending.length === 0) {
+                container.innerHTML = '<p class="text-green-600 text-xs font-bold"><i class="fas fa-check-circle mr-1"></i>यो कक्षामा Pending विद्यार्थी छैनन्।</p>';
+                return;
+            }
+
+            container.innerHTML = pending.sort((a, b) => parseInt(a.roll) - parseInt(b.roll)).map(s => {
+                const statusBadge = s.status === 'Repeater' ? '<span class="bg-red-100 text-red-700 text-[8px] px-1 rounded font-bold ml-1">Repeater</span>' : '';
+                return `<div class="flex justify-between items-center p-2 bg-white rounded border border-orange-100 hover:border-green-300 transition">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-[10px] font-bold">${s.roll || '-'}</span>
+                        <div>
+                            <span class="font-bold text-gray-800 text-xs">${s.name}${statusBadge}</span>
+                            <span class="text-[9px] text-gray-400 block">${s.regNo ? 'दर्ता: ' + s.regNo + ' | ' : ''}${s.father || ''}</span>
+                        </div>
+                    </div>
+                    <button onclick="approveStudent('${s.id}')" class="bg-green-500 text-white text-[10px] px-3 py-1 rounded font-bold hover:bg-green-600 transition shadow-sm"><i class="fas fa-check mr-1"></i>Accept</button>
+                </div>`;
+            }).join('');
+        };
+
+        // Populate accept class dropdown (called from loadSettings/loadStudents)
+        window.populateAcceptClassDropdown = () => {
+            const select = document.getElementById('accept-class-select');
+            if (!select) return;
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2082";
+            const pendingClasses = [...new Set(studentsData.filter(s => s.approved === false && s.academicYear === activeYear).map(s => s.class))].sort((a, b) => parseInt(a) - parseInt(b));
+            select.innerHTML = '<option value="">-- कक्षा छान्नुहोस् --</option>';
+            pendingClasses.forEach(cls => {
+                const count = studentsData.filter(s => s.approved === false && s.academicYear === activeYear && s.class == cls).length;
+                select.innerHTML += `<option value="${cls}">कक्षा ${cls} (${count} pending)</option>`;
+            });
+        };
+
 
         window.masterDeleteClass = async () => {
             if (!requireOnline()) return;
@@ -2946,14 +3402,51 @@
 
         window.addStudent = async (e) => {
             e.preventDefault();
-            const name = document.getElementById('s-name').value;
+            const name = document.getElementById('s-name').value.trim();
             const cls = document.getElementById('s-class').value;
             const sec = document.getElementById('s-sec').value.toUpperCase();
-            const roll = document.getElementById('s-roll').value;
-            const id = `${cls}-${sec}-${roll}`;
+            const rollInput = document.getElementById('s-roll').value;
+            const regNo = (document.getElementById('s-regNo').value || '').trim();
+            const dob = (document.getElementById('s-dob').value || '').trim();
+            const father = (document.getElementById('s-father').value || '').trim();
+            const mother = (document.getElementById('s-mother').value || '').trim();
+            const address = (document.getElementById('s-address').value || '').trim();
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2081";
+
+            // Auto-assign roll if not provided and rolls are not locked
+            let roll;
+            if (rollInput && parseInt(rollInput) > 0) {
+                roll = parseInt(rollInput);
+            } else if (schoolSettings.rollsLocked) {
+                Swal.fire({ icon: 'error', title: 'त्रुटि', text: 'रोल नं लक छ, कृपया रोल नं प्रविष्ट गर्नुहोस्।' });
+                return;
+            } else {
+                // Auto: count existing active students in this class/section + 1
+                const existingInSection = studentsData.filter(s => s.academicYear === activeYear && s.class === cls && s.section === sec && s.approved !== false && s.suspended !== true);
+                roll = existingInSection.length + 1;
+            }
+
+            const oldId = `${activeYear}-${cls}-${sec}-${roll}`;
+            
+            // Check if student with same class, section, roll already exists IN THIS ACADEMIC YEAR
+            const existingStudent = studentsData.find(s => s.oldId === oldId || (s.academicYear === activeYear && s.class === cls && s.section === sec && s.roll === roll));
+            const id = existingStudent ? existingStudent.id : doc(collection(db, "students")).id;
+
+            const studentData = { name, class: cls, section: sec, roll, oldId, academicYear: activeYear, approved: true, regNo, dob, father, mother, address };
+
             try {
-                await setDoc(doc(db, "students", id), { name, class: cls, section: sec, roll: parseInt(roll) });
-                if (!studentsData.find(s => s.id === id)) studentsData.push({ id, name, class: cls, section: sec, roll: parseInt(roll) });
+                await setDoc(doc(db, "students", id), studentData);
+                if (!existingStudent) {
+                    studentsData.push({ id, ...studentData });
+                } else {
+                    Object.assign(existingStudent, studentData);
+                }
+
+                // If rolls are NOT locked, re-order alphabetically after adding
+                if (!schoolSettings.rollsLocked) {
+                    await autoReorderRolls(cls, sec);
+                }
+
                 Swal.fire({
                     icon: 'success',
                     title: 'सफल!',
@@ -2964,17 +3457,153 @@
                 e.target.reset();
                 updateDashboard();
                 renderStudentMgmtList();
-            } catch (e) {
+            } catch (err) {
                 Swal.fire({
                     icon: 'error',
                     title: 'त्रुटि',
-                    text: 'Error: ' + e.message,
+                    text: 'Error: ' + err.message,
                     confirmButtonText: 'ठिक छ'
                 });
             }
         };
 
-        // Excel Upload (unchanged logic)
+        // --- SUSPEND / RESTORE ---
+        window.suspendStudent = async (id) => {
+            if (!requireOnline()) return;
+            const s = studentsData.find(st => st.id === id);
+            if (!s) return;
+            confirmAction(async () => {
+                try {
+                    await updateDoc(doc(db, "students", id), { suspended: true });
+                    s.suspended = true;
+                    renderStudentMgmtList();
+                    updateDashboard();
+                    Swal.fire({ icon: 'success', title: 'Suspended!', text: `${s.name} सस्पेन्ड भयो। यो विद्यार्थी अब हाजिरी र रिपोर्टमा देखिने छैन।`, timer: 3000, showConfirmButton: false });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'त्रुटि', text: err.message });
+                }
+            }, `${s.name} लाई Suspend गर्ने?`);
+        };
+
+        window.restoreStudent = async (id) => {
+            if (!requireOnline()) return;
+            const s = studentsData.find(st => st.id === id);
+            if (!s) return;
+            confirmAction(async () => {
+                try {
+                    await updateDoc(doc(db, "students", id), { suspended: false });
+                    s.suspended = false;
+
+                    // Re-order rolls alphabetically if not locked
+                    if (!schoolSettings.rollsLocked) {
+                        await autoReorderRolls(s.class, s.section);
+                    }
+
+                    renderStudentMgmtList();
+                    updateDashboard();
+                    Swal.fire({ icon: 'success', title: 'Restored!', text: `${s.name} पुनर्स्थापित भयो।`, timer: 2000, showConfirmButton: false });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'त्रुटि', text: err.message });
+                }
+            }, `${s.name} लाई Restore गर्ने?`);
+        };
+
+        // --- ROLL NUMBER MANAGEMENT ---
+        // Auto re-order rolls alphabetically for a given class/section (silent, no UI prompt)
+        async function autoReorderRolls(cls, sec) {
+            const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2083";
+            const sectionStudents = studentsData.filter(s =>
+                s.academicYear === activeYear && s.class == cls && s.section === sec && s.approved !== false && s.suspended !== true
+            );
+            sectionStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            const batch = writeBatch(db);
+            sectionStudents.forEach((s, index) => {
+                const newRoll = index + 1;
+                if (s.roll !== newRoll) {
+                    s.roll = newRoll;
+                    s.oldId = `${activeYear}-${cls}-${sec}-${newRoll}`;
+                    batch.update(doc(db, "students", s.id), { roll: newRoll, oldId: s.oldId });
+                }
+            });
+            await batch.commit();
+        }
+
+        // Admin: Re-order ALL rolls in selected class alphabetically
+        window.reorderRollsAlphabetical = async () => {
+            if (!requireOnline()) return;
+            const cls = document.getElementById('mgmt-class').value;
+            const sec = document.getElementById('mgmt-sec').value;
+
+            const result = await Swal.fire({
+                title: 'रोल नं पुन:क्रम गर्ने?',
+                html: `<p>कक्षा <b>${cls}</b> ${sec !== 'all' ? '(' + sec + ')' : '(सबै सेक्सन)'} का विद्यार्थीहरूको रोल नं नामको A-Z अर्डरमा राखिनेछ।</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'हो, गर्नुहोस्',
+                cancelButtonText: 'रद्द गर्नुहोस्',
+                confirmButtonColor: '#4f46e5'
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                if (sec !== 'all') {
+                    await autoReorderRolls(cls, sec);
+                } else {
+                    // Re-order all sections independently
+                    const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2083";
+                    const sections = [...new Set(studentsData.filter(s => s.class == cls && s.academicYear === activeYear).map(s => s.section))];
+                    for (const s of sections) {
+                        await autoReorderRolls(cls, s);
+                    }
+                }
+
+                renderStudentMgmtList();
+                Swal.fire({ icon: 'success', title: 'सफल!', text: 'रोल नं A-Z अर्डरमा राखियो।', timer: 2000, showConfirmButton: false });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'त्रुटि', text: err.message });
+            }
+        };
+
+        // Admin: Toggle lock/unlock rolls
+        window.toggleLockRolls = async () => {
+            if (!requireOnline()) return;
+            const currentlyLocked = schoolSettings.rollsLocked || false;
+            const newState = !currentlyLocked;
+
+            try {
+                await setDoc(doc(db, "settings", "config"), { rollsLocked: newState }, { merge: true });
+                schoolSettings.rollsLocked = newState;
+                updateLockRollsButton();
+                Swal.fire({
+                    icon: 'success',
+                    title: newState ? 'रोल नं Lock भयो!' : 'रोल नं Unlock भयो!',
+                    text: newState ? 'अब रोल नं कायम रहनेछ।' : 'अब Accept गर्दा र थप्दा alphabetical order मा रोल नं दिइनेछ।',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'त्रुटि', text: err.message });
+            }
+        };
+
+        function updateLockRollsButton() {
+            const btn = document.getElementById('btn-lock-rolls');
+            if (!btn) return;
+            if (schoolSettings.rollsLocked) {
+                btn.innerHTML = '<i class="fas fa-unlock mr-1"></i>Unlock Rolls';
+                btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                btn.innerHTML = '<i class="fas fa-lock mr-1"></i>Lock Rolls';
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+            }
+        }
+
+        // Excel Upload (with full details)
         window.uploadStudentExcel = (input) => {
             const file = input.files[0];
             if (!file) return;
@@ -2994,25 +3623,68 @@
                 }
                 let count = 0;
                 let newClassesFound = false;
-                const batch = writeBatch(db);
+                let batch = writeBatch(db);
                 let batchCount = 0;
+                const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2081";
+                const rollsLocked = schoolSettings.rollsLocked || false;
+                const classSecTracker = {}; // Track per class-section for auto roll
+
                 for (let row of jsonData) {
-                    const name = row['Name'] || row['name'];
-                    const cls = String(row['Class'] || row['class']).trim();
+                    const name = (row['Name'] || row['name'] || '').toString().trim();
+                    const cls = String(row['Class'] || row['class'] || '').trim();
                     const sec = String(row['Section'] || row['section'] || 'A').trim().toUpperCase();
-                    const roll = parseInt(row['Roll'] || row['roll']);
-                    if (name && cls && roll) {
-                        const id = `${cls}-${sec}-${roll}`;
-                        batch.set(doc(db, "students", id), { name, class: cls, section: sec, roll: roll });
+                    const rollVal = row['Roll'] || row['roll'];
+                    const regNo = (row['RegNo'] || row['Reg No'] || row['regNo'] || row['दर्ता नं'] || '').toString().trim();
+                    const dobVal = (row['DOB'] || row['dob'] || row['जन्म मिति'] || '').toString().trim();
+                    const fatherVal = (row['Father'] || row['father'] || row['बुबा'] || '').toString().trim();
+                    const motherVal = (row['Mother'] || row['mother'] || row['आमा'] || '').toString().trim();
+                    const addressVal = (row['Address'] || row['address'] || row['ठेगाना'] || '').toString().trim();
+
+                    if (name && cls) {
+                        let roll = rollVal ? parseInt(rollVal) : 0;
+                        if (!roll || roll <= 0) {
+                            // Auto-assign temporary roll (will be re-ordered later)
+                            const key = `${cls}-${sec}`;
+                            if (!classSecTracker[key]) {
+                                classSecTracker[key] = studentsData.filter(s => s.academicYear === activeYear && s.class === cls && s.section === sec && s.approved !== false && s.suspended !== true).length;
+                            }
+                            classSecTracker[key]++;
+                            roll = classSecTracker[key];
+                        }
+                        const oldId = `${activeYear}-${cls}-${sec}-${roll}`;
+                        const existingStudent = studentsData.find(s => s.oldId === oldId || (s.academicYear === activeYear && s.class === cls && s.section === sec && s.roll === roll));
+                        const id = existingStudent ? existingStudent.id : doc(collection(db, "students")).id;
+
+                        const studentData = { name, class: cls, section: sec, roll, oldId, academicYear: activeYear, approved: true, regNo: regNo, dob: dobVal, father: fatherVal, mother: motherVal, address: addressVal };
+                        batch.set(doc(db, "students", id), studentData);
                         if (!CLASSES.includes(cls)) { CLASSES.push(cls); newClassesFound = true; }
-                        if (!studentsData.find(s => s.id === id)) studentsData.push({ id, name, class: cls, section: sec, roll: roll });
-                        else { const idx = studentsData.findIndex(s => s.id === id); if (idx > -1) studentsData[idx] = { id, name, class: cls, section: sec, roll: roll }; }
+                        
+                        if (!existingStudent) {
+                            studentsData.push({ id, ...studentData });
+                        } else {
+                            Object.assign(existingStudent, studentData);
+                        }
                         count++; batchCount++;
-                        if (batchCount >= 450) { await batch.commit(); batchCount = 0; }
+                        if (batchCount >= 450) { await batch.commit(); batch = writeBatch(db); batchCount = 0; }
                     }
                 }
                 if (batchCount > 0) await batch.commit();
                 if (newClassesFound && currentUserData.role === 'admin') { await setDoc(doc(db, "settings", "config"), { classes: CLASSES }, { merge: true }); updateClassDropdowns(); }
+
+                // Re-order rolls alphabetically if not locked
+                if (!rollsLocked) {
+                    const processedSections = new Set();
+                    for (let row of jsonData) {
+                        const cls = String(row['Class'] || row['class'] || '').trim();
+                        const sec = String(row['Section'] || row['section'] || 'A').trim().toUpperCase();
+                        const key = `${cls}-${sec}`;
+                        if (cls && !processedSections.has(key)) {
+                            processedSections.add(key);
+                            await autoReorderRolls(cls, sec);
+                        }
+                    }
+                }
+
                 Swal.fire({
                     icon: 'success',
                     title: 'सफल!',
@@ -3025,7 +3697,10 @@
             reader.readAsArrayBuffer(file);
         };
         window.downloadStudentTemplate = () => {
-            const ws = XLSX.utils.json_to_sheet([{ Name: "Ram Nepal", Class: "10", Section: "A", Roll: 1 }, { Name: "Sita Sharma", Class: "10", Section: "A", Roll: 2 }]);
+            const ws = XLSX.utils.json_to_sheet([
+                { Name: "Ram Nepal", Class: "10", Section: "A", Roll: 1, RegNo: "1234", DOB: "2065-01-15", Father: "Hari Nepal", Mother: "Sita Nepal", Address: "Kathmandu-5" },
+                { Name: "Gita Sharma", Class: "10", Section: "A", Roll: 2, RegNo: "1235", DOB: "2065-03-20", Father: "Krishna Sharma", Mother: "Radha Sharma", Address: "Bhaktapur-3" }
+            ]);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Students"); XLSX.writeFile(wb, "Student_Template.xlsx");
         };
 
@@ -3049,7 +3724,15 @@
                     const assigned = currentUserData.classes || [];
                     const hasWhole = assigned.includes(cls);
                     const hasSec = assigned.includes(`${cls}-${sec}`);
-                    if (!hasWhole && !hasSec && sec !== 'all') {
+
+                    // Check date for override
+                    const tempY = parseInt(document.getElementById('att-y').value);
+                    const tempM = parseInt(document.getElementById('att-m').value);
+                    const tempD = parseInt(document.getElementById('att-d').value);
+                    const tempDateKey = `${tempY}-${tempM}-${tempD}`;
+                    const isOpen = isClassOpenForAll(tempDateKey, cls);
+
+                    if (!hasWhole && !hasSec && !isOpen && sec !== 'all') {
                         filterSectionDropdown('att-class', 'att-sec');
                         sec = document.getElementById('att-sec').value;
                     }
@@ -3139,7 +3822,7 @@
                 localAttendanceBuffer = {}; currentDayIsLocked = false;
                 statusBar.classList.add('hidden'); startBtn.classList.add('hidden');
 
-                let students = studentsData.filter(s => s.class == cls);
+                let students = studentsData.filter(s => s.class == cls && s.approved !== false && s.suspended !== true);
                 if (sec !== 'all') students = students.filter(s => s.section == sec);
                 students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
 
@@ -3178,7 +3861,7 @@
                         }
 
                         // Check if *any* student in this class has data in the doc
-                        const hasDataForClass = students.some(s => attData[s.id]);
+                        const hasDataForClass = students.some(s => attData[s.id] || (s.oldId && attData[s.oldId]));
 
                         if (hasDataForClass) {
                             currentDayIsLocked = true;
@@ -3222,7 +3905,7 @@
             grid.innerHTML = '';
             students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
             students.forEach(s => {
-                const status = attData[s.id] || 'A';
+                const status = attData[s.id] || (s.oldId ? attData[s.oldId] : null) || 'A';
                 localAttendanceBuffer[s.id] = status;
                 let cardClass = status === 'P' ? 'card-present' : (status.startsWith('L') ? 'card-leave' : 'card-absent');
                 let pClass = status === 'P' ? 'active-p' : '';
@@ -3244,7 +3927,7 @@
 
             students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
             students.forEach(s => {
-                const status = attData[s.id] || 'A';
+                const status = attData[s.id] || (s.oldId ? attData[s.oldId] : null) || 'A';
                 localAttendanceBuffer[s.id] = status;
                 let cardClass = status === 'P' ? 'card-present' : (status.startsWith('L') ? 'card-leave' : 'card-absent');
                 let pClass = status === 'P' ? 'active-p' : '';
@@ -3269,7 +3952,7 @@
 
             let cls = document.getElementById('att-class').value;
             let sec = document.getElementById('att-sec').value;
-            let students = studentsData.filter(s => s.class == cls);
+            let students = studentsData.filter(s => s.class == cls && s.approved !== false && s.suspended !== true);
             if (sec !== 'all') students = students.filter(s => s.section == sec);
 
             let initialData = {};
@@ -3308,7 +3991,7 @@
 
             let cls = document.getElementById('att-class').value;
             let sec = document.getElementById('att-sec').value;
-            let students = studentsData.filter(s => s.class == cls);
+            let students = studentsData.filter(s => s.class == cls && s.approved !== false && s.suspended !== true);
             if (sec !== 'all') students = students.filter(s => s.section == sec);
 
             // Check if all students are absent (not a valid school day)
@@ -3426,7 +4109,7 @@
             confirmAction(() => {
                 currentDayIsLocked = false; document.getElementById('att-lock-status-bar').classList.add('hidden');
                 let cls = document.getElementById('att-class').value; let sec = document.getElementById('att-sec').value;
-                let students = studentsData.filter(s => s.class == cls); if (sec !== 'all') students = students.filter(s => s.section == sec);
+                let students = studentsData.filter(s => s.class == cls && s.approved !== false && s.suspended !== true); if (sec !== 'all') students = students.filter(s => s.section == sec);
                 renderAttendanceGrid(students, localAttendanceBuffer, false);
                 document.getElementById('att-save-footer').classList.remove('hidden'); currentDayHasUnsavedChanges = true;
             }, "Unlock Attendance?");
@@ -3507,7 +4190,11 @@
                         return;
                     }
 
+                    const activeYear = schoolSettings.academicYear ? schoolSettings.academicYear.toString() : "2082";
                     let targetStudents = studentsData.filter(s => {
+                        if (s.approved === false) return false;
+                        if (s.suspended === true) return false;
+                        if (s.academicYear !== activeYear) return false;
                         if (selectedClass !== 'all' && s.class != selectedClass) return false;
                         if (selectedSec !== 'all' && s.section !== selectedSec) return false;
 
@@ -3523,7 +4210,7 @@
 
                     targetStudents.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
                     targetStudents.forEach(s => {
-                        const status = data[s.id];
+                        const status = data[s.id] || (s.oldId ? data[s.oldId] : null);
                         if (status === 'P') present++;
                         if (status === 'A') {
                             absent++;
@@ -3628,7 +4315,7 @@
                 const daysInMonth = dateConverter.nepaliCalendarData[year] ? dateConverter.nepaliCalendarData[year][month - 1] : 30;
 
                 // Get all students for this class
-                let students = studentsData.filter(s => s.class == classValue);
+                let students = studentsData.filter(s => s.class == classValue && s.approved !== false && s.suspended !== true);
                 if (students.length === 0) return;
 
                 // Fetch all attendance data for this month
@@ -3787,7 +4474,7 @@
             }
 
             output.innerHTML = `<p class="text-center p-4">Loading Report...</p>`;
-            let students = studentsData.filter(s => s.class == cls);
+            let students = studentsData.filter(s => s.academicYear === y.toString() && s.class == cls && s.approved !== false && s.suspended !== true);
             if (sec !== 'all') students = students.filter(s => s.section === sec);
             students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
             const daysInMonth = dateConverter.nepaliCalendarData[y] ? dateConverter.nepaliCalendarData[y][m - 1] : 30;
@@ -3864,7 +4551,7 @@
                             // All absent - don't count as school day, show blank
                             display = '-';
                         } else {
-                            const status = data[s.id];
+                            const status = data[s.id] || (s.oldId ? data[s.oldId] : null);
                             if (status === 'P') {
                                 display = 'P'; bgClass = 'bg-green-100'; presentCount++; dailyPresentCounts[d]++;
                             } else if (status && status.startsWith('L')) {
@@ -3884,7 +4571,7 @@
 
                 // Use pre-calculated AM and AT from monthly_summaries if available
                 // Otherwise calculate from current data (offline fallback)
-                const studentSummary = sessionData[s.id];
+                const studentSummary = sessionData[s.id] || (s.oldId ? sessionData[s.oldId] : null);
                 const monthTotal = studentSummary?.am || presentCount; // Prefer summary AM, fallback to counted
                 const sessionTotal = studentSummary?.at || presentCount; // AT from summary
 
@@ -3895,7 +4582,7 @@
 
             let totalSessionPresent = 0; // Calculate total AT
             students.forEach(s => {
-                const studentSummary = sessionData[s.id] || { at: 0 };
+                const studentSummary = sessionData[s.id] || (s.oldId ? sessionData[s.oldId] : null) || { at: 0 };
                 totalSessionPresent += studentSummary.at || 0;
             });
 
@@ -3929,7 +4616,7 @@
 
             output.innerHTML = `<p class="text-center p-4">Loading Fine Data...</p>`;
 
-            let students = studentsData.filter(s => s.class == cls);
+            let students = studentsData.filter(s => s.academicYear === y.toString() && s.class == cls && s.approved !== false && s.suspended !== true);
             if (sec !== 'all') students = students.filter(s => s.section === sec);
             students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
 
@@ -4000,7 +4687,8 @@
                     );
                     if (!hasAnyPresent) continue;
 
-                    if (data[s.id] === 'A') absentCount++;
+                    const status = data[s.id] || (s.oldId ? data[s.oldId] : null);
+                    if (status === 'A') absentCount++;
                 }
                 const fine = absentCount * rate;
                 const paidAmount = paymentMap[s.id] || 0;
